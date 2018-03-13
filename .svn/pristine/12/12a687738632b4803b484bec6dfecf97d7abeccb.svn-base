@@ -1,0 +1,158 @@
+package com.jeeplus.modules.agentsystem.sysdata.web;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.utils.IdGen;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasUserService;
+import com.jeeplus.modules.agentsystem.utils.StringChangeUtils;
+import com.jeeplus.modules.sys.entity.Role;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.service.SystemService;
+
+
+/**
+ * 角色Controller
+ * @author Wb
+ * @version 2017-9-29
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agentsystem/user")
+public class WasUserController {
+	@Autowired
+	private WasUserService wasUserService;
+	@Autowired
+	private SystemService systemService;
+	@Autowired
+	private SystemAuthorizingRealm systemRealm;
+	
+	@RequiresPermissions("sysdata:wasUser:list")
+	@RequestMapping(value = {"list", ""})
+	public String list(WasSysUser sysUser, HttpServletRequest request, HttpServletResponse response, Model model) {
+		String originalName=sysUser.getLogin_name();
+		sysUser.setLogin_name(StringChangeUtils.specialStr(sysUser.getLogin_name()));
+		Page<WasSysUser> page = wasUserService.findPage(new Page<WasSysUser>(request, response), sysUser); 
+		sysUser.setLogin_name(originalName);
+		model.addAttribute("log", sysUser);
+		model.addAttribute("page", page);
+		return "modules/agentsystem/sysdata/wasUserList";
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "checkName")
+	public String checkName(String oldName, String name,String operation) {
+		if("编辑".equals(operation)){
+			if (name!=null && name.equals(oldName)) {
+				return "true";
+			} else if (name!=null && systemService.getUserByLoginName(name) == null) {
+				return "true";
+			}
+		}else if(oldName==null&&"添加".equals(operation)){
+			if(name!=null && systemService.getUserByLoginName(name) == null){
+				return "true";
+			}
+		}
+		return "false";
+	}
+	
+	@RequiresPermissions(value={"sysdata:wasUser:add","sysdata:wasUser:edit"},logical=Logical.OR)
+	@ResponseBody
+	@RequestMapping(value = "saveUser")
+	public Integer saveRole(WasSysUser sysUser,String roleId,String oldName,String oldPassword) {
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = (Principal)subject.getPrincipal(); 
+		int result=0;
+		if(sysUser.getId()!=null&&!"".equals(sysUser.getId())){
+			sysUser.setIsNewRecord(false);
+		}else{
+			sysUser.setIsNewRecord(true);
+			sysUser.setId(IdGen.uuid());
+		}
+			sysUser.setLogin_flag("1");
+			sysUser.setState(1);
+			if(!"".equals(sysUser.getPassword())&&sysUser.getPassword()!=null){
+				sysUser.setPassword(SystemService.entryptPassword(sysUser.getPassword()));
+			}else{
+				sysUser.setPassword(oldPassword);
+			}
+			sysUser.setCompanyParentId(principal.getId());
+		try {
+			sysUser.setCompanyParentIds(wasUserService.get(principal.getId()).getCompanyParentIds()+","+principal.getId());	//设置全部父级id
+			wasUserService.save(sysUser);
+			wasUserService.deleteUserRole(sysUser.getId());
+			wasUserService.insertUserRole(sysUser.getId(), roleId);
+			// 清除用户缓存
+			StringChangeUtils.clearCache(sysUser, oldName);
+			// 清除权限缓存
+			systemRealm.clearAllCachedAuthorizationInfo();
+		} catch (Exception e) {
+			return result;
+		}
+		result=1;
+		return result;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "getAllRole")
+	public List<Role> getAllRole(){
+		return systemService.findAllRole();
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "getUserById")
+	public WasSysUser getUserById(String id){
+		return wasUserService.get(id);
+	}
+	
+	@RequiresPermissions("sysdata:wasUser:del")
+	@ResponseBody
+	@RequestMapping(value = "delete")
+	public Integer  delete(WasSysUser sysUser) {
+		int result=0;
+		try {
+			wasUserService.delete(sysUser);
+		} catch (Exception e) {
+			return result;
+		}
+		result=1;
+		return result;
+	}
+	
+	/**
+	 * 更新用户头像
+	 * @param wasSysUser
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "savePhoto")
+	public Integer savePhoto (WasSysUser wasSysUser,HttpServletRequest request, HttpServletResponse response) {
+		int result = -1;
+		try {
+			String  loginName = request.getParameter("userName");
+			String  photo = request.getParameter("filePath");
+			wasSysUser.setLogin_name(loginName);
+			wasSysUser.setPhoto(photo);
+			result = wasUserService.updateUserPhoto(wasSysUser);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return result;
+		}
+		return result;
+	}
+}

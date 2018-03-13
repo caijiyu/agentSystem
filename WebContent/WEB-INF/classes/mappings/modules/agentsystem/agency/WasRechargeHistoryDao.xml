@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.agency.dao.WasRechargeHistoryDao">
+    <sql id="RechargeHistorycolumns">
+		a.rechargeId AS "rechargeId",                
+		a.rechargeNo AS "rechargeNo",                
+		a.receivedUserId AS "receivedUserId",        
+		a.publicRecharge AS "publicRecharge",        
+		a.minaRecharge AS "minaRecharge",            
+		a.hardwareRecharge AS "hardwareRecharge",   
+		a.vipRecharge AS "vipRecharge",             
+		a.cashRecharge AS "cashRecharge",            
+		a.remarks AS "remarks",                      
+		a.expendPayId AS "expendPayId",             
+		a.policyPurchaseId AS "policyPurchaseId",    
+		a.createDate AS "createDate",               
+		a.createBy AS "operateBy",
+		u.login_name AS "loginName",                    
+		a.state AS "state"							 
+	</sql>
+    <sql id="RechargeHistoryJoins">
+    	LEFT JOIN sys_user u ON u.id = a.createBy
+    </sql>		
+	<select id="findList" resultType="WasRechargeHistory">
+		SELECT 
+			<include refid="RechargeHistorycolumns"/> 
+		FROM was_recharge_history a
+			<include refid="RechargeHistoryJoins"/>
+		<where>
+			<if test="receivedUserId != null and receivedUserId != ''">
+				AND a.receivedUserId = #{receivedUserId} 
+				AND a.state = 1
+			</if>
+			<!-- 时间范围搜索 -->
+			<if test="startDate != null and endDate != null and startDate != '' and endDate != ''">
+				AND createDate BETWEEN #{startDate} AND #{endDate}
+			</if>
+			<if test="startDate != null  and startDate != '' and (endDate==null or endDate=='')">
+				AND createDate  &gt;=  #{startDate}
+			</if>
+			<if test="endDate != null and endDate != '' and (startDate == null  or startDate == '')">
+				AND createDate  &lt;= #{endDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			order by createDate DESC
+			</otherwise>
+		</choose>
+		
+	</select>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_recharge_history SET 
+			state = 0
+		WHERE rechargeId = #{rechargeId}
+	</update>
+	
+	<insert id="insert">
+		INSERT INTO was_recharge_history(
+			rechargeId,
+			rechargeNo,
+			receivedUserId,
+			publicRecharge,
+			minaRecharge,
+			hardwareRecharge,
+			vipRecharge,
+			cashRecharge,
+			remarks,
+			expendPayId,
+			policyPurchaseId,
+			createDate,
+			createBy
+		) VALUES (
+			#{rechargeId},
+			#{rechargeNo},
+			#{receivedUserId},
+			#{publicRecharge},
+			#{minaRecharge},
+			#{hardwareRecharge},
+			#{vipRecharge},
+			#{cashRecharge},
+			#{remarks},
+			#{expendPayId},
+			#{policyPurchaseId},
+			#{createDate},
+			#{operateBy}
+		)
+	</insert>
+	
+</mapper>

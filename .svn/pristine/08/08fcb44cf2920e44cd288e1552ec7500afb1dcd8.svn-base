@@ -1,0 +1,17 @@
+package com.jeeplus.modules.agentsystem.sysdata.dao;
+
+
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.sys.entity.Menu;
+
+@MyBatisDao
+public interface WasMenuDao extends CrudDao<Menu>{
+
+	public void deleteMenu(Menu menu);
+
+	public List<Menu> selectChild(String id);
+
+}

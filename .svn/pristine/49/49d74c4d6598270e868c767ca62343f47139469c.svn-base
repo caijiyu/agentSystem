@@ -1,0 +1,102 @@
+package com.jeeplus.modules.agentsystem.utils;
+
+import java.math.BigDecimal;
+
+
+import com.jeeplus.common.utils.SpringContextHolder;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.sysdata.dao.WasUserDao;
+
+/**
+ * 金钱操作工具类
+ * @author Wb
+ * @date  2017-10-20
+ * @version 1.0
+ */
+public class MoneyOperation{
+	/**注解无法注入问题*/
+	private static WasUserDao wasUserDao = SpringContextHolder.getBean(WasUserDao.class);
+	public static final String  RECHARGE="充值";
+	
+	private static MoneyOperation instance;  						
+		
+		/**单例模式*/
+	    private MoneyOperation (){
+	    	
+	    }  
+	    public static synchronized MoneyOperation getInstance() {  
+		    if (instance == null) {  
+		        instance = new MoneyOperation();  
+		    }  
+		    return instance;  
+	    }  
+	    
+	  /**相当于用lock来锁定的效果，用static修饰无法访问非static对象*/
+	 public synchronized  String moneyOperation(BigDecimal cashPledge,BigDecimal publicAccountDeduct,BigDecimal minaAccountDeduct
+		,BigDecimal hardwareAccountDeduct,BigDecimal vipAccountDeduct,String id,String operation){
+		 	System.err.println(publicAccountDeduct);
+		 	System.err.println(minaAccountDeduct);
+			WasSysUser wasSysUser =wasUserDao.getUserAccountMoney(id);
+			System.err.println("=================================");
+			System.err.println(wasSysUser);
+			if(RECHARGE.equals(operation)){
+				if(cashPledge!=null&&!"".equals(cashPledge)){
+					wasSysUser.setCashPledge(wasSysUser.getCashPledge().add(cashPledge));
+				}
+				if(publicAccountDeduct!=null&&!"".equals(publicAccountDeduct)){
+					wasSysUser.setPublicAccount(wasSysUser.getPublicAccount().add(publicAccountDeduct));
+				}
+				if(minaAccountDeduct!=null&&!"".equals(minaAccountDeduct)){
+					wasSysUser.setMinaAccount(wasSysUser.getMinaAccount().add(minaAccountDeduct));
+				}
+				if(hardwareAccountDeduct!=null&&!"".equals(hardwareAccountDeduct)){
+					wasSysUser.setHardwareAccount(wasSysUser.getHardwareAccount().add(hardwareAccountDeduct));
+				}
+				if(vipAccountDeduct!=null&&!"".equals(vipAccountDeduct)){
+					wasSysUser.setVipAccount(wasSysUser.getVipAccount().add(vipAccountDeduct));
+				}
+			}else{
+				if(cashPledge!=null&&!"".equals(cashPledge)){
+					if(wasSysUser.getCashPledge().compareTo(cashPledge)!=-1){
+						wasSysUser.setCashPledge(wasSysUser.getCashPledge().subtract(cashPledge));
+					}else{
+						return "押金余额不足";
+					}
+				}
+				if(publicAccountDeduct!=null&&!"".equals(publicAccountDeduct)){
+					if(wasSysUser.getPublicAccount().compareTo(publicAccountDeduct)!=-1){
+						wasSysUser.setPublicAccount(wasSysUser.getPublicAccount().subtract(publicAccountDeduct));
+						wasSysUser.setPublicExpend(wasSysUser.getPublicExpend().add(publicAccountDeduct));
+					}else{
+						return "公众号账户余额不足";
+					}
+				}
+				if(minaAccountDeduct!=null&&!"".equals(minaAccountDeduct)){
+					if(wasSysUser.getMinaAccount().compareTo(minaAccountDeduct)!=-1){
+						wasSysUser.setMinaAccount(wasSysUser.getMinaAccount().subtract(minaAccountDeduct));
+						wasSysUser.setMinaExpend(wasSysUser.getMinaExpend().add(minaAccountDeduct));
+					}else{
+						return "小程序账户余额不足";
+					}
+				}
+				if(hardwareAccountDeduct!=null&&!"".equals(hardwareAccountDeduct)){
+					if(wasSysUser.getHardwareAccount().compareTo(hardwareAccountDeduct)!=-1){
+						wasSysUser.setHardwareAccount(wasSysUser.getHardwareAccount().subtract(hardwareAccountDeduct));
+						wasSysUser.setHardwareExpend(wasSysUser.getHardwareExpend().add(hardwareAccountDeduct));
+					}else{
+						return "硬件账户余额不足";
+					}
+				}
+				if(vipAccountDeduct!=null&&!"".equals(vipAccountDeduct)){
+					if(wasSysUser.getVipAccount().compareTo(vipAccountDeduct)!=-1){
+						wasSysUser.setVipAccount(wasSysUser.getVipAccount().subtract(vipAccountDeduct));
+						wasSysUser.setVipExpend(wasSysUser.getVipExpend().add(vipAccountDeduct));
+					}else{
+						return "vip账户余额不足";	
+					}
+				}
+			}
+			Integer result=wasUserDao.updateAccountMoney(wasSysUser);
+		return result==1?"操作成功":"操作失败";
+	 }	
+}

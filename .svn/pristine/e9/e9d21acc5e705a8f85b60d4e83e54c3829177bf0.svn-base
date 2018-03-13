@@ -1,0 +1,73 @@
+package com.jeeplus.modules.agentsystem.agency.dao;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+/**
+ * 
+ * @author admin
+ *
+ */
+
+@MyBatisDao
+public interface WasSysUserDao extends CrudDao<WasSysUser>{
+	/**
+	 * 查询是不是微炫客的代理商
+	 * @param sysUser
+	 * @return
+	 */
+	String angentLookUp(WasSysUser sysUser);
+	/**
+	 * 更新代理商时间
+	 * @param sysUser
+	 * @return
+	 */
+	public Integer updateTime(WasSysUser sysUser);
+
+	/**
+	 * 更新代理商账户余额
+	 * @param sysUser
+	 * @return
+	 */
+	public Integer updateAccount(WasSysUser sysUser);
+	/**
+	 * 更新代理商删除状态
+	 * @param sysUser
+	 * @return
+	 */
+	public Integer updateDelState(WasSysUser sysUser);
+	/**
+	 * 找到所有的总代
+	 * @param sysUser
+	 * @return
+	 */
+	public List<WasSysUser> findAllSuperAgent();
+	/**
+	 * 找到下级代理商
+	 * @param sysUser
+	 * @return
+	 */
+	public List<WasSysUser> findAllLowerAgent(WasSysUser sysUser);
+	/**
+	 * 找到直属上级代理商
+	 * @param id
+	 * @return
+	 */
+	public WasSysUser getDirectAgent(String id);
+	/**
+	 * 找到当前代理商是否拥有下放代理商的权限
+	 * @param id
+	 * @return
+	 */
+	public Integer findDelegateAgent(String id);
+	
+	//更新对应账户金额
+	public  Integer updatePublicAccountAndExpend(BigDecimal publicAccount,BigDecimal publicExpend,String id);
+	public  Integer updateMinaAccountAndExpend(BigDecimal minaAccount,BigDecimal minaExpend,String id);
+	public  Integer updateVipAccountAndExpend(BigDecimal vipAccount,BigDecimal vipExpend,String id);
+	
+
+}

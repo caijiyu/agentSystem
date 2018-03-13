@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.sysdata.dao.WasMenuDao">
+<resultMap id="menuResult" type="Menu">
+		<id property="id" column="id" />
+		<result property="parentIds" column="parentIds" />
+		<result property="name" column="name" />
+		<result property="href" column="href" />
+		<result property="target" column="target" />
+		<result property="icon" column="icon" />
+		<result property="sort" column="sort" />
+		<result property="isShow" column="isShow" />
+		<result property="permission" column="permission" />
+		<!-- 查询父模块-->  
+        <association property="parent" column="parent_id" select="getParent" />   
+          
+        <!-- 查询子模块 -->  
+        <collection property="children" column="id" select="getChildren" />  
+	</resultMap>
+	<resultMap id="Menu" type="Menu">
+		<id property="id" column="id" />
+		 
+	</resultMap>
+	<sql id="menuColumns">
+		a.id,
+		a.parent_id AS "parent.id",
+		a.parent_ids,
+		a.name,
+		a.href,
+		a.target,
+		a.icon,
+		a.sort,
+		a.is_show,
+		a.permission,
+		a.remarks,
+		a.create_by AS "createBy.id",
+		a.create_date,
+		a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		p.name AS "parent.name"
+	</sql>
+	
+	<sql id="menuJoins">
+		LEFT JOIN sys_menu p ON p.id = a.parent_id
+    </sql>
+	<!--获取单个菜单-->
+	<select id="get"  resultMap="menuResult">
+		SELECT
+			<include refid="menuColumns"/>
+		FROM sys_menu a
+		<include refid="menuJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<!--查找子菜单-->
+	<select id="selectChild" resultMap="Menu" >
+		SELECT  id FROM sys_menu 
+		WHERE id = #{id} OR parent_ids LIKE 
+					CONCAT('%,', #{id}, ',%')
+	</select>
+	<!--物理删除-->
+	<update id="deleteMenu">
+		DELETE FROM sys_role_menu 
+		WHERE menu_id = #{id} 
+	</update>
+</mapper>

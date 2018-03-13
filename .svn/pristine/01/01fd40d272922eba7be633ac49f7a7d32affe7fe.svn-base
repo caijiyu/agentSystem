@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentSystem.sysdata.dao.WasInvoiceContentDao">
+    
+	<sql id="wasInvoiceContentColumns">
+		a.contentId AS "contentId",
+		a.details AS "details",
+		a.createDate AS "createDate",
+		a.createBy AS "createBy"
+	</sql>
+	
+	<sql id="wasInvoiceContentJoins">
+	</sql>
+    
+	<select id="get" resultType="WasInvoiceContent">
+		SELECT 
+			<include refid="wasInvoiceContentColumns"/>
+		FROM was_invoice_content a
+		<include refid="wasInvoiceContentJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WasInvoiceContent">
+		SELECT 
+			<include refid="wasInvoiceContentColumns"/>
+		FROM was_invoice_content a
+		 <where>
+			
+			<if test="startCreateDate != null and endCreateDate != null and startCreateDate != '' and endCreateDate != ''">
+				AND a.createDate BETWEEN #{startCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="startCreateDate != null  and startCreateDate != '' and (endCreateDate==null or endCreateDate=='')">
+				AND a.createDate  &gt;=  #{startCreateDate}
+			</if>
+			<if test="endCreateDate != null and endCreateDate != '' and (startCreateDate == null  or startCreateDate == '')">
+				AND a.createDate  &lt;= #{endCreateDate}
+			</if>
+		</where>
+		ORDER BY createDate desc
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WasInvoiceContent">
+		SELECT 
+			<include refid="wasInvoiceContentColumns"/>
+		FROM was_invoice_content a
+		<include refid="wasInvoiceContentJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO was_invoice_content(
+			details,
+			createDate,
+			createBy
+		) VALUES (
+			#{details},
+			#{createDate},
+			#{createBy.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE was_invoice_content SET 	
+			contentid = #{contentId},
+			details = #{details},
+			createdate = #{createDate},
+			createby = #{createBy}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM was_invoice_content
+		WHERE contentId = #{contentId}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_invoice_content SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WasInvoiceContent" statementType="STATEMENT">
+		select * FROM was_invoice_content  where ${propertyName} = '${value}'
+	</select>
+</mapper>

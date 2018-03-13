@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentSystem.agency.dao.WasExpendPayDao">
+    
+    
+    <sql id="WasExpendPayColumns">
+		a.expendPayId AS "expendPayId",                
+		a.orderNo AS "orderNo",                
+		a.userId AS "userId",
+		u.login_name AS "loginName",        
+		a.behavior AS "behavior",        
+		a.payMoney AS "payMoney",            
+		a.publicExpend AS "publicExpend",   
+		a.minaExpend AS "minaExpend",
+		a.hardwareExpend AS "hardwareExpend",                
+		a.vipExpend AS "vipExpend",                
+		a.type AS "type",        
+		a.receivedUserId AS "receivedUserId",
+		u.companyName AS "receivedCompanyName",        
+		a.remarks AS "remarks",            
+		a.createDate AS "createDate",   
+		a.createBy AS "createId",
+		a.invoiceNo AS "invoiceNo",                
+		a.invoice AS "invoice",                
+		a.state AS "state"        
+	</sql>
+    <sql id="WasExpendPayJoins">
+    	LEFT JOIN sys_user u ON u.id = a.userId AND u.id = a.receivedUserId
+    	
+    </sql>
+    
+    <select id="findList" resultType="WasExpendPay">
+		SELECT 
+			<include refid="WasExpendPayColumns"/>
+		FROM was_expend_pay a
+			<include refid="WasExpendPayJoins"/>
+		<where>
+			<if test="userId != null and userId != ''">
+				AND a.userId = #{userId} 
+			</if>
+			<if test="createDate != null and createDate != ''">
+				AND <![CDATA[ a.createDate >= #{createDate} ]]> 
+			</if>
+			<!-- 时间范围搜索 -->
+			<if test="beginDate != null and beginDate != ''">
+				<![CDATA[   AND DATE_FORMAT(a.createDate, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')   ]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				<![CDATA[  AND DATE_FORMAT(a.createDate, '%Y-%m-%d') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d')    ]]>
+			</if>
+		</where>
+		
+	</select>
+    		
+	<select id="get" resultType="WasExpendPay">
+		SELECT 
+			<include refid="WasExpendPayColumns"/>
+		FROM was_expend_pay a
+			<include refid="WasExpendPayJoins"/>
+		<where>
+			<if test="orderNo != null and orderNo != ''">
+				AND a.orderNo = #{orderNo} 
+			</if>
+			<if test="userId != null and userId != ''">
+				AND a.userId = #{userId} 
+			</if>
+			
+		</where>
+		
+	</select>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_expend_pay SET 
+			state = 0
+		WHERE orderNo = #{orderNo}
+	</update>
+	
+	
+	<insert id="insert">
+		INSERT INTO was_expend_pay(
+			expendPayId,
+			orderNo,
+			userId,
+			behavior,
+			payMoney,
+			publicExpend,
+			minaExpend,
+			hardwareExpend,
+			vipExpend,
+			receivedUserId,
+			remarks,
+			createDate,
+			createBy,
+			invoiceNo
+		) VALUES (
+			#{expendPayId},
+			#{orderNo},
+			#{userId},
+			#{behavior},
+			#{payMoney},
+			#{publicExpend},
+			#{minaExpend},
+			#{hardwareExpend},
+			#{vipExpend},
+			#{receivedUserId},
+			#{remarks},
+			#{createDate},
+			#{createId},
+			#{invoiceNo}	
+		)
+	</insert>
+	
+</mapper>

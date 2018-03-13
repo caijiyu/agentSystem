@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.terminal.dao.WasTerminalProductDao">
+
+	<select id="findByTerminalUserId" resultType="WasTerminalProduct">
+		select * from was_terminal_product  where terminalUserId=#{0} and state=1
+	</select>
+	
+	<select id="findByTerminalUserIdAndSoftWareId" resultType="WasTerminalProduct">
+		select * from was_terminal_product  where terminalUserId=#{0} and softwareId=#{1} and state=1
+	</select>
+	
+
+	<select id="findCountById">
+		select * from was_terminal_product where salesPolicyId=#{0}
+	</select>
+	
+	<insert id="insertProduct">
+		INSERT INTO was_terminal_product(
+			terminalUserId, 
+			softwareId, 
+			startDate, 
+			endDate,
+			state
+		) VALUES (
+			#{terminalUserId}, 
+			#{softwareId}, 
+			#{startDate}, 
+			#{endDate},
+			#{state}
+		)
+	</insert>
+	
+	<update id="updateProduct">
+		UPDATE was_terminal_product SET 
+			softwareId = #{softwareId}, 
+			startDate = #{startDate}, 
+			endDate = #{endDate}, 
+			state = #{state}
+		WHERE terminalProductId = #{terminalProductId}
+	</update>
+</mapper>

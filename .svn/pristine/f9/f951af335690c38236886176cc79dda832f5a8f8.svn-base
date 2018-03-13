@@ -1,0 +1,34 @@
+package com.jeeplus.modules.agentsystem.terminal.dao;
+
+import java.util.Date;
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+/**
+ * 终端Dao接口 
+ * @author Hua
+ *
+ */
+@MyBatisDao
+public interface WasTerminalUserDao extends CrudDao<WasTerminalUser>{
+	
+	public Integer insertWasTerminalUser(WasTerminalUser wasTerminalUser);
+	public Integer updateWasTerminalUser(WasTerminalUser wasTerminalUser);  
+	public WasTerminalUser findByTerminalUserId(Integer  terminalUserId);
+	public Integer deleteLogic(Integer terminalUserId);
+	public Integer thaw(String reason,Integer terminalUserId);
+	public Integer freeze(String reason,Integer terminalUserId);
+	public Integer validateCompanyName(String companyName);
+	public Integer validateLoginName(String loginName);
+	//只插入更新时间与更新者
+	public Integer insertUpdateInfo(String updateName,Date updateDate,Integer terminalUserId);
+	
+	/**
+	 * 查询终端的产品详细信息
+	 */
+	public WasTerminalUser getTerminalInfo(WasTerminalUser wasTerminalUser);
+	
+	public Integer findIdBycompanyName(String companyName);
+}

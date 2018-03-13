@@ -1,0 +1,330 @@
+package com.jeeplus.modules.agentsystem.agency.web;
+
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.utils.IdGen;
+import com.jeeplus.modules.agentsystem.agency.entity.WasExpendPay;
+import com.jeeplus.modules.agentsystem.agency.entity.WasRechargeHistory;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.agency.service.WasAgentApplyService;
+import com.jeeplus.modules.agentsystem.agency.service.WasExpendPayService;
+import com.jeeplus.modules.agentsystem.agency.service.WasRechargeHistoryService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentLevel;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentSystemLog;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasSalesPolicy;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentSystemLogService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasSalesPolicyService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasUserService;
+import com.jeeplus.modules.agentsystem.utils.MoneyOperation;
+import com.jeeplus.modules.agentsystem.utils.OrderNumberUtils;
+import com.jeeplus.modules.agentsystem.utils.StringChangeUtils;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.service.SystemService;
+
+/**
+ * 角色Controller
+ * @author Wb
+ * @version 2017-9-29
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agency/wasAgentApply")
+public class WasAgentApplyController {
+@Autowired
+private WasAgentApplyService wasAgentApplyService;
+@Autowired
+private WasSalesPolicyService wasSalesPolicyService;
+@Autowired
+private WasUserService wasUserService;
+@Autowired
+private SystemAuthorizingRealm systemRealm;
+@Autowired
+private WasExpendPayService expendPayService;
+@Autowired
+private WasRechargeHistoryService rechargeHistoryService;
+@Autowired
+private WasAgentSystemLogService wasAgentSystemLogService;
+
+	/**
+	 * 代理商申请列表
+	 */
+	@RequiresPermissions("agency:wasAgentApply:list")
+	@RequestMapping(value = "list")
+	public String list(WasSysUser sysUser,String startDateA,String endDateA, HttpServletRequest request, HttpServletResponse response, Model model) throws ParseException {
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = (Principal)subject.getPrincipal(); 
+		if(subject.isPermitted("agency:wasAgentApply:addInside")){
+			sysUser.setId("1");
+		}else{
+			sysUser.setId(principal.getId());
+		}
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		if(sysUser!=null){
+			if(startDateA!=null&&!"".equals(startDateA)){
+				sysUser.setStartDate(sdf.parse(startDateA));
+			}
+			if(endDateA!=null&&!"".equals(endDateA)){
+				sysUser.setEndDate(sdf.parse(endDateA)); 
+			}												//无法接受时间，类型为String相关问题处理
+		}
+		String originalName=sysUser.getCompanyName();
+		sysUser.setCompanyName(StringChangeUtils.specialStr(sysUser.getCompanyName()));
+		Page<WasSysUser> page = wasAgentApplyService.findPage(new Page<WasSysUser>(request, response), sysUser); 
+		sysUser.setCompanyName(originalName);
+		model.addAttribute("sysUser", sysUser);
+		model.addAttribute("page", page);
+		return  "modules/agentsystem/agency/wasAgentApplyList";
+	}
+	
+	/**
+	 * 查看代理商
+	 */
+	@RequiresPermissions("agency:wasAgentApply:view")
+	@RequestMapping(value = "checkDetail")
+	public String checkDetail(String id,Model model){
+		WasSysUser wasSysUser=wasAgentApplyService.get(id);
+		model.addAttribute("wasSysUser", wasSysUser);
+		return "modules/agentsystem/agency/wasAgentApplyDetail"; 
+	}
+	
+	/**
+	 * 根据id获取代理商
+	 */
+	@ResponseBody
+	@RequestMapping(value = "get")
+	public WasSysUser get(String id){
+		return wasAgentApplyService.get(id);
+	}
+	
+	/**
+	 * 通过申请
+	 */
+	@RequiresPermissions("agency:wasAgentApply:pass")
+	@ResponseBody
+	@RequestMapping(value = "pass")
+	public Integer pass(WasSysUser wasSysUser){
+		int result=0;
+		String res=null;
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = (Principal)subject.getPrincipal(); 
+		try {
+			result=wasAgentApplyService.pass(wasSysUser);
+			res=MoneyOperation.getInstance().moneyOperation(wasSysUser.getCashPledge(), null, null, null, null, wasSysUser.getId(), "充值");
+			rechargeHistoryService.insert(new WasRechargeHistory("R"+OrderNumberUtils.OrderNumber(),										//充值记录添加
+			wasSysUser.getId(), new BigDecimal(0), new BigDecimal(0), new BigDecimal(0), new BigDecimal(0),wasSysUser.getCashPledge() , null, null, null, new Date(), principal.getId(), 1));																							
+		} catch (Exception e) {
+			return result;
+		}
+		if(result==1&&"操作成功".equals(res)){
+			result=1;
+		}else{
+			result=0;
+		}
+		return result;
+	}
+	
+	/**
+	 * 拒绝申请
+	 */
+	@RequiresPermissions("agency:wasAgentApply:refuse")
+	@ResponseBody
+	@RequestMapping(value = "overRule")
+	public Integer overRule(WasSysUser wasSysUser){
+		int result=0;
+		try {
+			result=wasAgentApplyService.overRule(wasSysUser);
+		} catch (Exception e) {
+			return result;
+		}
+		return result;
+	}
+	
+	/**
+	 * 跳转添加代理商申请页面
+	 */
+	@RequiresPermissions("agency:wasAgentApply:add")
+	@RequestMapping(value = "addAgentApply")
+	public String addAgentApply(Model model){
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = (Principal)subject.getPrincipal(); 
+		WasSysUser sysUser=wasAgentApplyService.get(principal.getId());
+		List<WasAgentLevel>	wasAgentLevel=wasAgentApplyService.getAllNotSuperAgentLevel("agency:wasAgentApply:list","agency:wasSysUser:list"); //传入总代特有的权限标识符
+		List<WasAgentLevel> allWasAgentLevel=wasAgentApplyService.getAllAgentLevel();
+		List<WasSysUser> agentUser=wasAgentApplyService.selectAllSuperAgent("agency:wasAgentApply:list","agency:wasSysUser:list");
+		model.addAttribute("allWasAgentLevel", allWasAgentLevel);
+		model.addAttribute("agentUser", agentUser);
+		model.addAttribute("wasAgentLevel", wasAgentLevel);
+		model.addAttribute("sysUser", sysUser);
+		return "modules/agentsystem/agency/wasAgentApplyAdd";
+	}
+	
+	/**
+	 * 跳转添加代理商页面
+	 */
+	@RequiresPermissions("agency:wasSysUser:add")
+	@RequestMapping(value = "addAgent")
+	public String addAgent(Model model){
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = (Principal)subject.getPrincipal(); 
+		WasSysUser sysUser=wasAgentApplyService.get(principal.getId());
+		List<WasAgentLevel>	wasAgentLevel=wasAgentApplyService.getAllNotSuperAgentLevel("agency:wasAgentApply:list","agency:wasSysUser:list"); //传入总代特有的权限标识符
+		List<WasAgentLevel> allWasAgentLevel=wasAgentApplyService.getAllAgentLevel();
+		List<WasSysUser> agentUser=wasAgentApplyService.selectAllSuperAgent("agency:wasAgentApply:list","agency:wasSysUser:list");
+		String cashPledge=wasAgentApplyService.getCashPledgeByUid(principal.getId());
+		model.addAttribute("cashPledge",cashPledge);
+		model.addAttribute("allWasAgentLevel", allWasAgentLevel);
+		model.addAttribute("agentUser", agentUser);
+		model.addAttribute("wasAgentLevel", wasAgentLevel);
+		model.addAttribute("sysUser", sysUser);
+		return "modules/agentsystem/agency/wasGeneralAddAgent";
+	}
+	
+	/**
+	 * 根据方针ids获取有序的方针集合
+	 */
+	@ResponseBody
+	@RequestMapping(value = "getWasSalesPolicys")
+	public Set<WasSalesPolicy> getWasSalesPolicys(String ids){
+		String[] idsA=ids.split(",");
+		Set<WasSalesPolicy> wasSalesPolicys=new TreeSet<WasSalesPolicy>(new Comparator<WasSalesPolicy>() {
+				@Override  
+			    public int compare(WasSalesPolicy o1, WasSalesPolicy o2) {  
+			        if(o2.getSort()!=o1.getSort()){
+			        	return o2.getSort().compareTo(o1.getSort());//降序排列  
+			        }else{
+			        	return o1.getSalesPolicyId().compareTo(o2.getSalesPolicyId());//升序排列  
+			        }
+			    }  
+		});
+		for (String id : idsA) {
+			WasSalesPolicy wasSalesPolicy=wasSalesPolicyService.findWasSalesPolicy(new Integer(id));
+			wasSalesPolicys.add(wasSalesPolicy);
+		}
+		return wasSalesPolicys;
+	}
+	
+	/**
+	 * 验证公司名称重复性
+	 */
+	@ResponseBody
+	@RequestMapping(value = "validateCompanyName")
+	public String checkName(String oldName, String companyName,String operation) {
+		if("编辑".equals(operation)){
+			if (companyName!=null && companyName.equals(oldName)) {
+				return "true";
+			} else if (companyName!=null && wasAgentApplyService.getCountByCopanyName(companyName) ==0) {
+				return "true";
+			}
+		}else if(oldName==null&&"添加".equals(operation)){
+			if(companyName!=null && wasAgentApplyService.getCountByCopanyName(companyName) == 0){
+				return "true";
+			}
+		}
+		return "false";
+	}
+	
+	/**
+	 * 代理商申请的添加和编辑，代理商添加和编辑
+	 */
+	@ResponseBody
+	@RequestMapping(value = "save")
+	public Integer saveRole(WasSysUser sysUser,String oldName,String oldPassword,String operation,String startDateA,String endDateA,String agentLevelIdA
+		,BigDecimal publicAccountDeduct,BigDecimal minaAccountDeduct,BigDecimal hardwareAccountDeduct,BigDecimal vipAccountDeduct,String menuIdA) throws ParseException {
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = (Principal)subject.getPrincipal(); 
+		BigDecimal 	ten = new BigDecimal(10);
+		int result=0;
+		if(sysUser.getId()!=null&&!"".equals(sysUser.getId())){
+			sysUser.setIsNewRecord(false);
+		}else{
+			sysUser.setIsNewRecord(true);
+			sysUser.setId(IdGen.uuid());
+		} 														//判断添加还是编辑				
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		if(sysUser!=null){
+			if(startDateA!=null&&!"".equals(startDateA)){
+				sysUser.setStartDate(sdf.parse(startDateA));
+			}
+			if(endDateA!=null&&!"".equals(endDateA)){
+				sysUser.setEndDate(sdf.parse(endDateA));  
+			} 												 //无法接受时间，类型为String相关问题处理
+		}
+		sysUser.setPackageDiscount(sysUser.getPackageDiscount().divide(ten, 2, RoundingMode.HALF_UP));
+		sysUser.setMinaDiscount(sysUser.getMinaDiscount().divide(ten, 2, RoundingMode.HALF_UP));
+		sysUser.setPublicDiscount(sysUser.getPublicDiscount().divide(ten, 2, RoundingMode.HALF_UP));               //折扣处理
+		String agentLevelId=agentLevelIdA.split("@")[1];												//代理商等级id处理
+		if(sysUser.getCashPledge()==null||"".equals(sysUser.getCashPledge())){							//押金为空时处理
+			sysUser.setCashPledge(new BigDecimal(0));
+		}
+		if("申请".equals(operation)){
+			sysUser.setState(2);
+		}else{
+			sysUser.setState(1);
+		}																		//根据不同操作设置状态
+		if(!"".equals(sysUser.getPassword())&&sysUser.getPassword()!=null){
+			sysUser.setPassword(SystemService.entryptPassword(sysUser.getPassword()));
+		}else{
+			sysUser.setPassword(oldPassword);
+		}
+		sysUser.setLogin_flag("1");
+		try {
+			sysUser.setAgentLevelId(Integer.parseInt(agentLevelId));			//设置代理商等级														
+			sysUser.setCompanyParentIds(wasUserService.get(sysUser.getCompanyParentId()).getCompanyParentIds()+","+sysUser.getCompanyParentId());	//设置全部父级id
+			WasAgentLevel wasAgentLevel=wasAgentApplyService.getAgentLevelById(sysUser.getAgentLevelId());  //获取代理商角色id
+			wasAgentApplyService.save(sysUser);                                      
+			wasUserService.deleteUserRole(sysUser.getId());                					//用户-角色表数据进行更新
+			wasUserService.insertUserRole(sysUser.getId(), wasAgentLevel.getRoleId());
+			// 清除用户缓存
+			StringChangeUtils.clearCache(sysUser, oldName);
+			// 清除权限缓存
+			systemRealm.clearAllCachedAuthorizationInfo();
+		} catch (Exception e) {
+			return result;
+		}
+		//先插入用户后才能进行充消记录更新
+		if(sysUser.getCashPledge()!=null&&!"".equals(sysUser.getCashPledge())){
+			String res=MoneyOperation.getInstance().moneyOperation(null,publicAccountDeduct, minaAccountDeduct, hardwareAccountDeduct, vipAccountDeduct, principal.getId(), "扣款");
+			WasExpendPay wasExpendPay=new WasExpendPay("EP"+OrderNumberUtils.OrderNumber(), principal.getId(), "总代充值"
+			  , sysUser.getCashPledge(), publicAccountDeduct==null?new BigDecimal(0):publicAccountDeduct, minaAccountDeduct==null?new BigDecimal(0):minaAccountDeduct, hardwareAccountDeduct==null?new BigDecimal(0):hardwareAccountDeduct, vipAccountDeduct==null?new BigDecimal(0):vipAccountDeduct, 3, sysUser.getId(), null, new Date(), principal.getId(), null, 0, 1);
+			expendPayService.insert(wasExpendPay);							//充销记录添加
+			WasExpendPay wasExpendPayB = expendPayService.get(wasExpendPay);
+			rechargeHistoryService.insert(new WasRechargeHistory("R"+OrderNumberUtils.OrderNumber(), sysUser.getId(), new BigDecimal(0), new BigDecimal(0), new BigDecimal(0), 
+					new BigDecimal(0), sysUser.getCashPledge(), null, wasExpendPayB.getExpendPayId(), null, new Date(), principal.getId(), 1));		//充值记录添加
+			if(!"操作成功".equals(res)){
+				return 0;
+			}
+		}
+		if("申请".equals(operation)){									//日志表数据插入
+			wasAgentSystemLogService.insert(new WasAgentSystemLog(menuIdA, new Date(), principal.getId(),"用户"+principal.getLoginName()+"申请了代理商"+sysUser.getLogin_name()));                         
+		}else{
+			if(sysUser.getId()!=null&&!"".equals(sysUser.getId())){
+			wasAgentSystemLogService.insert(new WasAgentSystemLog(menuIdA, new Date(), principal.getId(),"用户"+principal.getLoginName()+"编辑代理商的id为"+sysUser.getId()));                         
+			}
+		}
+		result=1;
+		return result;
+	}
+	
+}

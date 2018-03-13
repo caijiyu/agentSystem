@@ -1,0 +1,80 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentSystem.sysdata.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentSystem.sysdata.dao.WasAgentLevelDao;
+import com.jeeplus.modules.agentSystem.sysdata.entity.WasAgentLevel;
+import com.jeeplus.modules.sys.entity.Role;
+
+/**
+ * 代理商等级Service
+ * @author HJT
+ * @version 2017-10-09
+ */
+@Service
+@Transactional(readOnly = true)
+public class WasAgentLevelService extends CrudService<WasAgentLevelDao, WasAgentLevel> {
+
+	public WasAgentLevel get(String id) {
+		return super.get(id);
+	}
+	//
+	public List<WasAgentLevel> findList(WasAgentLevel wasAgentLevel) {
+		return super.findList(wasAgentLevel);
+	}
+	//列表
+	public Page<WasAgentLevel> findPage(Page<WasAgentLevel> page, WasAgentLevel wasAgentLevel) {
+		return super.findPage(page, wasAgentLevel);
+	}
+	//添加保存
+	@Transactional(readOnly = false)
+	public Integer saveAgentLevel(WasAgentLevel wasAgentLevel) {
+		return dao.insert(wasAgentLevel);
+	}
+	//更新销售方针
+	@Transactional(readOnly = false)
+	public Integer updateAgentLevel(WasAgentLevel wasAgentLevel) {
+		return dao.update(wasAgentLevel);
+	}
+	@Transactional(readOnly = false)
+	public void delete(WasAgentLevel wasAgentLevel) {
+		super.delete(wasAgentLevel);
+	}
+	//根据roleId查看是否有下放代理商的权限
+	public Integer whetherPermission(String permissionA,String permissionB,String id) {
+		return dao.getRoleNum(permissionA, permissionB, id);
+	}
+	//获得角色名称
+	public List<Role> getroleType(String roleType){
+		return dao.findByRoletype(roleType);
+	}
+	//逻辑删除
+	@Transactional(readOnly = false)
+	public Integer deleteAgentLevel(WasAgentLevel wasAgentLevel) {
+		return dao.deleteByLogic(wasAgentLevel);
+	}
+	//从sys_user
+	public Integer wasAgentLevelSum(Integer agentLevelId) {
+		return dao.findByAgentLevelId(agentLevelId);
+	}
+	//查找代理等级entiy
+	public WasAgentLevel getEnity(Integer agentLevelId) {
+		return dao.findEnity(agentLevelId);
+	}
+	//根据name查找数据个数
+	public Integer getNum(String name) {
+		return dao.getNameNum(name);
+	}
+	//查找角色entiy
+	public Role findRoleEnity(String id) {
+		return dao.findRoleById(id);
+	}
+}

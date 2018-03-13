@@ -1,0 +1,103 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentsystem.sysdata.entity;
+
+import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Length;
+
+import com.jeeplus.common.persistence.DataEntity;
+import com.jeeplus.common.utils.excel.annotation.ExcelField;
+
+/**
+ * 代理商等级Entity
+ * @author HJT
+ * @version 2017-10-09
+ */
+public class WasAgentLevel extends DataEntity<WasAgentLevel> {
+	
+	private static final long serialVersionUID = 1L;
+	private Integer agentLevelId;		// 主键ID
+	private String roleId;		// 角色ID
+	private String salesPolicyIds;		// 销售方针（1,2,3）
+	private String name;		// 等级名称
+	private String cashPledge;		// 下放代理商押金
+	private Integer state;		// 状态（0：删除，1：正常）
+	private Integer delegateAgent;		// 是否下放代理商（0：否，1：是）
+	
+	public WasAgentLevel() {
+		super();
+	}
+
+	public WasAgentLevel(String id){
+		super(id);
+	}
+
+	public Integer getDelegateAgent() {
+		return delegateAgent;
+	}
+
+	public void setDelegateAgent(Integer delegateAgent) {
+		this.delegateAgent = delegateAgent;
+	}
+
+	@NotNull(message="主键ID不能为空")
+	@ExcelField(title="主键ID", align=2, sort=0)
+	public Integer getAgentLevelId() {
+		return agentLevelId;
+	}
+
+	public void setAgentLevelId(Integer agentLevelId) {
+		this.agentLevelId = agentLevelId;
+	}
+	
+	@Length(min=1, max=64, message="角色ID长度必须介于 1 和 64 之间")
+	@ExcelField(title="角色ID", dictType="", align=2, sort=1)
+	public String getRoleId() {
+		return roleId;
+	}
+
+	public void setRoleId(String roleId) {
+		this.roleId = roleId;
+	}
+	
+	@Length(min=0, max=50, message="销售方针（1,2,3）长度必须介于 0 和 50 之间")
+	@ExcelField(title="销售方针（1,2,3）", align=2, sort=2)
+	public String getSalesPolicyIds() {
+		return salesPolicyIds;
+	}
+
+	public void setSalesPolicyIds(String salesPolicyIds) {
+		this.salesPolicyIds = salesPolicyIds;
+	}
+	
+	@Length(min=1, max=50, message="等级名称长度必须介于 1 和 50 之间")
+	@ExcelField(title="等级名称", align=2, sort=3)
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	@ExcelField(title="下放代理商押金", align=2, sort=4)
+	public String getCashPledge() {
+		return cashPledge;
+	}
+
+	public void setCashPledge(String cashPledge) {
+		this.cashPledge = cashPledge;
+	}
+	
+	@Length(min=1, max=4, message="状态（0：删除，1：正常）长度必须介于 1 和 4 之间")
+	@ExcelField(title="状态（0：删除，1：正常）", align=2, sort=9)
+	public Integer getState() {
+		return state;
+	}
+
+	public void setState(Integer state) {
+		this.state = state;
+	}
+	
+}

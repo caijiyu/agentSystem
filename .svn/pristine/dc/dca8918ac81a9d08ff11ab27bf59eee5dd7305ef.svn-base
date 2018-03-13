@@ -1,0 +1,105 @@
+package com.jeeplus.modules.agentsystem.agency.web;
+
+
+
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasConsumeSynthesis;
+import com.jeeplus.modules.agentsystem.agency.entity.WasInvoiceApplication;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.agency.service.WasConsumeSynthesisService;
+import com.jeeplus.modules.agentsystem.agency.service.WasInvoiceApplicationService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentSystemLog;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasInvoiceContent;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentSystemLogService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasInvoiceContentService;
+import com.jeeplus.modules.agentsystem.utils.OrderNumberUtils;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+
+/**
+ * 
+ * @author WR
+ * @version 2017-9-29
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agentSystem/wasInvoiceApplyFor")
+public class WasInvoiceApplyForController extends BaseController{
+	@Autowired
+	private WasInvoiceContentService wasInvoiceContentService;
+	@Autowired
+	private WasConsumeSynthesisService consumeSynthesisService;
+	@Autowired
+	private WasInvoiceApplicationService wasInvoiceApplicationService;
+	@Autowired
+	private WasAgentSystemLogService wasAgentSystemLogService;
+	
+	@RequiresPermissions("agentsystem:wasInvoiceApplyFor:form")
+	@RequestMapping(value = {"form", ""})
+	public String form(WasSysUser sysUser,WasInvoiceContent wasInvoiceContent,WasConsumeSynthesis consumeSynthesis,HttpServletRequest request, HttpServletResponse response, Model model){
+		Principal principal = UserUtils.getPrincipal();				
+		//是否开过票的信息
+		consumeSynthesis.setUserId(principal.toString());
+		consumeSynthesis.setInvoice(0);		
+		List<WasConsumeSynthesis> list = consumeSynthesisService.findForListForm(consumeSynthesis);					
+		model.addAttribute("list", list);
+		//开票的内容
+		List<WasInvoiceContent> listContent = wasInvoiceContentService.findList(wasInvoiceContent); 
+		model.addAttribute("listContent", listContent);
+		return "modules/agentsystem/agency/wasInvoiceApplyFor";
+		}
+	
+	//开票申请的保存	
+	@RequiresPermissions("agentsystem:wasInvoiceApplyFor:save")
+	@RequestMapping(value = "save")
+	@ResponseBody
+	public Integer save(String menuId,WasSysUser sysUser,WasInvoiceApplication wasInvoiceApplication,WasConsumeSynthesis consumeSynthesis,HttpServletRequest request, HttpServletResponse response, Model model) throws ParseException{								
+		String invoiceNo = "IN"+OrderNumberUtils.orderNumber();
+		consumeSynthesis.setInvoiceNo(invoiceNo);
+		consumeSynthesis.setInvoice(1);
+		wasInvoiceApplication.setInvoiceNo(invoiceNo);
+		wasInvoiceApplication.setApplyDate(new Date());
+		wasInvoiceApplication.setSendState(0);
+		wasInvoiceApplication.setState(1);
+		Principal principal = UserUtils.getPrincipal();	
+		wasInvoiceApplication.setApplyBy(principal.toString());
+		Integer result = wasInvoiceApplicationService.insert(wasInvoiceApplication);		
+		wasAgentSystemLogService.insert(new WasAgentSystemLog(menuId,new Date(),principal.getId(),"用户"+principal.getLoginName()+"生成了开票单号:"+invoiceNo));
+		String orderNumber = wasInvoiceApplication.getOrderNumber();		
+		String[] strArray = null;   
+	    strArray = orderNumber.split(","); 
+	    for(int i=0;i<strArray.length ;i++){
+	    	String flag = strArray[i].substring(0, 1);
+	    	consumeSynthesis.setOrderNo(strArray[i]);
+	    	//冲销
+	    	if("E".equals(flag)){
+	    		consumeSynthesisService.updateOrderC(consumeSynthesis);
+	    	}
+	    	//软件
+	    	if("P".equals(flag)){
+	    		consumeSynthesisService.updateOrderR(consumeSynthesis);
+	    	}
+	    	//硬件
+	    	if("H".equals(flag)){
+	    		consumeSynthesisService.updateOrderY(consumeSynthesis);
+	    	}	    		    	
+	    }		
+		return result;
+	}
+	}
+
+//}

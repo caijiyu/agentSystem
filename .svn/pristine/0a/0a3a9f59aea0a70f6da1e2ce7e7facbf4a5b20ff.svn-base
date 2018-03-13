@@ -1,0 +1,173 @@
+package com.jeeplus.modules.agentsystem.utils;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import com.jeeplus.common.utils.SpringContextHolder;
+import com.jeeplus.modules.agentsystem.terminal.dao.WasTerminalUserDao;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalProduct;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+import com.jeeplus.modules.tools.utils.ConfigurationFileHelper;
+
+import net.sf.json.JSONObject;
+
+/** 
+ * @author YeJR
+ * @date 创建时间：2017年10月20日 下午5:24:55 
+ * @version 1.0 
+ * @parameter  
+ * @since  
+ * @return  
+ */
+public class TerminalPermissionUtils {
+	
+	private static String webUrl = ConfigurationFileHelper.getWebConnector();
+	private static String minaUrl = ConfigurationFileHelper.getMinaConnector();
+//	private static String phpUrl = ConfigurationFileHelper.getPhpConnector();
+	
+	/**
+	 * 终端账户正常状态
+	 */
+	private static String normalState = "0";
+	
+	private static WasTerminalUserDao wasTerminalUserDao = SpringContextHolder.getBean(WasTerminalUserDao.class);
+	
+	public static synchronized boolean sendTerminalPermissions(WasTerminalUser wasTerminalUser) {
+		
+		boolean webFlag = false;
+		boolean minaFlag = false;
+		
+		//查询出该终端的详细信息
+		wasTerminalUser = wasTerminalUserDao.getTerminalInfo(wasTerminalUser);
+		if (wasTerminalUser != null) {
+			JSONObject jsonObject = new JSONObject();
+			try {
+				List<WasTerminalProduct> list = wasTerminalUser.getTerminalProducts();
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				//分组信息（暂时没有用）
+				jsonObject.put("groupId", 1+"");
+				//用户登录名
+				jsonObject.put("loginName", wasTerminalUser.getLoginName());
+				//用户登录密码
+				jsonObject.put("passWord", wasTerminalUser.getPassword());
+				//负责人
+				jsonObject.put("name", wasTerminalUser.getName());
+				//联系电话
+				jsonObject.put("phone", wasTerminalUser.getPhone());
+				//公司名称
+				jsonObject.put("company", wasTerminalUser.getCompanyName());
+				//地址
+				jsonObject.put("address", wasTerminalUser.getAddress());
+				//账户开始时间
+				jsonObject.put("createDate", formatter.format(wasTerminalUser.getCreateDate()));
+				jsonObject.put("startTime", formatter.format(wasTerminalUser.getCreateDate()));
+				//结束时间
+				Date endTime = new Date();
+				
+				//Array数据用于存放产品
+				ArrayList<HashMap<String, Object>> arrayList = new ArrayList<>();
+				for (int i = 0; i < list.size(); i++) {
+					//用于存放单个产品
+					HashMap<String, Object> hashMap = new HashMap<>();
+					//终端产品
+					WasTerminalProduct wasTerminalProduct = list.get(i);
+					//终端开始时间
+					hashMap.put("startTime", formatter.format(wasTerminalProduct.getStartDate()));
+					//终端结束时间
+					hashMap.put("endTime", formatter.format(wasTerminalProduct.getEndDate()));
+					//时间比较
+					if (i == 0) {
+						endTime = wasTerminalProduct.getEndDate();
+					} else {
+						if (wasTerminalProduct.getEndDate().after(endTime)) {
+							endTime = wasTerminalProduct.getEndDate();
+						}
+					}
+					//若终端产品中有对应的分类
+					if (wasTerminalProduct.getSoftClassify() == 1) {
+						minaFlag = true;
+					} else if (wasTerminalProduct.getSoftClassify() == 0){
+						webFlag = true;
+					}
+					//终端的ID
+					hashMap.put("moduleNumber", wasTerminalProduct.getSoftwareId());
+					//终端版本等级（0：标准版）
+					hashMap.put("subModuleNumber", 0+"");
+					//终端状态
+					hashMap.put("status", wasTerminalProduct.getState());
+					//添加进数组
+					arrayList.add(hashMap);
+				}
+				//账户结束时间
+				jsonObject.put("endTime", formatter.format(endTime));
+				//用户终端集合
+				jsonObject.put("userAuthoritys", arrayList);
+				//账户状态
+				if (normalState.equals(wasTerminalUser.getState())) {
+					jsonObject.put("loginFlag", 1+"");//web
+					jsonObject.put("delFlag", 0+"");//mina
+				} else {
+					jsonObject.put("loginFlag", 0+"");
+					jsonObject.put("delFlag", 1+"");
+				}
+				//若果有小程序的就发送小程序接口
+				if (minaFlag) {
+					try {
+						doPost(minaUrl, jsonObject.toString());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				//若果有公众号的就发送公众号接口
+				if (webFlag) {
+					try {
+						doPost(webUrl, jsonObject.toString());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * 数据流post请求
+	 * 
+	 * @param urlStr
+	 * @param xmlInfo
+	 */
+	public static String doPost(String urlStr, String strInfo) {
+		String reStr = "";
+		try {
+			URL url = new URL(urlStr);
+			URLConnection con = url.openConnection();
+			con.setDoOutput(true);
+			con.setRequestProperty("Pragma", "no-cache");
+			con.setRequestProperty("Cache-Control", "no-cache");
+			con.setRequestProperty("Content-Type", "text/xml");
+			OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+			out.write(new String(strInfo.getBytes("utf-8")));
+			out.flush();
+			out.close();
+			BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+			String line = "";
+			for (line = br.readLine(); line != null; line = br.readLine()) {
+				reStr += line;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return reStr;
+	} 
+}

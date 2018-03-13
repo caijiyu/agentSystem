@@ -1,0 +1,61 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentsystem.sysdata.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasHardware;
+import com.jeeplus.modules.agentsystem.sysdata.dao.WasHardwareDao;
+
+/**
+ * 硬件管理Service
+ * @author Ricky
+ * @version 2017-09-27
+ */
+@Service
+@Transactional(readOnly = true)
+public class WasHardwareService extends CrudService<WasHardwareDao, WasHardware> {
+	
+	@Autowired
+	private WasHardwareDao wasHardwareDao;
+	@Override
+	public WasHardware get(String id) {
+		return super.get(id);
+	}
+	@Override
+	public List<WasHardware> findList(WasHardware wasHardware) {
+		return super.findList(wasHardware);
+	}
+	@Override
+	public Page<WasHardware> findPage(Page<WasHardware> page, WasHardware wasHardware) {
+		return super.findPage(page, wasHardware);
+	}
+	@Override
+	@Transactional(readOnly = false)
+	public void save(WasHardware wasHardware) {
+		super.save(wasHardware);
+	}
+	@Override
+	@Transactional(readOnly = false)
+	public void delete(WasHardware wasHardware) {
+		super.delete(wasHardware);
+	}
+
+	@Transactional(readOnly = false)
+	public int deleteByLogic(WasHardware wasHardware) {
+		return wasHardwareDao.deleteByLogic(wasHardware);
+	}
+	//更新硬件卖出数量
+	@Transactional(readOnly = false)
+	public int updateSellNum(WasHardware wasHardware){
+		return wasHardwareDao.updateSellNum(wasHardware);
+	}
+	
+}

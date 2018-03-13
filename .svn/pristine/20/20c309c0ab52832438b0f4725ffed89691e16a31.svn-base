@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.sysdata.dao.WasAgelimitDao">
+    
+	<sql id="wasAgelimitColumns">
+		a.agelimitId AS "agelimitId",
+		a.year AS "year",
+		a.createDate AS "createDate",
+		a.createBy AS "createBy.id"
+	</sql>
+	
+	<sql id="wasAgelimitJoins">
+	</sql>
+    
+	<select id="get" resultType="WasAgelimit">
+		SELECT 
+			<include refid="wasAgelimitColumns"/>
+		FROM was_agelimit a
+		<include refid="wasAgelimitJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WasAgelimit">
+		SELECT 
+			<include refid="wasAgelimitColumns"/>
+		FROM was_agelimit a
+		<include refid="wasAgelimitJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WasAgelimit">
+		SELECT 
+			<include refid="wasAgelimitColumns"/>
+		FROM was_agelimit a
+		<include refid="wasAgelimitJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 根据年限找enity -->
+	<select id="findByYear" resultType="WasAgelimit">
+	select * FROM was_agelimit  where year = #{year}
+	
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO was_agelimit(
+			year,
+			createDate,
+			createBy
+		) VALUES (
+			#{year},
+			#{createDate},
+			#{createBy.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE was_agelimit SET 	
+			agelimitid = #{agelimitId},
+			year = #{year},
+			createdate = #{createDate},
+			createby = #{createBy}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM was_agelimit
+		WHERE agelimitId = #{agelimitId}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_agelimit SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WasAgelimit" statementType="STATEMENT">
+		select * FROM was_agelimit  where ${propertyName} = '${value}'
+	</select>
+</mapper>

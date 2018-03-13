@@ -1,0 +1,19 @@
+package com.jeeplus.modules.agentsystem.agency.dao;
+
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentLevel;
+@MyBatisDao
+public interface WasAgentApplyDao extends CrudDao<WasSysUser>{
+	public Integer pass(WasSysUser wasSysUser);
+	public Integer overRule(WasSysUser wasSysUser);
+	public List<WasAgentLevel>	getAllNotSuperAgentLevel(String permissionA,String permissionB);
+	public List<WasSysUser> selectAllSuperAgent(String permissionA,String permissionB);
+	public List<WasAgentLevel>	getAllAgentLevel();
+	public Integer	getCountByCopanyName(String companyName);
+    public WasAgentLevel getAgentLevelById(Integer id);
+    public String getCashPledgeByUid(String id);
+}

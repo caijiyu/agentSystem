@@ -1,0 +1,181 @@
+ package com.jeeplus.modules.agentsystem.terminal.web;
+
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentSystemLog;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentSystemLogService;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+import com.jeeplus.modules.agentsystem.terminal.service.WasTerminalUserService;
+import com.jeeplus.modules.sys.entity.User;
+import com.jeeplus.modules.sys.utils.UserUtils;
+/**
+ * 
+ * @author Hua
+ *
+ */
+@Controller
+@RequestMapping(value="${adminPath}/agentSystem/terminal/wasTerminalUser")
+public class WasTerminalUserController extends BaseController{
+
+	@Autowired
+	private WasTerminalUserService wasTerminalUserService;
+	@Autowired
+	private WasAgentSystemLogService wasAgentSystemLogService;
+	/**
+	 * 
+	 * @param wasTerminalUser
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	//@RequiresPermissions("terminal:wasTerminalUser:list")
+	@RequestMapping(value = {"list", ""})
+	public String list(WasTerminalUser wasTerminalUser, HttpServletRequest request, HttpServletResponse response, Model model) {
+		//管理员,财务，parentId置空
+		//总代，找二级代和自己
+		//一级二级不做处理
+		//时间限制在前端
+        Page<WasTerminalUser> page = wasTerminalUserService.findPage(new Page<WasTerminalUser>(request, response), wasTerminalUser); 
+        model.addAttribute("page", page);
+		return "modules/agentsystem/terminal/wasTerminalUserList";
+	}
+	/**
+	 * 
+	 * @param terminalUserId
+	 * @param model
+	 * @return
+	 */
+	//@RequiresPermissions(value={"terminal:wasTerminalUser:add","terminal:wasTerminalUser:edit"},logical=Logical.OR)
+	@RequestMapping(value = "form")
+	public String form(Integer terminalUserId,Model model) {
+		if(terminalUserId!=null){
+			model.addAttribute("wasTerminalUser", wasTerminalUserService.findByTerminalUserId(terminalUserId));
+		}
+		return "modules/agentsystem/terminal/wasTerminalUserForm";
+	}
+	/**
+	 * 保存
+	 * @param wasTerminalUser
+	 * @return
+	 */
+	//@RequiresPermissions("terminal:wasTerminalUser:save")
+	@RequestMapping(value = "save")
+	@ResponseBody
+	public String save(WasTerminalUser wasTerminalUser) {
+
+		if(wasTerminalUser.getTerminalUserId()!=null){
+			insertLog("terminal:wasTerminalUser:edit", "更新了终端用户表", wasTerminalUser.getLoginName());
+		}else{
+			insertLog("terminal:wasTerminalUser:edit", "添加了终端用户表", wasTerminalUser.getLoginName());
+		}
+		
+		Integer num = -1;
+		num = wasTerminalUserService.saveWasTerminalUser(wasTerminalUser);
+		return num>0?"success":"failure";
+	}
+	/**
+	 * 逻辑删除
+	 * @param terminalUserId
+	 * @return
+	 */
+	//@RequiresPermissions("terminal:wasTerminalUser:delete")
+	@RequestMapping(value = "delete")
+	@ResponseBody
+	public String delete(Integer terminalUserId) {
+		
+		insertLog("terminal:wasTerminalUser:delete", "删除了终端用户", wasTerminalUserService.findByTerminalUserId(terminalUserId).getLoginName());
+		
+		int num = -1;
+		num =  wasTerminalUserService.deleteLogic(terminalUserId);
+		return num>0?"success":"failure";
+	}
+	/**
+	 * 冻结
+	 * @param terminalUserId
+	 * @param reason
+	 * @return
+	 */
+	//@RequiresPermissions("terminal:wasTerminalUser:freeze")
+	@RequestMapping(value = "freeze")
+	@ResponseBody
+	public String freeze(Integer terminalUserId,String reason) {
+		
+		insertLog("terminal:wasTerminalUser:delete", "冻结了终端用户", wasTerminalUserService.findByTerminalUserId(terminalUserId).getLoginName());
+		
+		int num = -1;
+		num = wasTerminalUserService.freeze(reason, terminalUserId);
+		return num>0?"success":"failure";
+	}
+	/**
+	 * 解冻
+	 * @param terminalUserId
+	 * @param reason
+	 * @return
+	 */
+	//@RequiresPermissions("terminal:wasTerminalUser:thaw")
+	@RequestMapping(value = "thaw")
+	@ResponseBody
+	public String thaw(Integer terminalUserId,String reason) {
+		
+		insertLog("terminal:wasTerminalUser:delete", "解冻了终端用户", wasTerminalUserService.findByTerminalUserId(terminalUserId).getLoginName());
+		
+		int num = -1;
+		num = wasTerminalUserService.thaw(reason, terminalUserId);
+		return num>0?"success":"failure";
+	}	
+	/**
+	 * 公司名唯一性验证
+	 * @param companyName
+	 * @return
+	 */
+	@RequestMapping(value = "validateCompanyName")
+	@ResponseBody
+	public Boolean validateCompanyName(String companyName) {
+		return wasTerminalUserService.validateCompanyName(companyName);
+	}
+	/**
+	 * 账号唯一性验证
+	 * @param loginName
+	 * @return
+	 */
+	@RequestMapping(value = "validateLoginName")
+	@ResponseBody
+	public Boolean validateLoginName(String loginName) {
+		return wasTerminalUserService.validateLoginName(loginName);
+	}
+	/**
+	 * 编辑时的伪验证
+	 * @return
+	 */
+	@RequestMapping(value = "validate")
+	@ResponseBody
+	public Boolean validate() {
+		return true;
+	}
+
+	/**
+	 * 插入日志
+	 * @param permission
+	 * @param description
+	 * @param terminalUserName
+	 * @return
+	 */
+	private Integer insertLog(String permission,String description,String terminalUserName){
+		User user = UserUtils.getUser();
+		String menuId = wasTerminalUserService.getMenuIdByPermission(permission);
+		WasAgentSystemLog log = new WasAgentSystemLog(menuId, new Date(), user.getId(),"用户"+ user.getLoginName()+description + terminalUserName);
+		return wasAgentSystemLogService.insert(log);
+	}
+}

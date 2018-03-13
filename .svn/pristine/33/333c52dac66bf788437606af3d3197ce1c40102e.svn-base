@@ -1,0 +1,31 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentsystem.sysdata.dao;
+
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentLevel;
+import com.jeeplus.modules.sys.entity.Role;
+
+/**
+ * 代理商等级DAO接口
+ * @author HJT
+ * @version 2017-10-09
+ */
+@MyBatisDao
+public interface WasAgentLevelDao extends CrudDao<WasAgentLevel> {
+	/**
+	 * 发票内容Service
+	 * @author HJT
+	 * @version 2017-10-08
+	 */
+	public List<Role> findByRoletype(String roleType);
+	public Integer getRoleNum(String permissionA,String permissionB,String id);
+	public Integer findByAgentLevelId(Integer agentLevelId);
+	public WasAgentLevel findEnity(Integer agentLevelId);
+	public Integer getNameNum(String name);
+	public Role findRoleById(String id);
+}

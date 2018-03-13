@@ -1,0 +1,178 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentSystem/include/head.jsp"%>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<h5 style="margin-top: 10px;">发票信息</h5>
+				<hr>
+				<div class="row p-t-20">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">开票金额：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].body }</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group has-danger row">
+							<label class="control-label col-3" style="text-align: right;">发票内容：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].money}</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<!--/row-->
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">发票类型：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].invoiceType}</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">公司名称：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].companyName}</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<!--/row-->
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">发票收货地址：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].address}</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">纳税人识别号：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].dutyParagraph}</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">注册地址：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].registerAddress}</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">注册电话：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].registerPhone}</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">开户行：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].registerBank}</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">银行账户：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].account}</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<!--/row-->
+				<hr>
+				<h5 class="box-title m-t-15" style="margin-bottom: 15px;">订单信息</h5>
+				<table
+					class="display nowrap table table-hover table-striped table-bordered"
+					cellspacing="0" width="100%">
+					<thead>
+						<tr>
+							<th>订单编号</th>
+							<th>金额</th>
+							<th>支付日期</th>
+							<th>消费账户</th>
+						</tr>
+					</thead>
+					<tbody>
+						<c:forEach items="${pageB.list}" var="log">
+							<tr>
+								<td class="tableControl">${log.orderNo}</td>
+								<td class="tableControl">${log.payMoney}</td>
+								<td class="tableControl"><fmt:formatDate
+										value="${log.createDate}" type="both" /></td>
+								<td class="tableControl">${log.behavior}</td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+				<div class="dataTables_wrapper">
+					<div class="dataTables_paginate"style="margin-bottom: 15px; margin-top: -15px;">
+						<button type="button" onclick="examineBack(${page.list[0].applyBy})" class="btn btn-default" style="background-color: #DDDDDD;">返回</button>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+	<form id="backForm" method="post"
+		action="${ctx}/agentSystem/RecordExamine/list">
+		<input id="receivedUserId" name="receivedUserId" type="hidden" value="" />
+	</form>
+	<script type="text/javascript">
+		
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		
+		//查询方法
+		function search(){//查询，页码清零
+			$("#pageNo").val(0);
+			$("#searchForm").submit();
+		}
+		
+		//返回方法
+		function examineBack(userId){
+			
+			$("#receivedUserId").val(userId);
+			$("#backForm").submit();
+		}
+		
+	</script>
+	<style>
+/*给订单信息价滚动条*/
+table tbody {
+	display: block;
+	height: 220px;
+	overflow-y: scroll;
+}
+
+table thead, tbody tr {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+}
+
+table thead {
+	width: calc(100% - 1em)
+}
+</style>
+</body>
+</html>

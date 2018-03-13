@@ -1,0 +1,138 @@
+package com.jeeplus.modules.agentSystem.agency.entity;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jeeplus.common.persistence.DataEntity;
+/**
+ * 代理商消费综合实体
+ * @author SZP
+ * @version 2017-09-29
+ */
+public class WasConsumeSynthesis extends DataEntity<WasConsumeSynthesis> {
+	private static final long serialVersionUID = 1L;
+	private String orderNo;			//订单编号
+	private String behavior;		//消费行为
+	private BigDecimal payMoney;	//消费金额
+	private Integer type;			//类型
+	private Date createDate;		//消费时间
+	private String userId;			//操作人
+	private String loginName;		//登录账户
+	private Date startDate;			//开始时间
+	private Date endDate;			//结束时间
+	private String invoiceNo;		//开票单号	
+	private Integer invoice;        //是否开过票
+	private BigDecimal publicExpend;//公众号消费
+	private BigDecimal minaExpend;  //小程序消费
+	private BigDecimal hardwareExpend; //硬件消费
+	private BigDecimal vipExpend;   //vip消费
+	private String remark;   //备注
+	
+	public Integer getInvoice() {
+		return invoice;
+	}
+	public void setInvoice(Integer invoice) {
+		this.invoice = invoice;
+	}
+	public String getInvoiceNo() {
+		return invoiceNo;
+	}
+	public void setInvoiceNo(String invoiceNo) {
+		this.invoiceNo = invoiceNo;
+	}
+	public WasConsumeSynthesis() {
+		super();
+	}
+	public String getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
+	}
+	public String getBehavior() {
+		return behavior;
+	}
+	public void setBehavior(String behavior) {
+		this.behavior = behavior;
+	}
+	public Integer getType() {
+		return type;
+	}
+	public void setType(Integer type) {
+		this.type = type;
+	}
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	public Date getCreateDate() {
+		return createDate;
+	}
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public BigDecimal getPayMoney() {
+		return payMoney;
+	}
+	public void setPayMoney(BigDecimal payMoney) {
+		this.payMoney = payMoney;
+	}
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	public Date getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	public Date getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+	public String getLoginName() {
+		return loginName;
+	}
+	public void setLoginName(String loginName) {
+		this.loginName = loginName;
+	}
+	public BigDecimal getPublicExpend() {
+		return publicExpend;
+	}
+	public void setPublicExpend(BigDecimal publicExpend) {
+		this.publicExpend = publicExpend;
+	}
+	public BigDecimal getMinaExpend() {
+		return minaExpend;
+	}
+	public void setMinaExpend(BigDecimal minaExpend) {
+		this.minaExpend = minaExpend;
+	}
+	public BigDecimal getHardwareExpend() {
+		return hardwareExpend;
+	}
+	public void setHardwareExpend(BigDecimal hardwareExpend) {
+		this.hardwareExpend = hardwareExpend;
+	}
+	public BigDecimal getVipExpend() {
+		return vipExpend;
+	}
+	public void setVipExpend(BigDecimal vipExpend) {
+		this.vipExpend = vipExpend;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+	
+}

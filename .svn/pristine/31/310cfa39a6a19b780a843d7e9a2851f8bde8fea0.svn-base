@@ -1,0 +1,94 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+<!-- Favicon icon -->
+<link rel="icon" type="image/png" href="${ctxStatic}/assets/images/favicon.png">
+<link rel="apple-touch-icon-precomposed" href="${ctxStatic}/assets/images/favicon.png">
+<title>代理商管理系统</title>
+<link href="${ctxStatic}/agentSystem/css/timeLineStyle.css"  rel="stylesheet">
+<!-- Bootstrap Core CSS -->
+<link href="${ctxStatic}/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="${ctxStatic}/assets/plugins/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css" rel="stylesheet">
+<!-- Page plugins css -->
+<link href="${ctxStatic}/assets/plugins/clockpicker/dist/jquery-clockpicker.min.css" rel="stylesheet">
+<link href="${ctxStatic}/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
+<link href="${ctxStatic}/assets/plugins/switchery/dist/switchery.min.css" rel="stylesheet" />
+<link href="${ctxStatic}/assets/plugins/bootstrap-select/bootstrap-select.min.css" rel="stylesheet" />
+<link href="${ctxStatic}/assets/plugins/bootstrap-tagsinput/dist/bootstrap-tagsinput.css" rel="stylesheet" />
+<link href="${ctxStatic}/assets/plugins/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.css" rel="stylesheet" />
+<link href="${ctxStatic}/assets/plugins/multiselect/css/multi-select.css" rel="stylesheet" type="text/css" />
+<!-- Color picker plugins css -->
+<link href="${ctxStatic}/assets/plugins/jquery-asColorPicker-master/css/asColorPicker.css" rel="stylesheet">
+<!-- Date picker plugins css -->
+<link href="${ctxStatic}/assets/plugins/bootstrap-datepicker/bootstrap-datepicker.min.css" rel="stylesheet" type="text/css" />
+<!-- Daterange picker plugins css -->
+<link href="${ctxStatic}/assets/plugins/timepicker/bootstrap-timepicker.min.css" rel="stylesheet">
+<link href="${ctxStatic}/assets/plugins/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet">
+<link href="${ctxStatic}/assets/plugins/icheck/skins/all.css" rel="stylesheet">
+<!-- Custom CSS -->
+<link href="${ctxStatic}/assets/common/css/style.css" rel="stylesheet">
+<!-- theme colors -->
+<link href="${ctxStatic}/assets/common/css/colors/blue.css" id="theme" rel="stylesheet">
+<!-- icon -->
+<link href="${ctxStatic}/agentSystem/css/iconfont.css" rel="stylesheet">
+<!-- ====================================================================================== -->
+
+<!-- Jquery -->
+<script src="${ctxStatic}/assets/plugins/jquery/jquery.min.js"></script>
+<script src="${ctxStatic}/assets/common/js/jquery.cookie.js"></script>
+<!-- Bootstrap tether Core JavaScript -->
+<script src="${ctxStatic}/assets/plugins/bootstrap/js/popper.min.js"></script>
+<script src="${ctxStatic}/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+<!--stickey kit -->
+<script src="${ctxStatic}/assets/plugins/sticky-kit-master/dist/sticky-kit.min.js"></script>
+<script src="${ctxStatic}/assets/plugins/sparkline/jquery.sparkline.min.js"></script>
+<!-- Style switcher -->
+<script src="${ctxStatic}/assets/plugins/styleswitcher/jQuery.style.switcher.js"></script>
+<!-- slimscrollbar scrollbar JavaScript -->
+<script src="${ctxStatic}/assets/common/js/jquery.slimscroll.js"></script>
+<!--Wave Effects -->
+<script src="${ctxStatic}/assets/common/js/waves.js"></script>
+<!--Menu sidebar -->
+<script src="${ctxStatic}/assets/common/js/sidebarmenu.js"></script>
+<!--Custom JavaScript -->
+<script src="${ctxStatic}/assets/common/js/custom.js"></script>
+<!-- This page plugins -->
+<script src="${ctxStatic}/assets/common/js/jasny-bootstrap.js"></script>
+<script src="${ctxStatic}/assets/plugins/switchery/dist/switchery.min.js"></script>
+<script src="${ctxStatic}/assets/plugins/select2/dist/js/select2.full.min.js" type="text/javascript"></script>
+<script src="${ctxStatic}/assets/plugins/bootstrap-select/bootstrap-select.min.js" type="text/javascript"></script>
+<script src="${ctxStatic}/assets/plugins/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js"></script>
+<script src="${ctxStatic}/assets/plugins/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.min.js" type="text/javascript"></script>
+<script src="${ctxStatic}/assets/plugins/multiselect/js/jquery.multi-select.js"></script>
+
+<!-- validation -->
+<script src="${ctxStatic}/assets/common/js/validation.js"></script>
+
+<script src="${ctxStatic}/assets/plugins/moment/moment.js"></script>
+<script src="${ctxStatic}/assets/plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
+<!-- Clock Plugin JavaScript -->
+<script src="${ctxStatic}/assets/plugins/clockpicker/dist/jquery-clockpicker.min.js"></script>
+<!-- Color Picker Plugin JavaScript -->
+<script src="${ctxStatic}/assets/plugins/jquery-asColorPicker-master/libs/jquery-asColor.js"></script>
+<script src="${ctxStatic}/assets/plugins/jquery-asColorPicker-master/libs/jquery-asGradient.js"></script>
+<script src="${ctxStatic}/assets/plugins/jquery-asColorPicker-master/dist/jquery-asColorPicker.min.js"></script>
+<!-- Date Picker Plugin JavaScript -->
+<script src="${ctxStatic}/assets/plugins/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+<!-- Date range Plugin JavaScript -->
+<script src="${ctxStatic}/assets/plugins/timepicker/bootstrap-timepicker.min.js"></script>
+<script src="${ctxStatic}/assets/plugins/bootstrap-daterangepicker/daterangepicker.js"></script>
+<!-- icheck -->
+<script src="${ctxStatic}/assets/plugins/icheck/icheck.min.js"></script>
+<script src="${ctxStatic}/assets/plugins/icheck/icheck.init.js"></script>
+
+<!-- layer -->
+<script src="${ctxStatic}/layer-v2.0/layer/layer.js"></script>
+<script src="${ctxStatic}/webupload/js/uploadConfig.js"></script>
+<!-- validate -->
+<script src="${ctxStatic}/assets/common/js/jquery.validate.js"></script>
+

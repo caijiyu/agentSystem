@@ -1,0 +1,585 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<link href="${ctxStatic}/agentSystem/popup/style.css" rel="stylesheet">
+<script type="text/javascript" src="${ctxStatic}/agentSystem/popup/jquery.selectlayer.js" ></script>
+<style type="text/css">
+button:focus {
+    outline: 0px auto -webkit-focus-ring-color;
+    }
+.selecteditem label{
+text-align: left;
+}
+</style>
+</head>
+<body>
+	<div class="row divControl">
+		<div class="col-sm-12">
+			<div class="card">
+				<div class="card-body">
+					<h4 id="htitle" class="card-title">添加销售方针</h4>
+					<h6 class="card-subtitle"></h6>
+					<form class="form" id="inputForm">
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span style="color:red">*</span>产品选择</label>
+							<div class="col-9 controls">
+								<div class="input-group">
+									<input required style="border-radius:0.25rem !important;" name="district_cn" id="district_cn" type="text" placeholder="请选择产品" value="" readonly  class="sltinput form-control singleGraph height-control rightAngle"    />
+									<div style="display:none" id="sel_district">
+		<!-- <div class="OpenFloatBoxBg"></div> -->
+		<div class="OpenFloatBox" style="top:35px !important;">
+			<!-- <div class="title">
+				<h4>公众号</h4>
+				<div class="DialogClose" title="关闭">×</div>
+				<button type="button" class="DialogClose" >×</button>
+			</div> -->
+			<div class="content">
+			<!-- <div class="DialogClose" title="关闭">×</div> -->
+			<button type="button" style="float: right;width: 27px;" class="DialogClose close" >×</button>
+			<div class="txt" style="background: aliceblue;padding: 0px 15px 0px 15px;">
+                  <h4 style="margin-left: -5px;font-size: 14px">公众号</h4>
+                 </div>
+				<div class="txt">
+					 <c:forEach items="${officialAccounts}" var="ofA" >
+					<div class="item" id="of${ofA.softwareId}">
+						<label title="${ofA.name }" class="titem">
+							<input type="checkbox"  id="${ofA.softwareId}"  data-checkbox="icheckbox_square-blue" value="of0${ofA.softwareId}" title="${ofA.name }" class="b">
+							${ofA.name }</label>
+						<div class="sitem"></div>
+					 </div>
+                   </c:forEach> 
+                   <div class="clear"></div> 
+                   </div>
+                 <div class="txt" style="background: aliceblue;padding: 0px 15px 0px 15px;">
+                  <h4 style="margin-left: -5px;font-size: 14px">小程序</h4>
+                 </div>
+                  <div class="txt" >
+                   
+                   
+                   <c:forEach items="${miniApps}" var="ma" >
+					<div class="item" id="ma${ma.softwareId}">
+						<label title="${ma.name }" class="titem">
+							<input type="checkbox" id="${ma.softwareId}" value="ma1${ma.softwareId}" title="${ma.name }" class="b">
+							${ma.name }</label>
+						<div class="sitem"></div>
+					 </div>
+                   </c:forEach> 
+                   
+				
+					
+			 <div class="clear"></div> 
+				</div>
+				<div class="txt">
+					<div class="selecteditem"></div>
+				</div>
+				<div class="txt">
+					<div class="text-xs-right" style="text-align: right;">
+						<button type="button" class="btn btn-info Set">确定</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+									
+									
+									
+									<!-- <span class="input-group-btn " >
+										<button class="btn btn-default leftAngle height-control" onclick="" type="button" style=" height: 36px;font-size: 12px;">选择产品</button>
+									</span> -->
+								</div>
+								<span class="help-block"></span>
+							</div>
+						</div>
+						<input type="hidden" id="menuId" name="menuId" />
+						<!-- 编辑时判断 -->
+						<input id="judge" value="${judge}" type="hidden">
+						<!-- 软件ID -->
+						<input id="ids" name="softwareIds" value="" type="hidden">
+						<input id="softwareIds"  value="${WasSalesPolicy.softwareIds}" type="hidden">
+						<!-- 分类 -->
+						<input id="classifys" name="policyClassify" value="" type="hidden">
+						<!-- 销售方针ID -->
+						<input id="salesPolicyId" name="salesPolicyId" value="${WasSalesPolicy.salesPolicyId}" type="hidden">
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span style="color:red">*</span>套餐名</label>
+							<div class="col-9 controls">
+								<div>
+								<input maxlength="20" type="text" id="titles" name="title" value="${WasSalesPolicy.title}" class="form-control height-control">
+							</div>
+							</div>
+						</div>
+						<input type="hidden" id="oldTitle" name="oldTitle" value="${WasSalesPolicy.title}">
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span style="color:red">*</span>开通年限</label>
+							<div class="col-9 controls ">
+								<div class="input-group">
+								<input id="dy" type="hidden" value="${WasSalesPolicy.dredgeYear}"> 
+								<select name="dredgeYear"  id="dredgeYear" class="custom-select col-12 height-control form-control" >
+									<option value="" >...请选择...</option>
+								</select>
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">年</span>
+			                   </div>				
+							</div>
+						</div>
+						
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">赠送年限</label>
+							<div class="col-9 controls ">
+								<div class="input-group">
+								<input maxlength="2" autocomplete="off" id="giveYear" name="giveYear" value="${WasSalesPolicy.giveYear}" type="text" class="form-control height-control rightAngle" data-validation-required-message="这是必填项"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">年</span>
+							</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span style="color:red">*</span>价格</label>
+							<div class="col-9 controls ">
+								<div class="input-group">
+								<input maxlength="9" autocomplete="off" type="text" id="price" value="${WasSalesPolicy.price}" name="price" class="form-control height-control rightAngle" required data-validation-required-message="这是必填项"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+							</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span style="color:red">*</span>续费折扣</label>
+							<div class="col-9 controls ">
+								<div class="input-group">
+								<input maxlength="5" autocomplete="off" type="text" value="<fmt:formatNumber value="${WasSalesPolicy.renewDiscount*10 == '0' ? '':WasSalesPolicy.renewDiscount*10}" type="currency" pattern="#0.0"/>" id="renewDiscount" name="renewDiscount" class="form-control height-control rightAngle" required data-validation-required-message="这是必填项"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">折</span>
+							</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">时间</label>
+							<div class="col-9  input-daterange" id="date-range">
+								<div class="row">
+                            	<div class="col-6 " style="padding-right:0px">
+                            	<div class="input-group">
+                            	<input placeholder="请选择开始时间" type="text" class="form-control height-control" value="<fmt:formatDate value="${WasSalesPolicy.startDate}" pattern="yyyy-MM-dd"/>" id="startDate" name="startDate" style="text-align: left;"/>
+                                <span class="input-group-addon bg-info b-0 text-white height-control addCentreControl">至</span>
+                                </div>
+                                </div>
+                                <div class="col-6" style="padding-left:0px">
+                                <div class="input-group">
+                                <input placeholder="请选择结束时间" type="text" class="form-control height-control" value="<fmt:formatDate value="${WasSalesPolicy.endDate}" pattern="yyyy-MM-dd"/>" name="endDate" style="text-align: left;"/>
+								</div>
+								</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span style="color:red">*</span>排序</label>
+							<div class="col-9 controls">
+								<div>
+								<input maxlength="11" autocomplete="off" type="text" value="${WasSalesPolicy.sort}" id="sort" name="sort" class="form-control height-control" required data-validation-required-message="这是必填项">
+							</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">备注</label>
+							<div class="col-9 controls input-group">
+								<textarea maxlength="100" class="form-control" id="remarks" name="remarks"  rows="5">${WasSalesPolicy.remarks}</textarea>
+							</div>
+						</div>
+                           <div class="form-group row">
+							<label class="col-2 col-form-label"></label>
+							<div class="col-9">
+								<div class="text-xs-right" style="text-align: right;">
+									<button type="button" class="btn waves-effect waves-light btn-info" onclick="save()">保存</button>
+									<a href="${ctx}/agentsystem/wasSalesPolicy/list"><button type="button" class="btn waves-effect waves-light " >返回</button></a>
+								</div>
+							</div>
+						</div>
+						
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+	var a=new Date();
+	$(document).ready(function(){
+		selectdredgeYear();
+		var softwareIds=$("#softwareIds").val();
+		var judge=$("#judge").val();
+		if(softwareIds){
+			$("#htitle").text("编辑销售方针");
+			$("#dredgeYear").val($("#dy").val());
+			//编辑时产品显示
+			productShow();
+			//编辑显示所选产品
+			CopyItema(showid);
+			//编辑确定显示 
+			 SetInput(showid,input_cn,input,strlen);
+			if(judge=="0"){
+				a=$("#startDate").val();
+				$("#district_cn").attr("id","");
+				document.getElementById("titles").readOnly=true;
+				document.getElementById("dredgeYear").disabled=true;
+				document.getElementById("giveYear").readOnly=true;
+				document.getElementById("renewDiscount").readOnly=true;
+				document.getElementById("startDate").disabled=true;
+				document.getElementById("sort").readOnly=true;
+				document.getElementById("remarks").readOnly=true;
+			}
+		}
+		
+		 var QS_city=new Array() 
+			OpenCategoryLayer(
+				"#district_cn",
+				"#sel_district",
+				"#district_cn",
+				"#citycategory",
+				QS_city,
+			100);
+		//日期范围选择
+			 jQuery('#date-range').datepicker({
+			    toggleActive: true,
+			    autoclose: true,
+			    startDate:a,
+			    format: "yyyy-mm-dd"
+			});  
+	});
+	 //编辑时产品显示
+	 function productShow(){
+		var softwareIds=$("#softwareIds").val();
+		var strs= new Array(); 
+		strs=softwareIds.split(",");
+		for (i=0;i<strs.length ;i++ ){
+			$("#"+strs[i]).attr("checked",'true');
+		}
+		
+	 }
+	 var showid="#sel_district";
+	 function CopyItema(showid){
+			var htmlstr='&nbsp;&nbsp;&nbsp;已经选择产品：<span class=\"empty\">[清空已选]</span><br/>';
+			$(showid+" .item input[class='b']:checked").each(function(index){
+			htmlstr+="<label><input class=\"b\"  type=\"checkbox\" value=\""+$(this).attr("value")+"\" title=\""+$(this).attr("title")+"\" checked/>"+$(this).attr("title")+"</label>";
+			})
+			$(showid+" .item input[class='s']:checked").each(function(index){
+			 if ($(this).parent().parent().prev().find(":checkbox").attr('checked')==false)
+			 {						 
+			htmlstr+="<label><input class=\"s\"  type=\"checkbox\" id=\""+$(this).attr("id")+"\" value=\""+$(this).attr("value")+"\" title=\""+$(this).attr("title")+"\" checked/>"+$(this).attr("title")+"</label>";
+			 }
+			})
+			htmlstr+="<div class=\"clear\"></div>";
+			$(showid+" .selecteditem").html(htmlstr);
+			if ($(showid+" .item :checked").length>0){
+				$(showid+" .selecteditem").css("display","block");
+			}else{
+				$(showid+" .selecteditem").css("display","none");
+			}
+			//已选项目绑定click
+			$(showid+" .selecteditem :checkbox").unbind().click(function(){
+				var selval=$(this).val();
+					$(showid+" .item :checked").each(function()
+					{
+						
+						if ($(this).val()==selval)
+						{
+							$(this).prop("checked",false);
+							if ($(this).attr("class")=="b")
+							{
+								$(this).parent().next().find(":checkbox").prop("checked",false);
+							}									
+							//重新克隆
+							CopyItem(showid);
+						}	
+					})
+			});
+			$(showid+" .OpenFloatBox .item label :checkbox").parent().css("color","");
+			$(showid+" .OpenFloatBox .item label :checkbox[checked]").parent().css("color","#FF6600");
+			$(showid+" .OpenFloatBox .sitem :checkbox[checked]").each(function(index){
+				$(this).parent().parent().prev().css("color","#FF6600");
+			});
+			SetBoxBg(showid);
+			//清空
+			$(showid+" .selecteditem .empty").unbind().click(function()
+			{
+					$(showid+" .selecteditem").css("display","none");
+					$(showid+" .selecteditem").html("");
+					$(showid+" :checkbox[checked]").parent().css("color","");
+					$(showid+" :checkbox[checked]").parent().parent().prev().css("color","");
+					$(showid+" :checked").prop('checked',false);							
+					SetBoxBg(showid);
+			});	
+		}
+	//设置表单
+	var input_cn="#district_cn";
+	var input="#citycategory";
+	var strlen=100;
+		function SetInput(showid,input_cn,input,strlen)
+		{
+				var a_cn=new Array();
+				var a_id=new Array();
+				var id_s=new Array();
+				var classify_s=new Array();
+				var i=0;
+				var title;
+				
+				$(showid+" .OpenFloatBox .selecteditem :checkbox[checked]").each(function(index)
+				{
+					var str=$(this).attr("value").substring(0,2);
+					id_s[index]=$(this).attr("value").substr(3);
+					classify_s[index]=$(this).attr("value").substring(2,3);
+					if(str=="of"){
+						title=$(this).attr("title")+"(公众号)";
+					}else{
+						title=$(this).attr("title")+"(小程序)";
+					}
+				    a_cn[index]=title;	
+					if ($(this).attr("class")=="b")
+					{
+							a_id[i]=$(this).val()+".0";							
+					}
+					else
+					{							
+						a_id[i]=$(this).attr("id")+"."+$(this).val();
+					}
+						i++;
+				});
+				$(input_cn).val(limit(a_cn.join("+"),strlen));
+				$("#ids").val(id_s.join());
+				$("#classifys").val(classify_s.join());
+				if ($(input_cn).val()=="")$(input_cn).val("未选择");
+				$(input).val(a_id.join("-"));
+				//DialogClose(showid);
+		}
+	//小时选择
+		 /* $('.clockpicker').clockpicker({
+	        donetext: 'Done',
+	    }).find('input').change(function() {
+	        console.log(this.value);
+	    });  */
+		//日期选择
+		/*  $('#date-range').datepicker({
+	        autoclose: true,
+	        todayHighlight: true,
+	        format: "yyyy-mm-dd"
+	    });  */
+		
+		/*  $('#startDate').datepicker({
+				onSelect:function(date){ 
+					 this.focus();  
+			          this.blur();   
+			      }  
+			});
+			$('#endDate').datepicker({
+				onSelect:function(date){ 
+					 this.focus();  
+			          this.blur();   
+			      }  
+			}); */
+		//日期和时间
+		/* $('#date-format').bootstrapMaterialDatePicker({ format : 'YYYY-MM-DD HH:mm'});
+		//checkbox选中
+		$('#square-checkbox-2').iCheck('check');
+		//单选选中
+		$('#square-radio-2').iCheck('check');
+		//下拉多选
+		$(".select2").select2(); */
+		/* 
+		function test() {
+			//获取下拉多选的值
+			var options = $(".select2 option:selected");//获取当前选择项.
+			for (var i = 0; i < options.length; i++) {
+				alert(options[i].value);
+			}
+		} */
+		//checkbox监听
+		$('#ischange').on('ifChecked', function(event){ //ifCreated 事件应该在插件初始化之前绑定 
+			$('.check').iCheck('check');
+		});
+		$('#ischange').on('ifUnchecked', function(event){ //ifUnchecked 事件应该在插件初始化之前绑定 
+			$('.check').iCheck('uncheck');
+		});
+		function save(){
+			var isValid = $("#inputForm").valid();
+			$("#menuId").val($("#btnId",parent.document).val());
+			if(isValid){
+			 layer.confirm('是否确认保存？', { icon : 3 ,
+				 skin : 'layui-layer-molv',btn: ['确认','取消']},function(){
+					 $("#dredgeYear").removeAttr("disabled");
+					 $("#startDate").removeAttr("disabled");
+					 $("#modal").modal("hide");
+					 var index = layer.load(1, {shade: [0.1,'#fff']});
+					 $.ajax({
+							url : "${ctx}/agentsystem/wasSalesPolicy/save",
+							dataType : "json",
+							type : "post",
+							data : $('#inputForm').serialize(),
+							success : function(result) {
+								layer.close(index);
+								if (result >0) {
+									layer.msg("保存成功",{icon:1,time:1000},function(){
+										location.href="${ctx}/agentsystem/wasSalesPolicy/list";
+									});
+								}
+							},error : function(){
+								layer.close(index);
+								layer.msg("保存失败",{icon:2,time:1000},function(){
+									location.href="${ctx}/agentsystem/wasSalesPolicy/list";
+								});
+							}
+						});  
+				 });
+			}
+		}
+		$.validator.addMethod("minNumber",function(value, element) {
+			   var returnVal = true;
+	           inputZ=value;
+	           var ArrMen= inputZ.split(".");    //截取字符串
+	           if(ArrMen.length==2){
+	               if(ArrMen[1].length>2){    //判断小数点后面的字符串长度
+	                   returnVal = false;
+	                   return false;
+	               }
+	           }
+	           return returnVal;
+		},"最多支持两位小数");
+		$.validator.addMethod("minNumberas",function(value, element) {
+			   var returnVal = true;
+	           inputZ=value;
+	           var ArrMen= inputZ.split(".");    
+	           if(ArrMen.length==2){
+	               if(ArrMen[1].length>1){   
+	                   returnVal = false;
+	                   return false;
+	               }
+	           }
+	           return returnVal;
+		},"最多支持一位小数");
+		jQuery.validator.addMethod("positiveinteger", function(value, element) {
+			   var aint=parseInt(value);	
+			    return aint>0&& (aint+"")==value;   
+			  }, "请输入正整数。"); 
+		 jQuery.validator.addMethod("isIntGteZero", function(value, element) { 
+	         //value=parseInt(value); 
+	         var returnVal = true;
+	         if(value>=10 || value<=0){
+	        	 returnVal = false;
+	        	 return false;
+	         }
+	         return returnVal;
+	    }, "有效数字范围大于0小于10");   
+		$("#inputForm").validate({
+			rules : {
+				district_cn : {
+					required : true,
+				},
+				title : {
+					required : true,
+					remote : {
+						 url:"${ctx}/agentsystem/wasSalesPolicy/validateTitle", 
+						  data :{
+							 title:function(){return $("#titles").val();},
+						     salesPolicyId:function(){return $("#salesPolicyId").val();},
+					          oldTitle: function(){return $("#oldTitle").val();},
+			          		} 
+					}
+				},
+				dredgeYear : {
+					required : true,
+					
+				},
+				
+				price : {
+					required : true,
+					number : true,
+					min : 0,
+					max : 999999.99,
+					minNumber : true
+				},
+				renewDiscount : {
+					required : true,
+					number : true,
+					minNumberas : true,
+					isIntGteZero : true,
+				},
+				startDate : {
+					required : true,
+				},
+				endDate : {
+					required : true,
+				},
+				sort : {
+					required : true,
+					digits : true,
+				},
+				
+				
+				},messages : {
+					district_cn : {
+						required : "请选择产品",
+					},
+					title : {
+						required : "请填写套餐名",
+						remote : "套餐名重复，请重新填写"
+					},
+					dredgeYear : {
+						required : "请选择开通年限",
+						
+					},
+					
+					price : {
+						required : "请填写价格",
+						number :"请输入数字",
+						min : "有效数字范围0~999999.99",
+						max : "有效数字范围0~999999.99"
+					},
+					renewDiscount : {
+						required : "请填写续费折扣",
+						number :"请输入数字",
+						
+					},
+					startDate : {
+						required : "请选择开始时间",
+					},
+					endDate : {
+						required : "请选择结束时间",
+					},
+					sort : {
+						required : "请填写排序",
+						digits : "请输入整数",
+					},
+					
+				},errorPlacement : function(error, element) {
+					error.insertAfter(element.parent());
+				}
+			
+		});
+		//根据所选产品计算总价格
+		function totalPrice(ids){
+			$.ajax({
+				url : "${ctx}/agentsystem/wasSalesPolicy/total",
+				dataType : "text",
+				type : "post",
+				data : {"softwareIds":ids},
+				success : function(data){
+					$("#price").val(data);
+				}
+			});
+		}
+		//查找年限
+		function selectdredgeYear(){
+			$.ajax({
+				url : "${ctx}/agentsystem/wasSalesPolicy/findYear",
+				dataType : "json",
+				type : "post",
+				async : false,
+				data : {},
+				success : function(data){
+					$.each(data,function(i,li){
+						var str='<option value="'+li.year+'">'+li.year+'</option>';
+						$("#dredgeYear").append(str);
+					});
+				}
+			});
+		}
+	</script>
+</body>
+</html>

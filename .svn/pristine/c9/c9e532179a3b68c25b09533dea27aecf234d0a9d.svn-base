@@ -1,0 +1,394 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<!-- 续签页面 -->
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<style type="text/css">
+		#startDate-error{
+				width: 55%;
+	   			text-align: left;
+	   			display:inline-block!important;
+			}
+	</style>
+</head>
+<body>
+	<div class="row divControl">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-body">
+					<h3 class="cardTitle">代理商续签</h3>
+					<hr class="m-t-0 m-b-40">
+					<form action="#" method="post" style="width: 100%" id="renewForm">
+					 <input type="hidden" value="" id="agentId" name="id">
+					 <input type="hidden" value="" id="menuId" name="menuId">  
+						<div class="form-body">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">账号：</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" value="${agent.login_name}" name="login_name"
+												readonly="readonly">
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">公司全称：</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" value="${fn:escapeXml(agent.companyName)}"
+												readonly="readonly">
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">套餐折扣：</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control height-control rightAngle" value="${agent.packageDiscount}" readonly>
+												<span class="input-group-addon height-control leftAngle">折</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">公众号折扣：</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control height-control rightAngle" value="${agent.publicDiscount}" readonly>
+												<span class="input-group-addon height-control leftAngle">折</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+							</div>
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">小程序折扣：</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control height-control rightAngle" value="${agent.minaDiscount}" readonly>
+												<span class="input-group-addon height-control leftAngle">折</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">所属上级：</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" value="${fn:escapeXml(agent.companyParent.companyName)}"
+												readonly="readonly">
+										</div>
+									</div>
+								</div>
+
+								<!--/span-->
+							</div>
+							<!--/row-->
+
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">代理商等级：</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" value="${fn:escapeXml(agent.agentLevel)}"
+												readonly="readonly">
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">客户等级：</label>
+										<div class="col-md-9">
+											<c:if test="${agent.customerLevel == 1}">
+												<input type="text" class="form-control" value="VIP用户" readonly>	
+											</c:if>
+											<c:if test="${agent.customerLevel == 0 }">
+												<input type="text" class="form-control" value="普通用户" readonly>
+											</c:if> 
+										</div>
+									</div>
+								</div>
+
+
+
+								<!--/span-->
+							</div>
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">代理状态：</label>
+										<div class="col-md-9">
+											<div class="input-group">
+											<c:if test="${agent.state == 1}">
+												<input type="text" class="form-control" value="正常" readonly>
+											</c:if>
+											<c:if test="${agent.state == 0 }">
+												<input type="text" class="form-control" value="冻结" readonly>
+											</c:if> 
+												
+
+											</div>
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">平台押金：</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control height-control rightAngle" value="${agent.cashPledge}"
+													readonly="readonly"> <span
+													class="input-group-addon height-control leftAngle">元</span>
+											</div>
+
+										</div>
+									</div>
+								</div>
+
+								<!--/span-->
+							</div>
+
+							<div class="row">
+
+
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">公众号余额：</label>
+										<div class="col-md-9">
+
+											<div class="input-group">
+												<input type="text" class="form-control height-control rightAngle" value="${agent.publicAccount}"
+													readonly="readonly"> <span
+													class="input-group-addon height-control leftAngle">元</span>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">硬件余额：</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control height-control rightAngle" value="${agent.hardwareAccount}"
+													readonly="readonly"> <span
+													class="input-group-addon height-control leftAngle">元</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!--/row-->
+							<div class="row">
+
+
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">小程序余额：</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control height-control rightAngle" value="${agent.minaAccount}"
+													readonly="readonly"> <span
+													class="input-group-addon height-control leftAngle">元</span>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">VIP余额：</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control height-control rightAngle" value="${agent.vipAccount}"
+													readonly="readonly"> <span
+													class="input-group-addon height-control leftAngle">元</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label">时间范围：</label>
+										<div class="col-md-9">
+											<div class="input-daterange input-group">
+												<input type="text" class="form-control height-control rightAngle" name="start"
+													value="<fmt:formatDate value="${agent.startDate}" pattern="yyyy-MM-dd"/>" readonly> <span
+													class="input-group-addon bg-info b-0 text-white height-control addCentreControl">至</span> <input
+													type="text" class="form-control height-control leftAngle" name="end"
+													value="<fmt:formatDate value="${agent.endDate}" pattern="yyyy-MM-dd"/>" readonly>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="col-3 col-form-label"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>续签时间：</label>
+										<div class="col-md-9">
+											<div class="input-daterange input-group" >
+												<input type="text" autocomplete="off" class="form-control rightAngle height-control"  id="startDate" readonly>
+												<span class="input-group-addon bg-info b-0 text-white rightAngle height-control leftAngle">至</span>
+												<input type="text" autocomplete="off" class="form-control height-control leftAngle" name="endDate" id="endDate">
+											</div>
+											<label id="endDate-error" class="error" for="endDate" style="margin-left:54%"></label>
+										</div>
+
+									</div>
+								</div>
+								<!--/span-->
+							</div>
+						</div>
+						<div class="form-group row">
+							<label class="col-3 col-form-label"></label>
+							<div class="col-9">
+								<div class="text-xs-right" style="text-align: right;">
+									<button type="button" class="btn btn-default" onclick="jump()">返回</button>
+									<button type="button"
+										class="btn waves-effect waves-light btn-info" onclick="updateTime('${agent.id}')">确认</button>
+								</div>
+							</div>
+						</div>
+					
+					
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	var sysDate = new Date();
+	var endDate = new Date('${agent.endDate}');
+	var date;
+	function Appendzero (obj) {
+		if(obj<10) {
+			return "0"+obj;
+		}else {
+			return obj;
+		}
+	}
+		$("document").ready(function() {
+			if(sysDate > endDate) {
+				date = sysDate;
+			}else {
+				date = endDate;
+			}
+			date = date.getFullYear() + '-' + Appendzero((date.getMonth() + 1)) + '-' + Appendzero((date.getDate()));
+			$("#startDate").val(date);
+			
+			//日期范围选择
+			jQuery('#endDate').datepicker({
+				toggleActive : true,
+				autoclose : true, 
+				startDate: date,
+				format : "yyyy-mm-dd",
+			});
+			//表单验证
+			$("#renewForm").validate(
+				{
+					rules : {			
+						endDate:{
+							required:true
+						},
+					},
+					
+					//错误信息提示
+					messages:{
+						endDate:{
+							required:"请输入到期时间"
+						}
+					},
+					errorPlacement : function(error, element) {
+		            if(element.attr("name")=="endDate"){
+		            		$("#endDate-error").append(error);		            	         
+						}
+					}
+				});
+		
+		});
+		/* $('#endDate').keyup(function() {
+			alert($("#endDate").val())
+			if($("#endDate").val() != '') {
+				alert(12342454)
+				$("#endDate-error").text('');
+			}
+			}); */
+		
+		
+		function updateTime(agentId) {
+			var menuId = $("#btnId",parent.document).val();
+			$("#menuId").val(menuId);
+			var isValid = $("#renewForm").valid();
+			$("#agentId").val(agentId);
+			if (isValid) {
+					var locked = false;
+					layer.confirm('是否确认续期?', {
+						closeBtn : 0,
+						skin : 'layui-layer-molv',
+						icon : 3,
+						btn : [ '确认', '取消' ]
+					//按钮
+					},function() {
+						if(!locked) {
+							locked = true;
+							var index = layer.load(1, {shade: [0.1,'#fff']});
+							$.ajax({
+								url : "${ctx}/agentSystem/SysUser/updateTime",
+								type : "post",
+								dataType : "json",
+								data : $('#renewForm').serialize(),
+								success : function(result) {
+									layer.close(index);
+									if (result == 1) {
+										layer.msg("续期成功！", {
+											icon : 1,
+											time : 1000
+										},function(data){
+											jump();	
+										}
+										);
+									} else {
+										layer.msg("续期失败！", {
+											icon : 1,
+											time : 1000
+										});
+									}
+								}
+							});
+						}
+					
+					});
+			}
+		}
+		function jump() {
+			window.location.href = "${ctx}/agentSystem/SysUser/list";
+		}
+	</script>
+</body>
+</html>

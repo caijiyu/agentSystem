@@ -1,0 +1,644 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<!-- 代理商等级 -->
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<style type="text/css">
+#contentTableA td{
+border: 0px;
+border-top: 1px solid #e9ecef;
+}
+#contentTableA{
+width:80% !important;
+align:center; 
+valign:center;
+}
+.a{
+white-space: pre-wrap;
+}
+#tables td{
+white-space: pre-wrap;
+}
+::-webkit-scrollbar {
+	width: 4px !important;
+	height : 4px !important;
+	background-color: white;
+}
+
+::-webkit-scrollbar-track {
+	/* -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
+	border-radius: 10px;
+	background-color: white;
+}
+/*定义滑块 内阴影+圆角*/
+::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+	background-color: #f4f5f9;
+}
+</style>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Nav tabs -->
+			
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">
+						<shiro:hasPermission name="agentsystem:wasAgentLevel:add">
+								<button style="margin-bottom:16.35px;" type="button" class="btn btn-info" onclick="show(this)">
+							<i class="fa fa-plus-circle"></i> 添加
+						</button>			
+						</shiro:hasPermission>
+					</div>
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentsystem/wasAgentLevel/list" method="post"
+							style="width: 100%" id="searchForm">
+							<input id="pageNo" name="pageNo" type="hidden"
+								value="${page.pageNo}" /> <input id="pageSize" name="pageSize"
+								type="hidden" value="${page.pageSize}" />
+						</form>
+					</div>
+					<table id="contentTable"
+						class="display nowrap table table-hover table-striped table-bordered">
+						<thead>
+							<tr>
+								<th class="tableControl">等级名称</th>
+								<th class="tableControl">代理商等级</th>
+								<th class="tableControl">添加时间</th>
+								<th class="tableControl">操作</th>
+							</tr>
+						</thead>
+						<tbody id="tbody">
+							<c:forEach items="${page.list}" var="agentLevel">
+								<tr>
+									<td class="tableControl" style="white-space: pre-wrap;">${fn:escapeXml(agentLevel.name)}</td>
+									<td class="tableControl">
+									<c:if test="${agentLevel.delegateAgent == 0}">
+									总代理
+									</c:if>
+									<c:if test="${agentLevel.delegateAgent == 1}">
+									一级代理
+									</c:if>
+									<c:if test="${agentLevel.delegateAgent == 2}">
+									二级代理
+									</c:if>
+									</td>
+									<td class="tableControl"><fmt:formatDate
+											value="${agentLevel.createDate}" type="both" /></td>
+									<td class="tableControl"><shiro:hasPermission
+											name="sysdata:wasAgentLevel:look">
+											<button id="azx" type="button" data-toggle="tooltip"
+												onclick="lookOver(${agentLevel.agentLevelId},this)" data-original-title="查看"
+												class="btn btn-info btn-circle btn-xs">
+												<i class="fa fa-search-plus"></i>
+											</button>
+										</shiro:hasPermission> <shiro:hasPermission name="sysdata:wasAgentLevel:fap">
+											<button type="button" data-toggle="tooltip"
+											onclick="distributePolicy(${agentLevel.agentLevelId},this)" data-original-title="分配销售方针"
+												class="btn btn-info btn-circle btn-xs">
+												<i class="mdi mdi-sitemap"></i>
+											</button>
+										</shiro:hasPermission> 
+										<shiro:hasPermission name="sysdata:wasAgentLevel:del">
+											<button type="button" data-toggle="tooltip"
+											onclick="deleteAgentLevel(${agentLevel.agentLevelId});"
+												data-original-title="删除"
+												class="btn btn-danger btn-circle btn-xs ">
+												<i class="fa fa-times"></i>
+											</button>
+										</shiro:hasPermission>
+										</td>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${page.count gt 10}">
+						<table:page page="${page}"></table:page>
+					</c:if>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<!-- 模态框 -->
+	<div class="modal fade" id="modal" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content" style="margin-top:205px">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+						<h6 id="title" class="modal-title">添加代理商等级</h6>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="inputForm">
+					<!-- 判断是否有下放权利 -->
+					<!-- <input name="delegateAgent" value="" id="delegateAgent" type="hidden"> -->
+						<input type="hidden" id="menuId" name="menuId" />
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								Style="color: red">*&nbsp;</span>角色选择：</label>
+							<div class="col-8 ">
+								<div class="controls">
+								<div>
+								<select name="roleId" style="cursor: pointer;color:#495057 !important"
+									class="custom-select col-12 height-control"
+									id="inlineFormCustomSelect" >
+									<option selected value="">请选择</option>
+								</select>
+								</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								Style="color: red">*&nbsp;</span>等级名称：</label>
+							<div class="col-8 ">
+								<div class="controls">
+								<div>
+								<input autocomplete="off" type="text" id="name" maxlength="10" name="name"
+									class="form-control height-control" >
+									</div>
+									</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								Style="color: red">*&nbsp;</span>代理商等级：</label>
+							<input id="delegateAgent" name="delegateAgent" type="hidden">
+							<div class="col-8">
+								<div class="controls">
+								<input type="radio" id="one" class="check"  name="squareradio" data-radio="iradio_square-blue" value="0" >
+                                <label for="square-radio-1">总代理&nbsp;</label>
+                                <input type="radio"  id="two" class="check" name="squareradio" data-radio="iradio_square-blue" value="1"  >
+                                <label for="square-radio-2">一级代理&nbsp;</label>
+                                <input type="radio"  id="three" class="check" name="squareradio" data-radio="iradio_square-blue" value="2" >
+                                <label for="square-radio-3">二级代理&nbsp;</label>
+							    </div>
+							</div>
+						</div>
+						<div id="cash" style="display:none" class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								Style="color: red">*&nbsp;</span>下放押金：</label>
+							<div class="col-8 ">
+								<div class="controls ">
+								<div class="input-group">
+								<input autocomplete="off" style="border-radius:0.25rem 0 0 0.25rem ;" value="0.00" maxlength="9" type="text"
+									id="cashPledge" name="cashPledge" class="form-control height-control">
+									<span class="input-group-addon height-control leftAngle" style="border-radius:0 0.25rem 0.25rem 0;border-left:0px;" >元</span>
+								</div>
+								</div>
+							</div>
+						</div>
+
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer"
+					style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="save()">保存</button>						
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--                       -->
+	<input type="hidden" id="ida">
+	<div class="modal fade" id="modalA" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content" style="margin-top:150px">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+						<h6 id="title" class="modal-title">分配销售方针</h6>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body" style="max-height: 529px;overflow: auto;">
+					<form id="">
+					<table style="margin:0px auto;font-size:13px" id="contentTableA" class="display nowrap table table-hover table-striped table-bordered" >
+					   
+					</table>
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer"
+					style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="saveDistributePolicy()">保存</button>			
+				</div>
+			</div>
+		</div>
+	</div>
+
+<div class="modal fade" id="modalB" data-backdrop="static">
+		<div class="modal-dialog">
+			<div class="modal-content" style="margin-top:205px">
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+						<h6 id="title" class="modal-title">代理商等级详情</h6>
+				</div>
+				<div class="modal-body">
+					<form id="">
+						<div class="form-group row">
+                            <label class="control-label col-3" style="text-align: right;">角色：</label>
+                            <label class="control-label col-9 a" style="text-align: left;" id="rolea"></label>
+                        </div>
+                        <div class="form-group row">
+                            <label class="control-label col-3" style="text-align: right;">等级名称：</label>
+                            <label class="control-label col-9 a" style="text-align: left;" id="namea"></label>
+                        </div>
+                        <div class="form-group row">
+                            <label class="control-label col-3" style="text-align: right;">代理商等级：</label>
+                            <label class="control-label col-9 a" style="text-align: left;" id="delegateAgenta"></label>
+                        </div>
+                        <div id="cashaa" class="form-group row">
+                            <label class="control-label col-3" style="text-align: right;">押金：</label>
+                            <label class="control-label col-9" style="text-align: left;" id="cashPledgea"></label>
+                        </div>
+					<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label">销售方针：</label>
+							<div class="col-8 " >
+								<div  class="fixed-table-body" style="border: 1px solid #e9ecef;height: 123.33px;overflow-x:hidden">
+								<table id="tables" class="table  table-bordered" style="font-size: 13px;margin-bottom:0px;margin-top:0px">
+								
+								</table>
+								</div>
+							</div>
+						</div>
+
+					</form>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+
+
+	<script type="text/javascript">
+	$(document).ready(function(){
+		//角色选择获取添加下拉选数据
+		getData();
+		
+	});
+	//分配销售方针
+	function distributePolicy(id,obj){
+		$(obj).blur();
+		$("#ida").val(id);
+		var index = layer.load(1, {shade: [0.1,'#fff']});
+		$.ajax({
+			url : "${ctx}/agentsystem/wasAgentLevel/findAllPolicy",
+			dataType : "json",
+			type : "post",
+			async : false,
+			data:{agentLevelId:id},
+			success : function(data){
+				layer.close(index);
+				$("#contentTableA").empty();
+				$.each(data[1],function(i,li){
+					var str='<tr>'
+				            +'<td width="20%" style="text-align: right;" class="tableControl" ><input type="checkbox" name="box" class="check" id="'
+				            +li.salesPolicyId
+				            +'" ></td>'
+					        +'<td width="80%" id="'+li.salesPolicyId+'asdscvbssg'+'" style="padding-left: 0px;">'
+					        +'</td></tr>';
+					$("#contentTableA").append(str);
+					$('#'+li.salesPolicyId+'asdscvbssg').text(li.title)
+					
+				});
+				$(("[type='checkbox']")).iCheck({
+					  checkboxClass: 'icheckbox_square-blue',
+					});
+				var z_id=new Array();
+				if(data[0].salesPolicyIds !=null){
+					z_id=data[0].salesPolicyIds.split(",");
+					for(var i=0;i<z_id.length;i++){
+							$("#"+z_id[i]).iCheck('check');
+					}
+				}
+				
+			},
+		});
+		$("#modalA").modal("show");
+	}
+	/* document.onkeydown = function () {
+        if (window.event && window.event.keyCode == 13) {
+            window.event.returnValue = false;
+        }
+    } */
+	//保存分配的销售方针
+	function saveDistributePolicy(){
+		var id=$("#ida").val();
+		var a_id=new Array();
+		var ids = "";
+		var lock=true;
+		var menuId=$("#btnId",parent.document).val();
+		$("input[name='box']:checked").each(
+			function(index) {
+				a_id[index]=$(this).attr("id");
+			});
+		ids=a_id.join();
+		if (a_id.length<=0) {
+			layer.msg("请至少选择一条销售方针！",{icon : 7,time:1000});
+			return;
+		}
+		 layer.confirm('是否确认保存？', {closeBtn:0,icon : 3 ,
+			 skin : 'layui-layer-molv',btn: ['确认','取消']},function(){
+				 if(lock){
+					 lock=false;
+					 var index = layer.load(1, {shade: [0.1,'#fff']});
+					 $.ajax({
+						url : "${ctx}/agentsystem/wasAgentLevel/update",
+						dataType : "json",
+						type : "post",
+						data : {"agentLevelId":id,"salesPolicyIds":ids,"menuId":menuId},
+						success : function(data){
+							layer.close(index);
+							if(data>0){
+								layer.msg("保存成功",{icon:1,time:1000},function(){
+									$("#modalA").modal("hide");
+								});
+							}
+						},
+						error : function(){
+							layer.close(index);
+							layer.msg("保存失败",{icon:2,time:1000},function(){
+								$("#modalA").modal("hide");
+							});	
+						}
+					}); 
+				 }
+			 });
+		
+	}
+	//获取添加下拉选数据
+	function getData(){
+		$.ajax({
+			url : "${ctx}/agentsystem/wasAgentLevel/getRole",
+			dataType : "json",
+			type : "post",
+			success : function(data){
+				$.each(data,function(i,li){
+					var str='<option id="'+li.id+'fghsdrtktr'+'" value="'+li.id+'"></option>';
+					$("#inlineFormCustomSelect").append(str);
+					$('#'+li.id+'fghsdrtktr').text(li.name);
+				}
+				 );
+			},
+		});
+	}
+		//弹框显示
+		function show(obj) {
+			$(obj).blur();
+			$("#inlineFormCustomSelect").val("");
+			$("#name").val("");
+			$("#cash").hide();
+			$("#cashPledge").val("0.00");
+			$('.check').iCheck('uncheck');
+			$("#inputForm").data("validator").resetForm();
+			$("#modal").modal("show");
+		}
+		
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n,s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		
+		//checkbox监听
+		$('#one').on('ifChecked', function(event){ //ifCreated 事件应该在插件初始化之前绑定 
+			$("#cash").show();
+		    $("#cashPledge").val("");
+		    $("#squareradio-error").remove();
+		});
+		$('#two').on('ifChecked', function(event){ //ifCreated 事件应该在插件初始化之前绑定 
+			$("#cash").hide();
+			$("#cashPledge").val("0.00");
+			$("#squareradio-error").remove();
+		});
+		$('#three').on('ifChecked', function(event){ //ifCreated 事件应该在插件初始化之前绑定 
+			$("#cash").hide();
+			$("#cashPledge").val("0.00");
+			$("#squareradio-error").remove();
+		});
+		
+		$('#ischange').on('ifUnchecked', function(event){ //ifUnchecked 事件应该在插件初始化之前绑定 
+			$('.check').iCheck('uncheck');
+		}); 
+	
+		function save(){
+			$("#delegateAgent").val($(":radio:checked").val());
+			var isValidate=$("#inputForm").valid();
+			$("#menuId").val($("#btnId",parent.document).val());
+			var lock=true;
+			if(isValidate){
+			layer.confirm('是否确认保存？', {closeBtn:0,icon : 3 ,
+				 skin : 'layui-layer-molv',btn: ['确认','取消']},function(){
+					 if(lock){
+						lock=false;
+				var index = layer.load(1, {shade: [0.1,'#fff']});						
+				$.ajax({
+				url : "${ctx}/agentsystem/wasAgentLevel/save",
+				dataType : "json",
+				type : "post",
+				data : $('#inputForm').serialize(),
+				success : function(result){
+					layer.close(index);
+					if(result>0){
+						layer.msg("保存成功",{icon:1,time:1000},function(){
+							location.href="${ctx}/agentsystem/wasAgentLevel/list";
+						});
+					}
+				},
+				error : function(){
+					layer.close(index);
+					layer.msg("保存失败",{icon:2,time:1000},function(){
+						location.href="${ctx}/agentsystem/wasAgentLevel/list";
+					       });
+				         }
+			          });
+					 }
+				 });
+			}
+		}
+		function deleteAgentLevel(id){
+			var menuId=$("#btnId",parent.document).val();
+			judgeDel(id);
+			if(sum<=0){
+			layer.confirm("确认要彻底删除数据吗?",{closeBtn:0,skin : "layui-layer-molv",btn : [ "确认","取消" ],icon:3},
+					function() {
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+					url :"${ctx}/agentsystem/wasAgentLevel/delete",
+					dataType : "json",
+					Type : "post",
+					data : {"agentLevelId":id,"menuId":menuId},
+					success : function(result){
+						layer.close(index);
+						if(result>0){
+							layer.msg("删除成功",{icon:1,time:1000},function(){
+								if($("#tbody>tr").length==1){
+									$("#pageNo").val($("#pageNo").val()-1);
+								}
+								$("#searchForm").submit();
+							});
+						}
+					},
+					error : function(){
+						layer.close(index);
+						layer.msg("删除失败",{icon:2,time:1000},function(){
+							$("#searchForm").submit();
+						});
+					}
+				});
+			});
+			}else{
+				layer.msg("当前代理商等级在使用中，请勿删除！",{icon : 7,time:2000});
+			}
+		}
+		var sum;
+		function judgeDel(id){
+			$.ajax({
+				url :"${ctx}/agentsystem/wasAgentLevel/judgeDel",
+				dataType : "json",
+				Type : "post",
+				async:false,
+				data : {"agentLevelId":id},
+				success : function(result){
+					sum=result;
+						},
+					});
+		}
+		$.validator.addMethod("minNumber",function(value, element) {
+			   var returnVal = true;
+	           inputZ=value;
+	           var ArrMen= inputZ.split(".");    //截取字符串
+	           if(ArrMen.length==2){
+	               if(ArrMen[1].length>2){    //判断小数点后面的字符串长度
+	                   returnVal = false;
+	                   return false;
+	               }
+	           }
+	           return returnVal;
+		},"最多支持两位小数");
+		jQuery.validator.addMethod("positiveNumber", function(value, element) { 
+	         var returnVal = true;
+	         if(value<=0){
+	        	 return false;
+	         }
+	         return returnVal;
+	    }, "请输入正数");
+		$("#inputForm").validate({
+			rules : {
+				roleId : {
+					required : true,
+				},
+				squareradio : {
+					required : true,
+				},
+				cashPledge : {
+					required : true,
+					number : true,
+					positiveNumber : true,
+					max : 999999.99,
+					minNumber : true
+				},
+				name : {
+					required : true,
+					remote : {
+						url:"${ctx}/agentsystem/wasAgentLevel/validate",
+						type:"post",
+						data:{
+							name:function(){
+								return $("#name").val();
+							}
+						}
+					}
+				},
+			},messages : {
+				roleId : {
+					required : "请选择角色",
+				},
+				squareradio : {
+					required : "请选择代理商等级",
+				},
+				cashPledge : {
+					required : "请输入押金",
+					number :"请输入正数",
+					max : "押金不可大于999999.99"
+				},
+				name : {
+					required : "请填写等级名称",
+					remote : "此等级名称已存在，请重新填写",
+				},
+			},errorPlacement : function(error, element) {
+				error.insertAfter(element.parent().parent());
+			}
+		});
+		
+		function lookOver(id,obj){
+			$(obj).blur();
+			var index = layer.load(1, {shade: [0.1,'#fff']});
+			$.ajax({
+				url : "${ctx}/agentsystem/wasAgentLevel/lookover",
+				dataType : "json",
+				type : "post",
+				data : {"agentLevelId":id},
+				success : function(data){
+					layer.close(index);
+					$("#rolea").text(data[1]);
+					$("#namea").text(data[0].name);
+					if(data[0].delegateAgent==0){
+						$("#cashaa").show();
+						$("#delegateAgenta").text("总代理");
+						$("#cashPledgea").text(data[0].cashPledge);
+					}else if(data[0].delegateAgent==1){
+						$("#cashaa").hide();
+						$("#delegateAgenta").text("一级代理");
+						$("#cashPledgea").text(data[0].cashPledge);
+					}else{
+						$("#cashaa").hide();
+						$("#delegateAgenta").text("二级代理");
+						$("#cashPledgea").text(data[0].cashPledge);
+					}
+					$("#tables").empty();
+					if(data[2].length>0){
+						for(var i=0;i<data[2].length;i++){
+							var str='<tr><td id="'+i+'qwedsasdxslk'+'">'
+								    +'</td></tr>'
+								    $("#tables").append(str);
+								    $('#'+i+'qwedsasdxslk').text(data[2][i]);
+						} 
+					}
+					 
+					$("#modalB").modal("show");
+				},
+				
+			}); 
+			
+		}
+	</script>
+
+</body>
+</html>

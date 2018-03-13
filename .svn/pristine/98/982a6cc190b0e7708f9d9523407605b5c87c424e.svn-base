@@ -1,0 +1,419 @@
+package com.jeeplus.modules.agentsystem.terminal.web;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.jeeplus.common.utils.StringUtils;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasPolicyPurchase;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.agency.service.WasPolicyPurchaseService;
+import com.jeeplus.modules.agentsystem.agency.service.WasSysUserService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasSalesPolicy;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasSoftware;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasSalesPolicyService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasSoftwareService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasUserService;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalProduct;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+import com.jeeplus.modules.agentsystem.terminal.service.WasTerminalProductService;
+import com.jeeplus.modules.agentsystem.terminal.service.WasTerminalUserService;
+import com.jeeplus.modules.agentsystem.utils.MoneyOperation;
+import com.jeeplus.modules.agentsystem.utils.OrderNumberUtils;
+import com.jeeplus.modules.sys.utils.UserUtils;
+/**
+ * 
+ * @author Hua
+ *
+ */
+@Controller
+@RequestMapping(value="${adminPath}/agentSystem/terminal/wasRecharge")
+@Transactional(readOnly = false,rollbackFor=Exception.class)
+public class WasRechargeController  extends BaseController{
+	@Autowired
+	private WasTerminalUserService wasTerminalUserService;
+	@Autowired
+	private WasSysUserService wasSysUserService;
+	@Autowired
+	private WasTerminalProductService wasTerminalProductService;
+	@Autowired
+	private WasPolicyPurchaseService wasPolicyPurchaseService;
+	@Autowired
+	private WasSalesPolicyService wasSalesPolicyService;
+	@Autowired
+	private WasSoftwareService wasSoftwareService;
+
+	/**
+	 * 全是公众号
+	 * @param wasPolicyPurchase
+	 * @param request
+	 * @return
+	 * @throws ParseException
+	 */
+	@ResponseBody
+	@RequestMapping(value="payAllPublic")
+	public String payAllPublic(WasPolicyPurchase wasPolicyPurchase, HttpServletRequest request) throws ParseException {
+		//取参数
+		Integer salesPolicyId = wasPolicyPurchase.getSalesPolicyId();
+		Integer policyNumber = wasPolicyPurchase.getPolicyNumber();
+		String behavior = wasPolicyPurchase.getBehavior();
+		Integer terminalUserId = Integer.parseInt(request.getParameter("terminalUserId"));
+		//查终端--->查所属代理商-->查各个账户
+		WasTerminalUser wasTerminalUser = wasTerminalUserService.findByTerminalUserId(terminalUserId);
+		String id = wasTerminalUser.getParentId();
+    	WasSysUser sysUser = wasSysUserService.get(id);
+		BigDecimal pubA = sysUser.getPublicAccount();
+		BigDecimal vipA = sysUser.getVipAccount();
+		WasSalesPolicy wasSalesPolicy = wasSalesPolicyService.findById(salesPolicyId);
+		BigDecimal discount = new BigDecimal(0.00);
+		String defaultBehavior = "recharge";
+		if(defaultBehavior.equals(behavior)){
+			discount = wasSalesPolicy.getRenewDiscount();
+		}else{
+			discount = sysUser.getPublicDiscount();
+		}
+		BigDecimal payMoney = totalPayMoney(salesPolicyId, policyNumber,discount);
+		BigDecimal totalMoney = totalMoney(salesPolicyId, policyNumber);
+		//构造方针购买实体属性字段
+		String number = "P"+OrderNumberUtils.orderNumber();
+		//==============
+		Integer dredgeYear = wasSalesPolicy.getDredgeYear();
+		Integer giveYear = wasSalesPolicy.getGiveYear();
+		Calendar time = Calendar.getInstance();
+		Date createDate = time.getTime();
+		time.add(Calendar.YEAR, dredgeYear+giveYear);
+		Date endDate = time.getTime();
+		//==============														
+		String userId = UserUtils.getUser().getId();
+		BigDecimal publicExpend =new BigDecimal("0.00");				
+		BigDecimal minaExpend = new BigDecimal("0.00");					
+		BigDecimal hardwareExpend = new BigDecimal("0.00");				
+		BigDecimal vipExpend = new BigDecimal("0.00");	
+		Integer type = 1;
+		String remarks = "";		
+		Integer state = 1;
+		Integer temp = payMoney.compareTo(pubA);
+		//账户操作结果
+		String accountResult = null;
+		if(temp==-1||temp==0){
+			publicExpend = payMoney;
+			pubA = pubA.subtract(publicExpend);
+			accountResult = MoneyOperation.getInstance().moneyOperation(null,publicExpend, null, null, null, userId, behavior);
+		}else {
+			publicExpend = pubA;
+			vipExpend = payMoney.subtract(pubA);
+			pubA = new BigDecimal("0.00");
+			vipA = vipA.subtract(vipExpend);
+			accountResult = MoneyOperation.getInstance().moneyOperation(null,publicExpend, null, null, vipExpend, userId, behavior);
+		}
+		WasPolicyPurchase wasPolicyPurchase2 = new WasPolicyPurchase(number, terminalUserId, salesPolicyId, policyNumber, 
+																												behavior, totalMoney, payMoney,createDate , endDate, userId, publicExpend, minaExpend, 
+																												hardwareExpend, vipExpend, type, remarks,  state);
+		wasPolicyPurchaseService.save(wasPolicyPurchase2);
+		updateTerminalProduct(terminalUserId, salesPolicyId, policyNumber);
+		return accountResult!=null?"success":"error";
+	}
+	@ResponseBody
+	@RequestMapping(value="payAllMina")
+	public String payAllMina(WasPolicyPurchase wasPolicyPurchase, HttpServletRequest request) throws ParseException {
+		Integer salesPolicyId = wasPolicyPurchase.getSalesPolicyId();
+		Integer policyNumber = wasPolicyPurchase.getPolicyNumber();
+		String behavior = wasPolicyPurchase.getBehavior();
+		Integer terminalUserId = Integer.parseInt(request.getParameter("terminalUserId"));
+		WasTerminalUser wasTerminalUser = wasTerminalUserService.findByTerminalUserId(terminalUserId);
+		String id = wasTerminalUser.getParentId();
+    	WasSysUser sysUser = wasSysUserService.get(id);
+		BigDecimal minaA = sysUser.getMinaAccount();
+		BigDecimal vipA = sysUser.getVipAccount();
+		WasSalesPolicy wasSalesPolicy = wasSalesPolicyService.findById(salesPolicyId);
+		BigDecimal discount = new BigDecimal(0.00);
+		String defaultBehavior = "recharge";
+		if(defaultBehavior.equals(behavior)){
+			discount = wasSalesPolicy.getRenewDiscount();
+		}else{
+			discount = sysUser.getMinaDiscount();
+		}
+		BigDecimal payMoney = totalPayMoney(salesPolicyId, policyNumber,discount);
+		BigDecimal totalMoney = totalMoney(salesPolicyId, policyNumber);
+		String number = "P"+OrderNumberUtils.orderNumber();
+		//==============
+		Integer dredgeYear = wasSalesPolicy.getDredgeYear();
+		Integer giveYear = wasSalesPolicy.getGiveYear();
+		Calendar time = Calendar.getInstance();
+		Date createDate = time.getTime();
+		time.add(Calendar.YEAR, dredgeYear+giveYear);
+		Date endDate = time.getTime();
+		//==============			
+		String userId = UserUtils.getUser().getId();
+		BigDecimal publicExpend =new BigDecimal("0.00");				
+		BigDecimal minaExpend = new BigDecimal("0.00");					
+		BigDecimal hardwareExpend = new BigDecimal("0.00");				
+		BigDecimal vipExpend = new BigDecimal("0.00");	
+		Integer type = 1;
+		String remarks = "";
+		Integer state = 1;
+		Integer temp = payMoney.compareTo(minaA);
+		//账户操作结果
+		String accountResult = null;
+		if(temp==-1||temp==0){
+			minaExpend = payMoney;
+			minaA = minaA.subtract(minaExpend);
+			accountResult = MoneyOperation.getInstance().moneyOperation(null,null, minaExpend, null, null, userId, behavior);
+		}else {
+			minaExpend = minaA;
+			vipExpend = payMoney.subtract(minaA);
+			minaA = new BigDecimal("0.00");
+			vipA = vipA.subtract(vipExpend);
+			accountResult = MoneyOperation.getInstance().moneyOperation(null,null, minaExpend, null, vipExpend, userId, behavior);
+		}
+		WasPolicyPurchase wasPolicyPurchase2 = new WasPolicyPurchase(number, terminalUserId, salesPolicyId,  policyNumber, 
+																												behavior, totalMoney, payMoney, createDate, endDate, userId, publicExpend, minaExpend, 
+																												hardwareExpend, vipExpend, type, remarks,  state);
+		wasPolicyPurchaseService.save(wasPolicyPurchase2);
+		updateTerminalProduct(terminalUserId, salesPolicyId, policyNumber);
+		return accountResult!=null?"success":"error";
+	}
+	//混合
+	@ResponseBody
+	@RequestMapping(value="payPublicAndMina")
+	public String payPublicAndMina(WasPolicyPurchase wasPolicyPurchase, HttpServletRequest request) throws ParseException {
+		Integer salesPolicyId = wasPolicyPurchase.getSalesPolicyId();
+		Integer policyNumber = wasPolicyPurchase.getPolicyNumber();
+		String behavior = wasPolicyPurchase.getBehavior();
+		Integer terminalUserId = Integer.parseInt(request.getParameter("terminalUserId"));
+		WasTerminalUser wasTerminalUser = wasTerminalUserService.findByTerminalUserId(terminalUserId);
+		String id = wasTerminalUser.getParentId();
+    	WasSysUser sysUser = wasSysUserService.get(id);
+		BigDecimal pubA = sysUser.getPublicAccount();
+		BigDecimal minaA = sysUser.getMinaAccount();
+		BigDecimal vipA = sysUser.getVipAccount();
+		BigDecimal pubAandMinaA = pubA.add(minaA);
+		WasSalesPolicy wasSalesPolicy = wasSalesPolicyService.findById(salesPolicyId);
+		BigDecimal discount = new BigDecimal(0.00);
+		String defaultBehavior = "recharge";
+		if(defaultBehavior.equals(behavior)){
+			discount = wasSalesPolicy.getRenewDiscount();
+		}else{
+			discount = sysUser.getPackageDiscount();
+		}
+		BigDecimal payMoney = totalPayMoney(salesPolicyId, policyNumber,discount);
+		BigDecimal totalMoney = totalMoney(salesPolicyId, policyNumber);
+		String number = "P"+OrderNumberUtils.orderNumber();
+		//==============
+		Integer dredgeYear = wasSalesPolicy.getDredgeYear();
+		Integer giveYear = wasSalesPolicy.getGiveYear();
+		Calendar time = Calendar.getInstance();
+		Date createDate = time.getTime();
+		time.add(Calendar.YEAR, dredgeYear+giveYear);
+		Date endDate = time.getTime();
+		//==============			
+		String userId = UserUtils.getUser().getId();
+		BigDecimal publicExpend =new BigDecimal("0.00");				
+		BigDecimal minaExpend = new BigDecimal("0.00");					
+		BigDecimal hardwareExpend = new BigDecimal("0.00");				
+		BigDecimal vipExpend = new BigDecimal("0.00");	
+		Integer type = 1;
+		String remarks = "";
+		Integer state = 1;
+		Integer temp = payMoney.compareTo(pubA);
+		Integer temp1 = payMoney.compareTo(pubAandMinaA);
+		//账户操作结果
+		String accountResult = null;
+		if(temp==-1||temp==0){
+			publicExpend = payMoney;
+			pubA = pubA.subtract(publicExpend);
+			accountResult = MoneyOperation.getInstance().moneyOperation(null,publicExpend, null, null, null, userId, behavior);
+		}else if(temp1==-1||temp1==0) {
+			publicExpend = pubA;
+			minaExpend = payMoney.subtract(pubA);
+			pubA = new BigDecimal("0.00");
+			minaA = minaA.subtract(minaExpend);
+			accountResult = MoneyOperation.getInstance().moneyOperation(null,publicExpend, minaExpend, null, null, userId, behavior);
+		}else {
+			publicExpend = pubA;
+			minaExpend = minaA;
+			vipExpend = payMoney.subtract(pubA.add(minaA));
+			pubA = new BigDecimal("0.00");
+			minaA =  new BigDecimal("0.00");
+			vipA = vipA.subtract(vipExpend);
+			accountResult = MoneyOperation.getInstance().moneyOperation(null,publicExpend, minaExpend, null, vipExpend, userId, behavior);
+		}
+		WasPolicyPurchase wasPolicyPurchase2 = new WasPolicyPurchase(number, terminalUserId, salesPolicyId, policyNumber, 
+																												behavior, totalMoney, payMoney, createDate, endDate, userId, publicExpend, minaExpend, 
+																												hardwareExpend, vipExpend, type, remarks,  state);
+		wasPolicyPurchaseService.save(wasPolicyPurchase2);
+		updateTerminalProduct(terminalUserId, salesPolicyId, policyNumber);
+		return accountResult!=null?"success":"error";
+	}
+	/**
+	 * 
+	 * @param policyId
+	 * @param policyNumber
+	 * @return
+	 * 根据方针ID与数理算出折扣后的总价，精确度0.00
+	 */
+	public BigDecimal totalPayMoney(Integer policyId,Integer policyNumber,BigDecimal discount){
+		WasSalesPolicy wasSalesPolicy = wasSalesPolicyService.findById(policyId);
+		BigDecimal price = wasSalesPolicy.getPrice();
+		BigDecimal payMoney = price.multiply(discount).multiply(new BigDecimal(policyNumber));
+		DecimalFormat df = new DecimalFormat("0.00");
+		String payMoneyString = df.format(payMoney);
+		return new BigDecimal(payMoneyString);
+	}
+	
+	/**
+	 * 
+	 * @param policyId
+	 * @param policyNumber
+	 * @return
+	 * 根据方针ID与数理算出折扣后的总价
+	 */
+	public BigDecimal totalMoney(Integer policyId,Integer policyNumber){
+		WasSalesPolicy wasSalesPolicy = wasSalesPolicyService.findById(policyId);
+		BigDecimal price = wasSalesPolicy.getPrice();
+		return price.multiply(new BigDecimal(policyNumber));
+	}
+	/**
+	 * 续费页面
+	 * @param terminalUserId
+	 * @param model
+	 * @return
+	 */
+	@RequiresPermissions("terminal:wasRecharge:toWasRechargeList")
+	@RequestMapping(value="toWasRechargeList")
+	public String findProductsByTerminalUserId(String terminalUserId,Model model) {
+		//1、终端用户
+		WasTerminalUser wasTerminalUser = wasTerminalUserService.findByTerminalUserId(Integer.parseInt(terminalUserId));
+		model.addAttribute("wasTerminalUser",wasTerminalUser );
+		//2、所属代理商
+    	WasSysUser wasSysUser = wasSysUserService.get(wasTerminalUser.getParentId());
+    	model.addAttribute("wasSysUser", wasSysUser);
+    	//3、终端拥有产品
+		List<WasTerminalProduct> list = wasTerminalProductService.findProductsByTerminalUserId(Integer.parseInt(terminalUserId));
+		for(WasTerminalProduct wasTerminalProduct : list){
+			Integer softId = wasTerminalProduct.getSoftwareId();
+			WasSoftware soft = wasSoftwareService.findSoftwareById(softId);			
+			wasTerminalProduct.setId(soft.getName());
+		}
+    	model.addAttribute("productList",list );
+    	//4、可选购的方针列表
+    	List<WasPolicyPurchase> policyList = wasPolicyPurchaseService.findPolicyOfTerminalUser(terminalUserId);   
+    	List<WasSalesPolicy> salesPolicyList = new ArrayList<>();
+    	for(WasPolicyPurchase wasPolicyPurchase : policyList){
+    		Integer policyId = wasPolicyPurchase.getSalesPolicyId();
+    		WasSalesPolicy wasSalesPolicy = wasSalesPolicyService.findById(policyId);				
+    		BigDecimal renewMoney = wasSalesPolicy.getPrice().multiply(wasSalesPolicy.getRenewDiscount());
+    		wasSalesPolicy.setRenewDiscount(renewMoney);
+    		wasSalesPolicy.setId("3");
+    		salesPolicyList.add(wasSalesPolicy);
+    	}
+    	model.addAttribute("policies", salesPolicyList);
+		return "modules/agentsystem/terminal/wasRechargeList";
+	}
+	/**
+	 * 添加产品页面
+	 * @param terminalUserId
+	 * @param model
+	 * @return
+	 */
+
+	@RequiresPermissions("terminal:wasRecharge:toAddProductList")
+	@RequestMapping(value="toAddProductList")
+	public String toAddProductList(String terminalUserId,Model model) {
+		//1、终端用户
+		WasTerminalUser wasTerminalUser = wasTerminalUserService.findByTerminalUserId(Integer.parseInt(terminalUserId));
+		model.addAttribute("wasTerminalUser",wasTerminalUser );
+		//2、所属代理商
+    	WasSysUser wasSysUser = wasSysUserService.get(wasTerminalUser.getParentId());
+    	model.addAttribute("wasSysUser", wasSysUser);
+    	//3、终端拥有产品
+		List<WasTerminalProduct> list = wasTerminalProductService.findProductsByTerminalUserId(Integer.parseInt(terminalUserId));
+		for(WasTerminalProduct wasTerminalProduct : list){
+			Integer softId = wasTerminalProduct.getSoftwareId();
+			WasSoftware soft = wasSoftwareService.findSoftwareById(softId);
+			wasTerminalProduct.setId(soft.getName());
+		}
+    	model.addAttribute("productList",list );
+    	//4、可选购的方针列表
+    	List< WasSalesPolicy> policies = wasSalesPolicyService.findUseablePolicies();
+       	for(WasSalesPolicy wasSalesPolicy : policies){
+       		DecimalFormat df = new DecimalFormat("0.00"); 
+    		String softClass = wasSalesPolicy.getSoftwareIds();
+    		BigDecimal discount = null;
+    		if(softClass.equals("0")){
+    			//公众号套餐
+    			discount = wasSysUser.getPublicDiscount();
+    		}else if(softClass.equals("1")){
+    			//小程序套餐
+    			discount = wasSysUser.getMinaDiscount();
+    		}else{
+    			//混合套餐
+    			discount = wasSysUser.getPackageDiscount();
+    		}
+    		BigDecimal renewMoney = wasSalesPolicy.getPrice().multiply(discount);
+    		String temp = df.format(renewMoney);
+    		wasSalesPolicy.setRenewDiscount(new BigDecimal(temp));
+    		wasSalesPolicy.setId("3");
+    	}
+    	model.addAttribute("policies", policies);
+		return "modules/agentsystem/terminal/wasAddProductList";
+	}
+	/**
+	 * 更新终端产品表
+	 * @param terminalUserId
+	 * @param salesPolicyId
+	 * @param num
+	 */
+	private void updateTerminalProduct(Integer terminalUserId,Integer salesPolicyId,Integer num){
+		WasSalesPolicy wasSalesPolicy = wasSalesPolicyService.findById(salesPolicyId);
+		String[] salesPolicyIds = StringUtils.split(wasSalesPolicy.getSoftwareIds(), ",");
+		Integer time = wasSalesPolicy.getDredgeYear() + wasSalesPolicy.getGiveYear();
+		for(int i=0;i<salesPolicyIds.length;i++){
+			WasTerminalProduct wasTerminalProduct = wasTerminalProductService.findByTerminalUserIdAndSoftWareId(terminalUserId,Integer.parseInt(salesPolicyIds[i]));
+			//新建一个终端产品
+			if (wasTerminalProduct == null) {
+				Calendar calendar = Calendar.getInstance();
+				Date startDate = calendar.getTime();
+				int year = calendar.get(Calendar.YEAR) + time;
+				calendar.set(Calendar.YEAR, year);
+				Date endDate = calendar.getTime();
+				WasTerminalProduct newData = new WasTerminalProduct(terminalUserId,Integer.parseInt(salesPolicyIds[i]) , startDate, endDate, 1);
+				wasTerminalProductService.insertProduct(newData);
+			//续费-没过期
+			}else{
+				if(wasTerminalProduct.getEndDate().getTime() > System.currentTimeMillis()){
+					Date endDate = wasTerminalProduct.getEndDate();
+					Calendar calendar=Calendar.getInstance();
+					calendar.setTime(endDate);
+					int year = calendar.get(Calendar.YEAR) + time;
+					calendar.set(Calendar.YEAR, year);
+					endDate = calendar.getTime();
+					wasTerminalProductService.updateProduct(wasTerminalProduct);
+				//续费-过期
+				}else{
+					Calendar calendar = Calendar.getInstance();
+					Date startDate = calendar.getTime();
+					int year = calendar.get(Calendar.YEAR) + time;
+					calendar.set(Calendar.YEAR, year);
+					Date endDate = calendar.getTime();
+					wasTerminalProduct.setStartDate(startDate);
+					wasTerminalProduct.setEndDate(endDate);
+					wasTerminalProductService.updateProduct(wasTerminalProduct);
+				}
+			}
+		}
+	}
+
+}

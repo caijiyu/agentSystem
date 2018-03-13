@@ -1,0 +1,640 @@
+package com.jeeplus.modules.agentSystem.agency.entity;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+
+
+import com.google.common.collect.Lists;
+import com.jeeplus.common.persistence.DataEntity;
+import com.jeeplus.modules.sys.entity.Role;
+
+
+/**
+ * @author admin
+ *
+ */
+public class WasSysUser extends DataEntity<WasSysUser>{
+	private static final long serialVersionUID = 1L;
+	
+	private String company_id;			//归属公司
+	private String office_id;			//归属部门
+	private String no;			        //工号
+	private String login_name;			//登录名	
+	private String password;		    //密码
+	private String companyName;		    //公司全称
+	private String companyParentId;		//直属上级公司ID（默认0：微炫客）
+	private String companyParentIds;	//隶属上级公司ID（0,1,asdwasd,3）
+	private String name;			    //姓名
+	private String phone;			    //电话
+	private String province;		    //省
+	private String city;				//市
+	private String county;				//县
+	private String address;				//地址
+	private String email;				//邮箱
+	private String qq;					//QQ号
+	private String wechat;				//微信号
+	private String theater;				//战区
+	private String principal;			//战区负责人
+	private BigDecimal packageDiscount; //套餐折扣（最大1.0
+	private BigDecimal publicDiscount;  //公众号折扣（最大1.0）
+	private BigDecimal minaDiscount;	//小程序折扣（最大1.0）
+	private Integer agentLevelId;		//代理商等级ID
+	private String roleName;			//代理商等级名称
+	private Integer customerLevel;		//客户等级（0：普通客户  1：VIP客户）
+	private String certificate;			//证书
+	private BigDecimal cashPledge;		//押金
+	private BigDecimal publicAccount;	//公众号账户
+	private BigDecimal minaAccount;		//小程序账户
+	private BigDecimal hardwareAccount;	//硬件账户
+	private BigDecimal vipAccount;		//vip账户
+	private BigDecimal publicExpend;	//公众号账户消耗
+	private BigDecimal minaExpend;		//小程序消耗
+	private BigDecimal hardwareExpend;	//硬件消耗
+	private BigDecimal vipExpend;		//VIP消耗
+	private String mobile;				//手机
+	private char user_type;				//用户类型
+	private String photo;				//用户头像
+	private String login_ip;			//最后登陆IP
+	private Date login_date;			//最后登陆时间
+	private String login_flag;			//是否可登录
+	private String create_by;			//创建者
+	private Date create_date;			//添加时间
+	private String update_by;			//更新者
+	private Date update_date;			//更新时间
+	private Date startDate;				//开始时间
+	private Date endDate;				//结束时间
+	private Integer state;				//状态（0：冻结，1：正常，2申请中，3：驳回）
+	private String remarks;				//备注
+	private char del_flag;				//删除标记
+	private String qrcode;				//二维码
+	private List<Role> roleList = Lists.newArrayList(); // 拥有角色列表
+	private String agentLevel;    //代理商所属上级名称
+	private WasSysUser  companyParent;
+	
+	public WasSysUser() {
+		super();
+	}
+
+
+	public WasSysUser(String id,BigDecimal publicAccount, BigDecimal minaAccount, BigDecimal hardwareAccount,
+			BigDecimal vipAccount) {
+		super();
+		this.id=id;
+		this.publicAccount = publicAccount;
+		this.minaAccount = minaAccount;
+		this.hardwareAccount = hardwareAccount;
+		this.vipAccount = vipAccount;
+	}
+
+
+	public String getRoleName() {
+		return roleName;
+	}
+
+
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
+	}
+
+
+	
+
+	public WasSysUser(String id) {
+		super();
+		this.id = id;
+	}
+
+
+	public String getCompany_id() {
+		return company_id;
+	}
+
+
+	public void setCompany_id(String company_id) {
+		this.company_id = company_id;
+	}
+
+
+	public String getOffice_id() {
+		return office_id;
+	}
+
+
+	public void setOffice_id(String office_id) {
+		this.office_id = office_id;
+	}
+
+
+	public String getNo() {
+		return no;
+	}
+
+
+	public void setNo(String no) {
+		this.no = no;
+	}
+
+
+	public String getLogin_name() {
+		return login_name;
+	}
+
+
+	public void setLogin_name(String login_name) {
+		this.login_name = login_name;
+	}
+
+
+	public String getPassword() {
+		return password;
+	}
+
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+
+	public String getCompanyParentId() {
+		return companyParentId;
+	}
+
+
+	public void setCompanyParentId(String companyParentId) {
+		this.companyParentId = companyParentId;
+	}
+
+
+	public String getCompanyParentIds() {
+		return companyParentIds;
+	}
+
+
+	public void setCompanyParentIds(String companyParentIds) {
+		this.companyParentIds = companyParentIds;
+	}
+
+
+	public String getName() {
+		return name;
+	}
+
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	public String getPhone() {
+		return phone;
+	}
+
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+
+	public String getProvince() {
+		return province;
+	}
+
+
+	public void setProvince(String province) {
+		this.province = province;
+	}
+
+
+	public String getCity() {
+		return city;
+	}
+
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+
+	public String getCounty() {
+		return county;
+	}
+
+
+	public void setCounty(String county) {
+		this.county = county;
+	}
+
+
+	public String getAddress() {
+		return address;
+	}
+
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+
+	public String getEmail() {
+		return email;
+	}
+
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+
+	public String getQq() {
+		return qq;
+	}
+
+
+	public void setQq(String qq) {
+		this.qq = qq;
+	}
+
+
+	public String getWechat() {
+		return wechat;
+	}
+
+
+	public void setWechat(String wechat) {
+		this.wechat = wechat;
+	}
+
+
+	public String getTheater() {
+		return theater;
+	}
+
+
+	public void setTheater(String theater) {
+		this.theater = theater;
+	}
+
+
+	public String getPrincipal() {
+		return principal;
+	}
+
+
+	public void setPrincipal(String principal) {
+		this.principal = principal;
+	}
+
+
+	public BigDecimal getPackageDiscount() {
+		return packageDiscount;
+	}
+
+
+	public void setPackageDiscount(BigDecimal packageDiscount) {
+		this.packageDiscount = packageDiscount;
+	}
+
+
+	public BigDecimal getPublicDiscount() {
+		return publicDiscount;
+	}
+
+
+	public void setPublicDiscount(BigDecimal publicDiscount) {
+		this.publicDiscount = publicDiscount;
+	}
+
+
+	public BigDecimal getMinaDiscount() {
+		return minaDiscount;
+	}
+
+
+	public void setMinaDiscount(BigDecimal minaDiscount) {
+		this.minaDiscount = minaDiscount;
+	}
+
+
+	public Integer getAgentLevelId() {
+		return agentLevelId;
+	}
+
+
+	public void setAgentLevelId(Integer agentLevelId) {
+		this.agentLevelId = agentLevelId;
+	}
+
+
+	public Integer getCustomerLevel() {
+		return customerLevel;
+	}
+
+
+	public void setCustomerLevel(Integer customerLevel) {
+		this.customerLevel = customerLevel;
+	}
+
+
+	public String getCertificate() {
+		return certificate;
+	}
+
+
+	public void setCertificate(String certificate) {
+		this.certificate = certificate;
+	}
+
+
+	public BigDecimal getCashPledge() {
+		return cashPledge;
+	}
+
+
+	public void setCashPledge(BigDecimal cashPledge) {
+		this.cashPledge = cashPledge;
+	}
+
+
+	public BigDecimal getPublicAccount() {
+		return publicAccount;
+	}
+
+
+	public void setPublicAccount(BigDecimal publicAccount) {
+		this.publicAccount = publicAccount;
+	}
+
+
+	public BigDecimal getMinaAccount() {
+		return minaAccount;
+	}
+
+
+	public void setMinaAccount(BigDecimal minaAccount) {
+		this.minaAccount = minaAccount;
+	}
+
+
+	public BigDecimal getHardwareAccount() {
+		return hardwareAccount;
+	}
+
+
+	public void setHardwareAccount(BigDecimal hardwareAccount) {
+		this.hardwareAccount = hardwareAccount;
+	}
+
+
+	public BigDecimal getVipAccount() {
+		return vipAccount;
+	}
+
+
+	public void setVipAccount(BigDecimal vipAccount) {
+		this.vipAccount = vipAccount;
+	}
+
+
+	public BigDecimal getPublicExpend() {
+		return publicExpend;
+	}
+
+
+	public void setPublicExpend(BigDecimal publicExpend) {
+		this.publicExpend = publicExpend;
+	}
+
+
+	public BigDecimal getMinaExpend() {
+		return minaExpend;
+	}
+
+
+	public void setMinaExpend(BigDecimal minaExpend) {
+		this.minaExpend = minaExpend;
+	}
+
+
+	public BigDecimal getHardwareExpend() {
+		return hardwareExpend;
+	}
+
+
+	public void setHardwareExpend(BigDecimal hardwareExpend) {
+		this.hardwareExpend = hardwareExpend;
+	}
+
+
+	public BigDecimal getVipExpend() {
+		return vipExpend;
+	}
+
+
+	public void setVipExpend(BigDecimal vipExpend) {
+		this.vipExpend = vipExpend;
+	}
+
+
+	public String getMobile() {
+		return mobile;
+	}
+
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+
+	public char getUser_type() {
+		return user_type;
+	}
+
+
+	public void setUser_type(char user_type) {
+		this.user_type = user_type;
+	}
+
+
+	public String getPhoto() {
+		return photo;
+	}
+
+
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+
+
+	public String getLogin_ip() {
+		return login_ip;
+	}
+
+
+	public void setLogin_ip(String login_ip) {
+		this.login_ip = login_ip;
+	}
+
+
+	public Date getLogin_date() {
+		return login_date;
+	}
+
+
+	public void setLogin_date(Date login_date) {
+		this.login_date = login_date;
+	}
+
+
+	public String getLogin_flag() {
+		return login_flag;
+	}
+
+
+	public void setLogin_flag(String login_flag) {
+		this.login_flag = login_flag;
+	}
+
+
+	public String getCreate_by() {
+		return create_by;
+	}
+
+
+	public void setCreate_by(String create_by) {
+		this.create_by = create_by;
+	}
+
+
+	public Date getCreate_date() {
+		return create_date;
+	}
+
+
+	public void setCreate_date(Date create_date) {
+		this.create_date = create_date;
+	}
+
+
+	public String getUpdate_by() {
+		return update_by;
+	}
+
+
+	public void setUpdate_by(String update_by) {
+		this.update_by = update_by;
+	}
+
+
+	public Date getUpdate_date() {
+		return update_date;
+	}
+
+
+	public void setUpdate_date(Date update_date) {
+		this.update_date = update_date;
+	}
+
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+
+	public Integer getState() {
+		return state;
+	}
+
+
+	public void setState(Integer state) {
+		this.state = state;
+	}
+
+
+	public String getRemarks() {
+		return remarks;
+	}
+
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+
+	public char getDel_flag() {
+		return del_flag;
+	}
+
+
+	public void setDel_flag(char del_flag) {
+		this.del_flag = del_flag;
+	}
+
+
+	public String getQrcode() {
+		return qrcode;
+	}
+
+
+	public void setQrcode(String qrcode) {
+		this.qrcode = qrcode;
+	}
+
+
+	public List<Role> getRoleList() {
+		return roleList;
+	}
+
+
+	public void setRoleList(List<Role> roleList) {
+		this.roleList = roleList;
+	}
+
+
+	public String getAgentLevel() {
+		return agentLevel;
+	}
+
+
+	public void setAgentLevel(String agentLevel) {
+		this.agentLevel = agentLevel;
+	}
+
+
+	public WasSysUser getCompanyParent() {
+		return companyParent;
+	}
+
+
+	public void setCompanyParent(WasSysUser companyParent) {
+		this.companyParent = companyParent;
+	}
+
+	
+}

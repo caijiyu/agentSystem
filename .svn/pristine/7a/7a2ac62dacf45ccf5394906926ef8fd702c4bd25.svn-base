@@ -1,0 +1,911 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+	<style type="text/css">
+		.error {
+			color: red;
+		}
+		#harewareVal-error{
+			margin-left: 164px;
+		}
+		#publicVal-error{
+			margin-left: 164px;
+		}
+		#minaVal-error{
+			margin-left: 164px;
+		}
+		#vipVal-error{
+			margin-left: 164px;
+		}
+		#price-error{
+		margin-left: 164px;
+		}
+		#vipAccountCharge-error{
+		margin-left: 164px;
+		}
+		#remarks-error{
+		margin-left: 164px;
+		}
+		#vipChargeMoney-error{
+		margin-left: 164px;
+		}
+		#vipRemarks-error{
+		margin-left: 164px;
+		}
+	</style>
+</head>
+<body>
+	<div class="row divControl">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-body">
+					<h3 class="box-title">代理商充值</h3>
+					<hr class="m-t-0 m-b-40">
+					<form action="${ctx}/agentSystem/SysUser/getAgentRecharge" method="post" style="width: 100%" id="refreshForm">
+					<input type="hidden" value="" id="id" name="id"> 
+						<div class="form-body">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">账号</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" value="${agent.login_name}"
+												readonly="readonly">
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">公司全称</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" value="${agent.companyName}" id="company"
+												readonly="readonly">
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">套餐折扣</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control" value="${agent.packageDiscount}" readonly>
+												<span class="input-group-addon">折</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">公众号折扣</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control" value="${agent.publicDiscount}" readonly>
+												<span class="input-group-addon">折</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+							</div>
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">小程序折扣</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control" value="${agent.minaDiscount}" readonly>
+												<span class="input-group-addon">折</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">所属上级</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" value="${agent.companyParent.companyName}"
+												readonly="readonly">
+										</div>
+									</div>
+								</div>
+
+								<!--/span-->
+							</div>
+							<!--/row-->
+
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">代理商等级</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" value="${agent.agentLevel}"
+												readonly="readonly">
+										</div>
+									</div>
+								</div>
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">客户等级</label>
+										<div class="col-md-9">
+											<c:if test="${agent.customerLevel == 1}">
+												<input type="text" class="form-control" value="VIP用户" readonly>	
+											</c:if>
+											<c:if test="${agent.customerLevel == 0 }">
+												<input type="text" class="form-control" value="普通用户" readonly>
+											</c:if> 
+										</div>
+									</div>
+								</div>
+
+
+
+								<!--/span-->
+							</div>
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">时间范围</label>
+										<div class="col-md-9">
+											<div class="input-daterange input-group" id="date-range">
+												<input type="text" class="form-control" name="start"
+													value="<fmt:formatDate value="${agent.startDate}" pattern="yyyy-MM-dd"/>" readonly> <span
+													class="input-group-addon bg-info b-0 text-white">至</span> <input
+													type="text" class="form-control" name="end"
+													value="<fmt:formatDate value="${agent.endDate}" pattern="yyyy-MM-dd"/>" readonly>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">平台押金</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control" value="${agent.cashPledge}${'元'}"
+													readonly="readonly"> 
+													 <button type="button" class="btn waves-effect waves-light btn-info" onclick="showcashPledgeModal('${agent.id}')"> 充值
+                                                      </button>
+											</div>
+
+										</div>
+									</div>
+								</div>
+
+							
+							</div>
+
+							<div class="row">
+
+
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">公众号余额</label>
+										<div class="col-md-9">
+
+											<div class="input-group">
+												<input type="text" class="form-control" value="${agent.publicAccount}${'元'}" id="publicAccount"
+													readonly="readonly">
+													<button type="button" class="btn waves-effect waves-light btn-info" onclick="showAccountModal('${agent.id}','publicAccount')"> 充值
+                                                      </button>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">硬件余额</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control" value="${agent.hardwareAccount}${'元'}" id="hardwareAccount"
+													readonly="readonly">
+													<button type="button" class="btn waves-effect waves-light btn-info" onclick="showAccountModal('${agent.id}','hardwareAccount')"> 充值
+                                                      </button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!--/row-->
+							<div class="row">
+
+
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">小程序余额</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control" value="${agent.minaAccount}${'元'}" id="minaAccount"
+													readonly="readonly"> 
+													<button type="button" class="btn waves-effect waves-light btn-info" onclick="showAccountModal('${agent.id}','minaAccount')"> 充值
+                                                      </button>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">VIP余额</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control" value="${agent.vipAccount}${'元'}" id="vipAccount"
+													readonly="readonly"> 
+													<button type="button" class="btn waves-effect waves-light btn-info" onclick="showVipModal('${agent.id}')"> 充值
+                                                      </button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+						<div class="form-group row">
+							<label class="col-2 col-form-label"></label>
+							<div class="col-9">
+								<div class="text-xs-right" style="text-align: right;">
+									<button type="button" class="btn btn-default" onclick="jump()">返回</button>
+								</div>
+							</div>
+						</div>
+						
+					
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<!-- 模态框 -->
+
+<div class="modal fade" id="cashPledgeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true" style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content"  style="margin-top:200px;width: 600px">
+            <div class="modal-header" style="background-color: #F4F5F9;">
+                <h4 class="modal-title" id="exampleModalLabel">押金充值</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="cashPledgeForm">
+                 <input type="hidden" value="" id="agentId" name="id"> 
+                    <div class="form-group row">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">公司名称:</label>
+                        <div class="col-8">
+                            <input type="text" class="form-control" id="companyName"  value="" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="hardwarerow">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">硬件账户充值:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"   name="hardwareAccount" id="harewareVal" >
+                                <span class="input-group-addon">元</span>
+                            </div>
+                            <span id="hardwareBalance"></span>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="publicrow">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">公众号账户充值:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"   name="publicAccount" id="publicVal" >
+                                <span class="input-group-addon">元</span>
+                            </div>
+                            <span id="publicBalance"></span>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="minarow">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">小程序账户充值:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"   name="minaAccount" id="minaVal" >
+                                <span class="input-group-addon">元</span>
+                            </div>
+                            <span id="minaBalance"></span>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="viprow">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">VIP账户充值:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"  name="vipAccount"  id="vipVal" >
+                                <span class="input-group-addon">元</span>
+                            </div>
+                            <span id="vipBalance"></span>
+                        </div>
+                    </div>
+                     <div class="form-group row" >
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">备注:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <textarea class="form-control"  name="remarks" id="cashPledgeRemark" spellcheck="false"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                        </div>
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="col-4"></div>
+                               
+                                <div class="col-8" >总价格：<span id="totalcashPledgeMoney"></span>元</div>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer" style="background-color: #F4F5F9;">
+                <button type="button" class="btn waves-effect waves-light btn-info" onclick="rechargeCashPledge()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="accountModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true" style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content"  style="margin-top:200px;width: 600px">
+            <div class="modal-header" style="background-color: #F4F5F9;">
+                <h4 class="modal-title" id="accountTitle"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="accountForm">
+                 <input type="hidden" value="" id="userId" name="id"> 
+                 <input type="hidden" value="" id="sign" name="sign"> 
+                    <div class="form-group row">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">公司名称:</label>
+                        <div class="col-8">
+                            <input type="text" class="form-control" id="companyAccount"  value="" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="accountCharge">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px" id="recipient"></label>
+                        <div class="col-8">
+                            <div class="input-group" >
+                                <input type="text" class="form-control"   name="price" id="price">
+                                <span class="input-group-addon">元</span>
+                            </div>
+                            <span id="currentMoney"></span>
+                        </div>
+                    </div>       
+                
+                    <div class="form-group row" id="vipCharge">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">VIP账户充值:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"  name="vipAccount"  id="vipAccountCharge">
+                                <span class="input-group-addon">元</span>
+                            </div>
+                            <span id="vipMoney"></span>
+                        </div>
+                    </div>
+                     <div class="form-group row" >
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">备注:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <textarea class="form-control"  name="remarks" id="accountRemarks" spellcheck="false"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                       <div class="row">
+                        <div class="col-6">
+                        </div>
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="col-4"></div>
+                               
+                                <div class="col-8" >总价格：<span id="totalAccountMoney"></span>元</div>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer" style="background-color: #F4F5F9;">
+                <button type="button" class="btn waves-effect waves-light btn-info" onclick="saveAccount()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="vipModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true" style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content"  style="margin-top:200px;width: 600px">
+            <div class="modal-header" style="background-color: #F4F5F9;">
+                <h4 class="modal-title" >VIP账户充值</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="vipForm">
+                 <input type="hidden" value="" id="Id" name="id"> 
+                    <div class="form-group row">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">公司名称:</label>
+                        <div class="col-8">
+                            <input type="text" class="form-control" id="name"  value="" readonly>
+                        </div>
+                    </div>
+                     
+                    <div class="form-group row" >
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px"><span style='color: red'>*&nbsp;&nbsp;&nbsp;</span>VIP充值:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"  name="vipAccount"  id="vipChargeMoney">
+                                <span class="input-group-addon">元</span>
+                            </div>
+                            <span id="vipAccountMoney"></span>
+                        </div>
+                    </div>
+                     <div class="form-group row" >
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">备注:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <textarea class="form-control"  name="remarks" id="vipRemarks" spellcheck="false"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer" style="background-color: #F4F5F9;">
+                <button type="button" class="btn waves-effect waves-light btn-info" onclick="saveVipAccount()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+	<script src="${ctxStatic}/jquery-validation/1.14.0/jquery.validate.js"></script>
+	<script type="text/javascript">
+	
+		$("document").ready(function() {
+			//表单验证
+			$("#cashPledgeForm").validate(
+				{
+					rules : {
+						hardwareAccount:{
+							required: true,
+							number: true,
+							
+							minNumber: $("#harewareVal").val(),
+							range: [0,'${genAgent.hardwareAccount}']
+						},			
+						publicAccount:{
+							required: true,
+							number: true,
+							
+							minNumber: $("#publicVal").val(),
+							range: [0,'${genAgent.publicAccount}']
+						},
+						minaAccount:{
+							required: true,
+							number: true,
+							
+							minNumber: $("#minaVal").val(),
+							range: [0,'${genAgent.minaAccount}']
+						},
+						vipAccount :{
+							required: true,
+							number: true,
+							
+							minNumber: $("#vipVal").val(),
+							range: [0,'${genAgent.vipAccount}']
+						},
+						remarks:{
+							maxlength: 50
+						}
+					},
+					
+					//错误信息提示
+					messages:{
+						hardwareAccount:{
+							required: "请填写充值金额",
+							number: "请正确输入金额",
+							length: "输入数字最多小数点后两位",
+							range: "请输入正确的金额范围"
+						},
+						publicAccount:{
+							required: "请填写充值金额",
+							number: "请正确输入金额",
+							length: "输入数字最多小数点后两位",
+							range: "请输入正确的金额范围"
+						},
+						minaAccount:{
+							required: "请填写充值金额",
+							number: "请正确输入金额",
+							length: "输入数字最多小数点后两位",
+							range: "请输入正确的金额范围"
+						},
+						vipAccount:{
+							required: "请填写充值金额",
+							number: "请正确输入金额",
+							length: "输入数字最多小数点后两位",
+							range: "请输入正确的金额范围"
+						},
+						remarks:{
+							maxlength:"最多输入50个字符",
+						}
+					},
+					errorPlacement : function(error, element) {	
+		            	error.insertAfter( element.parent().parent()); 		            	         
+					}
+				});
+			 jQuery.validator.addMethod("minNumber",function(value, element){
+		            var returnVal = true;
+		            inputZ=value;
+		            var ArrMen= inputZ.split(".");    //截取字符串
+		            if(ArrMen.length==2){
+		                if(ArrMen[1].length>2){    //判断小数点后面的字符串长度
+		                    returnVal = false;
+		                    return false;
+		                }
+		            }
+		            return returnVal;
+		        },"小数点后最多为两位");
+			 
+			 $("#accountForm").validate(
+						{
+							rules : {
+								 price:{
+									required: true,
+									number: true,
+									minNumber: $("#price").val(),
+									
+								},	 	
+								vipAccount :{
+									required: true,
+									number: true,
+									minNumber: $("#vipVal").val(),
+									range: [0,'${genAgent.vipAccount}']
+								},
+								remarks:{
+									maxlength: 50
+								}
+							},
+							
+							//错误信息提示
+							messages:{
+								price:{
+									required: "请填写充值金额",
+									number: "请正确输入金额",
+									length: "输入数字最多小数点后两位",
+									range: "请输入正确的金额范围"
+								},
+								vipAccount:{
+									required: "请填写充值金额",
+									number: "请正确输入金额",
+									length: "输入数字最多小数点后两位",
+									range: "请输入正确的金额范围"
+								},
+								remarks:{
+									maxlength:"最多输入50个字符",
+								}
+							},
+							errorPlacement : function(error, element) {	
+				            	error.insertAfter( element.parent().parent()); 		            	         
+							}
+						});
+			 $("#vipForm").validate(
+						{
+							rules : { 	
+								vipAccount :{
+									required: true,
+									number: true,
+									minNumber: $("#vipVal").val(),
+									range: [0.01,'${genAgent.vipAccount}']
+								},
+								remarks:{
+									maxlength: 50
+								}
+							},
+							
+							//错误信息提示
+							messages:{
+								vipAccount:{
+									required: "请填写充值金额",
+									number: "请正确输入金额",
+									length: "输入数字最多小数点后两位",
+									range: "请输入正确的金额范围"
+								},
+								remarks:{
+									maxlength:"最多输入50个字符",
+								}
+							},
+							errorPlacement : function(error, element) {	
+				            	error.insertAfter( element.parent().parent()); 		            	         
+							}
+						});
+	        
+		});
+		
+
+		function showcashPledgeModal(agentId) {
+			$("#cashPledgeForm").data("validator").resetForm();
+			document.getElementById("cashPledgeForm").reset();
+			$("#totalcashPledgeMoney").html(0);
+			$("#agentId").val(agentId);
+			$("#companyName").val($("#company").val());
+			$("#hardwareBalance").text("您的硬件账户余额为"+'${genAgent.hardwareAccount}'+"元");
+			$("#publicBalance").text("您的公众号账户余额为"+'${genAgent.publicAccount}'+"元");
+			$("#minaBalance").text("您的小程序账户余额为"+'${genAgent.minaAccount}'+"元");
+			$("#vipBalance").text("您的VIP账户余额为"+'${genAgent.vipAccount}'+"元");
+			if(Number('${genAgent.hardwareAccount}') == 0) {
+				$("#hardwarerow").hide();
+			}
+			if(Number('${genAgent.publicAccount}') == 0) {
+				$("#publicrow").hide();
+			}
+			if(Number('${genAgent.minaAccount}') == 0) {
+				$("#minarow").hide();
+			}
+			if(Number('${genAgent.vipAccount}') == 0) {
+				$("#viprow").hide();
+			} 
+			$("#cashPledgeModal").modal("show");
+		
+		}
+		var hardwareMoney=0;var publicMoney = 0;var minaMoney=0; var vipMoney= 0;
+		$('#harewareVal').bind('input propertychange', function() {
+			hardwareMoney = $('#harewareVal').val();
+			$('#totalcashPledgeMoney').html(Number(hardwareMoney)+Number(publicMoney)+Number(minaMoney)+Number(vipMoney));
+		});
+		
+		$('#publicVal').bind('input propertychange', function() {
+			publicMoney = $('#publicVal').val();
+			$('#totalcashPledgeMoney').html(Number(hardwareMoney)+Number(publicMoney)+Number(minaMoney)+Number(vipMoney));
+		});
+		$('#minaVal').bind('input propertychange', function() {
+			minaMoney = $('#minaVal').val();
+			$('#totalcashPledgeMoney').html(Number(hardwareMoney)+Number(publicMoney)+Number(minaMoney)+Number(vipMoney));
+		});
+		$('#vipVal').bind('input propertychange', function() {
+			vipMoney = $('#vipVal').val();
+			$('#totalcashPledgeMoney').html(Number(hardwareMoney)+Number(publicMoney)+Number(minaMoney)+Number(vipMoney));
+		});
+		function rechargeCashPledge() {
+			$("#id").val('${agent.id}');
+			var isValid = $("#cashPledgeForm").valid();
+			if(isValid) {
+				var flag;
+				if($("#harewareVal").val() == 0 && $("#publicVal").val() == 0 && $("#minaVal").val() == 0 && $("#vipVal").val() == 0) {
+					flag = false;
+					layer.msg("您还未输入一个非0的充值金额",{icon:7,time:1500});
+				}else {
+					flag = true;
+				}
+			}
+			if(isValid && flag) {
+				var locked = false;
+				layer.confirm('是否确认充值?', {
+					skin : 'layui-layer-molv',
+					icon : 3,
+					btn : [ '确认', '取消' ]
+				//按钮
+				},function() {
+					if(!locked) {
+						locked = true;
+						$.ajax({
+							url : "${ctx}/agentSystem/SysUser/updateCashPledgeAccount",
+							type : "post",
+							dataType : "json",
+							data : $('#cashPledgeForm').serialize(),
+							success : function(result) {
+								if (result == 1) {
+									$("#cashPledgeModal").modal("hide");
+									$("#refreshForm").submit();
+									layer.msg("充值成功！", {
+										icon : 1,
+										time : 1000
+									});
+								
+								} else {
+									$("#cashPledgeModal").modal("hide");
+									layer.msg("充值失败！", {
+										icon : 1,
+										time : 1000
+									});
+								}
+							}
+						});
+					}
+				
+				});
+			}
+		}
+		
+		function showAccountModal(agentId,sign) {
+			$("#accountForm").data("validator").resetForm();
+			document.getElementById("accountForm").reset();
+			$("#totalAccountMoney").html(0);
+			$("#accountCharge").show();
+			$("#vipCharge").show();
+			$("#userId").val(agentId);
+			$("#sign").val(sign);
+			$("#companyAccount").val($("#company").val());
+			//动态添加验证
+			if(sign == "hardwareAccount") {
+				if(Number('${genAgent.hardwareAccount}') == 0) {
+					$("#accountCharge").hide();
+				} else {
+					$("#price").rules("add",{
+						range: [0,'${genAgent.hardwareAccount}']	
+					});
+					$("#accountTitle").text("硬件账户充值");
+					$("#recipient").html("硬件充值:");
+					$("#currentMoney").text("您的硬件账户余额为"+'${genAgent.hardwareAccount}'+"元");
+				}
+			}
+		
+			if(sign == "publicAccount") {
+				if(Number('${genAgent.publicAccount}') == 0) {
+					$("#accountCharge").hide();
+				} else {
+					$("#price").rules("add",{
+						range: [0,'${genAgent.publicAccount}']	
+					});
+					$("#accountTitle").text("公众号账户充值");
+					$("#recipient").html("公众号充值:");
+					$("#currentMoney").text("您的公众号账户余额为"+'${genAgent.publicAccount}'+"元");
+				}						
+			}
+			if(sign == "minaAccount") {
+				if(Number('${genAgent.minaAccount}') == 0) {
+					$("#accountCharge").hide();
+				} else {
+					$("#price").rules("add",{
+						range: [0,'${genAgent.minaAccount}']	
+					});
+					$("#accountTitle").text("小程序账户充值");
+					$("#recipient").html("小程序充值:");
+					$("#currentMoney").text("您的小程序账户余额为"+'${genAgent.minaAccount}'+"元");
+				}
+				
+				
+			}
+			$("#vipMoney").text("您的VIP账户余额为"+'${genAgent.vipAccount}'+"元");
+
+			if('${genAgent.vipAccount}' == '0.00') {
+				$("#vipCharge").hide();
+			} 
+			$("#accountModal").modal("show");
+		}
+		var price=0;var vipAccountCharge=0;
+		$('#price').bind('input propertychange', function() {
+			price = $('#price').val();
+			$('#totalAccountMoney').text(Number(price)+Number(vipAccountCharge));
+		});
+		
+		$('#vipAccountCharge').bind('input propertychange', function() {
+			vipAccountCharge = $('#vipAccountCharge').val();
+			$('#totalAccountMoney').html(Number(price)+Number(vipAccountCharge));
+		});
+			
+		function saveAccount() {
+			$("#id").val('${agent.id}');
+			var isValid = $("#accountForm").valid();
+			if(isValid) {
+				var flag;
+				if($("#price").val() == 0 && $("#vipAccount").val() == 0) {
+					flag = false;
+					layer.msg("您还未输入一个非0的充值金额",{icon:7,time:1500});
+				}else {
+					flag = true;
+				}
+			}
+			if(isValid && flag) {
+				var locked = false;
+				layer.confirm('是否确认充值?', {
+					skin : 'layui-layer-molv',
+					icon : 3,
+					btn : [ '确认', '取消' ]
+				//按钮
+				},function() {
+					if(!locked) {
+						locked = true;
+						$.ajax({
+							url : "${ctx}/agentSystem/SysUser/updateAccountCharge",
+							type : "post",
+							dataType : "json",
+							data : $('#accountForm').serialize(),
+							success : function(result) {
+								if (result == 1) {
+									$("#accountModal").modal("hide");
+									$("#refreshForm").submit();
+									layer.msg("充值成功！", {
+										icon : 1,
+										time : 1000
+									});
+								
+								} else {
+									$("#accountModal").modal("hide");
+									layer.msg("充值失败！", {
+										icon : 1,
+										time : 1000
+									});
+								}
+							}
+						});
+					}
+				
+				});
+			}
+			
+		}
+		function showVipModal(agentId) {
+			$("#vipForm").data("validator").resetForm();
+			document.getElementById("vipForm").reset();  
+			$("#Id").val(agentId);
+			$("#name").val($("#company").val());
+			$("#vipAccountMoney").text("您的VIP账户余额为"+'${genAgent.vipAccount}'+"元");
+			$("#vipModal").modal("show");
+		}
+		function saveVipAccount() {
+			$("#id").val('${agent.id}');
+			var isValid = $("#vipForm").valid();
+			if(isValid) {
+				var locked = false;
+				layer.confirm('是否确认充值?', {
+					skin : 'layui-layer-molv',
+					icon : 3,
+					btn : [ '确认', '取消' ]
+				//按钮
+				},function() {
+					if(!locked) {
+						var index = layer.load(1, {shade: [0.1,'#fff']});
+						locked = true;
+						$.ajax({
+							url : "${ctx}/agentSystem/SysUser/updateVipCharge",
+							type : "post",
+							dataType : "json",
+							data : $('#vipForm').serialize(),
+							success : function(result) {
+								if (result == 1) {
+									layer.close(index);
+									$("#vipModal").modal("hide");
+									$("#refreshForm").submit();
+									layer.msg("充值成功！", {
+										icon : 1,
+										time : 1000
+									});
+								
+								} else {
+									$("#vipModal").modal("hide");
+									layer.msg("充值失败！", {
+										icon : 1,
+										time : 1000
+									});
+								}
+							}
+						});
+					}
+				
+				});
+			}
+		}
+		function jump() {
+			window.location.href = "${ctx}/agentSystem/SysUser/list";
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentSystem.sysdata.dao;
+
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentSystem.sysdata.entity.WasSalesPolicy;
+
+/**
+ * 销售方针DAO接口
+ * @author HJT
+ * @version 2017-10-09
+ */
+@MyBatisDao
+public interface WasSalesPolicyDao extends CrudDao<WasSalesPolicy> {
+	public WasSalesPolicy findBySalesPolicyId(Integer salesPolicyId);
+	public WasSalesPolicy findById(Integer salesPolicyId);
+	//根据title查找
+	public Integer findByTitle(String title);
+	public List<WasSalesPolicy> findUseablePolicies();
+	//查找未过期的方针
+	public List<WasSalesPolicy> findUnexpiredPolicy(WasSalesPolicy wasSalesPolicy);
+}

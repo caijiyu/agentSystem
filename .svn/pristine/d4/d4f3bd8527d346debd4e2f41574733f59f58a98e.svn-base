@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentSystem.agency.dao.WasConsumeSynthesisDao">
+    
+    <sql id="WasConsumeSynthesisColumns">
+		a.orderNo AS "orderNo",                
+		a.behavior AS "behavior",                
+		a.payMoney AS "payMoney",        
+		a.type AS "type",        
+		a.createDate AS "createDate",            
+		a.userId AS "userId",   
+		u.login_name AS "loginName"            
+							 
+	</sql>
+    <sql id="WasConsumeSynthesisJoins">
+    	LEFT JOIN sys_user u ON u.id = a.userId
+    </sql>
+    		
+	<select id="findList" resultType="WasConsumeSynthesis">
+		SELECT 
+			<include refid="WasConsumeSynthesisColumns"/>
+		FROM (SELECT 
+			number orderNo,behavior behavior,totalMoney payMoney,type type,createDate createDate,userId userId
+		FROM was_policy_purchase
+		
+		<where>
+			<if test="userId != null and userId != ''">
+				AND userId = #{userId} 
+				AND state = 1 
+			</if>
+			<!-- 时间范围搜索 -->
+			<if test="startDate != null and startDate != ''">
+				<![CDATA[   AND DATE_FORMAT(createDate, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')   ]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				<![CDATA[  AND DATE_FORMAT(createDate, '%Y-%m-%d') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d')    ]]>
+			</if>
+			<if test="invoiceNo != null and invoiceNo != ''">
+				AND invoiceNo = #{invoiceNo}
+			</if>
+			<if test="invoice != null">
+				AND invoice = #{invoice}
+			</if>
+		</where>
+		
+		UNION ALL
+		SELECT 
+			orderNo orderNo,behavior behavior,payMoney payMoney,type type,createDate createDate,createBy userId
+		FROM was_hardware_purchase
+		
+		<where>
+			<if test="userId != null and userId != ''">
+				AND createBy = #{userId} 
+				AND state = 1 
+			</if>
+			<!-- 时间范围搜索 -->
+			<if test="startDate != null and startDate != ''">
+				<![CDATA[   AND DATE_FORMAT(createDate, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')   ]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				<![CDATA[  AND DATE_FORMAT(createDate, '%Y-%m-%d') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d')    ]]>
+			</if>
+			<if test="invoiceNo != null and invoiceNo != ''">
+				AND invoiceNo = #{invoiceNo}
+			</if>
+			<if test="invoice != null">
+				AND invoice = #{invoice}
+			</if>
+			
+		</where>
+		
+		UNION ALL
+		SELECT 
+			orderNo orderNo,behavior behavior,payMoney payMoney,type type,createDate createDate,createBy userId
+		FROM was_expend_pay
+		
+		<where>
+			<if test="userId != null and userId != ''">
+				AND createBy = #{userId} 
+				AND state = 1 
+			</if>
+			<!-- 时间范围搜索 -->
+			<if test="startDate != null and startDate != ''">
+				<![CDATA[   AND DATE_FORMAT(createDate, '%Y-%m-%d')>=  DATE_FORMAT(#{startDate}, '%Y-%m-%d')   ]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				<![CDATA[  AND DATE_FORMAT(createDate, '%Y-%m-%d') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d')    ]]>
+			</if>
+			
+			<if test="invoiceNo != null and invoiceNo != ''">
+				AND invoiceNo = #{invoiceNo}
+			</if>
+			<if test="invoice != null">
+				AND invoice = #{invoice}
+			</if>
+		</where>) AS a
+		
+		<include refid="WasConsumeSynthesisJoins"/>
+		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			order by createDate DESC
+			</otherwise>
+		</choose>
+		
+	</select>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_recharge_history SET 
+			state = 0
+		WHERE rechargeId = #{rechargeId}
+	</update>
+	
+	<!-- 更新各表中对应的开票状态 -->
+	<update id="updateInvoiceY" parameterType="WasConsumeSynthesis">
+		 UPDATE was_hardware_purchase SET	invoice = #{invoice} WHERE invoiceNo = #{invoiceNo}				 
+	</update>
+	<update id="updateInvoiceC" parameterType="WasConsumeSynthesis">		
+		 UPDATE was_expend_pay SET	 invoice = #{invoice} WHERE invoiceNo = #{invoiceNo}
+	</update>		 
+	<update id="updateInvoiceR" parameterType="WasConsumeSynthesis">		
+		 UPDATE was_policy_purchase SET	 invoice = #{invoice} WHERE invoiceNo = #{invoiceNo}
+	</update>
+	
+	
+	<!-- 查询是否开过票 -->
+	<select id="findForList" resultType="WasConsumeSynthesis">
+		 SELECT 
+			<include refid="WasConsumeSynthesisColumns"/>
+		FROM (SELECT 
+			number orderNo,behavior behavior,totalMoney payMoney,type type,createDate createDate,userId userId
+		FROM was_policy_purchase
+		<where>
+			<if test="invoice != null">
+				AND invoice = #{invoice}
+			</if>
+			 AND terminalUserId in (
+			 	SELECT terminalUserId FROM was_terminal_user 
+			 <where>
+			 <if test="userId != null and userId != ''">
+			 	parentId = #{userId}			 
+			 </if>
+			 </where>
+			 	group by terminalUserId 
+			  )
+		</where>
+	
+		UNION ALL
+		SELECT 
+			orderNo orderNo,behavior behavior,payMoney payMoney,type type,createDate createDate,createBy userId
+		FROM was_hardware_purchase		
+		<where>
+			<if test="userId != null and userId != ''">
+				AND userId = #{userId} 				 
+			</if>			
+			<if test="invoice != null">
+				AND invoice = #{invoice}
+			</if> 			
+		</where>
+		
+		UNION ALL
+		SELECT 
+			orderNo orderNo,behavior behavior,payMoney payMoney,type type,createDate createDate,createBy userId
+		FROM was_expend_pay
+		
+		<where>
+			<if test="userId != null and userId != ''">
+				AND userId = #{userId} 				 
+			</if>					
+			<if test="invoice != null">
+				AND invoice = #{invoice}
+			</if> 
+		</where> ) AS a
+		
+		<include refid="WasConsumeSynthesisJoins"/> 
+		
+	</select>
+	<!-- 更新各表中的订单编号（开票单号、开票状态） -->
+	<update id="updateOrderY" parameterType="WasConsumeSynthesis">
+		 UPDATE was_hardware_purchase SET	invoice = #{invoice},invoiceNo = #{invoiceNo} WHERE orderNo=#{orderNo}				 
+	</update>
+	<update id="updateOrderC" parameterType="WasConsumeSynthesis">		
+		 UPDATE was_expend_pay SET	 invoice = #{invoice},invoiceNo = #{invoiceNo} WHERE  orderNo=#{orderNo}
+	</update>		 
+	<update id="updateOrderR" parameterType="WasConsumeSynthesis">		
+		 UPDATE was_policy_purchase SET	 invoice = #{invoice}, invoiceNo = #{invoiceNo} WHERE number=#{orderNo}
+	</update>
+	
+	
+	
+	
+	
+</mapper>

@@ -1,0 +1,996 @@
+package com.jeeplus.modules.agentsystem.agency.web;
+
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasExpendPay;
+import com.jeeplus.modules.agentsystem.agency.entity.WasRechargeHistory;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.agency.service.WasAgentApplyService;
+import com.jeeplus.modules.agentsystem.agency.service.WasExpendPayService;
+import com.jeeplus.modules.agentsystem.agency.service.WasRechargeHistoryService;
+import com.jeeplus.modules.agentsystem.agency.service.WasSysUserService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentLevel;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentLevelService;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+import com.jeeplus.modules.agentsystem.terminal.service.WasTerminalUserService;
+import com.jeeplus.modules.agentsystem.utils.MoneyOperation;
+import com.jeeplus.modules.agentsystem.utils.OrderNumberUtils;
+import com.jeeplus.modules.agentsystem.utils.StringChangeUtils;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+@Controller
+@RequestMapping(value = "${adminPath}/agentSystem/SysUser")
+public class WasSysUserController extends BaseController{
+
+	@Autowired
+	private WasSysUserService wasSysUserService;
+	@Autowired
+	private WasRechargeHistoryService rechargeHistoryService;
+	@Autowired
+	private WasExpendPayService expendPayService;
+	@Autowired
+	private WasTerminalUserService wasTerminalUserService;
+	@Autowired
+	private WasAgentApplyService wasAgentApplyService;
+	@Autowired
+	private WasAgentLevelService wasAgentLevelService;
+	/**
+	 * 代理商列表页面
+	 */
+	@RequiresPermissions("agency:wasSysUser:list")
+	@RequestMapping(value = {"list",""})
+	public String findAgentlist( WasSysUser sysUser,HttpServletRequest request, HttpServletResponse response, Model model) {
+		sysUser.setCompanyName(StringChangeUtils.specialStr(sysUser.getCompanyName()));	
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = UserUtils.getPrincipal();
+		String adminId = "1";
+		String permission = "agency:wasSysUser:addInside";
+		if(subject.isPermitted(permission)){
+			sysUser.setId(adminId);
+		}else {
+			sysUser.setId(principal.toString());
+		}
+		
+		Page<WasSysUser> page = wasSysUserService.findPage(new Page<WasSysUser>(request, response), sysUser); 
+		model.addAttribute("page",page );
+		return "modules/agentsystem/agency/wasAgentList";
+	}
+	
+	/**
+	 * 代理商记录
+	 */
+	@RequiresPermissions("agentSystem:wasAgentRecord:list")
+	@RequestMapping(value = {"recordList", ""})
+	public String recordList(WasSysUser sysUser, HttpServletRequest request, HttpServletResponse response, Model model) {
+		Principal principal = UserUtils.getPrincipal();
+		sysUser.setId(principal.toString());
+		sysUser.setCompanyName(StringChangeUtils.specialStr(sysUser.getCompanyName()));
+		Page<WasSysUser> page = wasSysUserService.findPage(new Page<WasSysUser>(request, response), sysUser); 
+		model.addAttribute("page",page );
+		return "modules/agentsystem/agency/wasAgentRecord";
+	}
+	
+	/**
+	 * 代理商首页入口
+	 */
+	@RequiresPermissions("agentSystem:wasAgentHomePage:entrance")
+	@RequestMapping(value = "homeEntrance")
+	public String homeEntrance(WasSysUser sysUser, HttpServletRequest request, HttpServletResponse response, Model model) {
+		Principal principal = UserUtils.getPrincipal();
+		String id = principal.toString();
+		model.addAttribute("id", id);
+		return "modules/agentsystem/agency/wasAgentHomePage";
+	}
+	
+	/**
+	 * 代理商首页页面展示
+	 */
+	@ResponseBody
+	@RequestMapping(value = "homePage")
+	public WasSysUser homePage(WasSysUser sysUser, HttpServletRequest request, HttpServletResponse response) {
+		sysUser = wasSysUserService.get(sysUser);
+		return sysUser;
+	}
+	
+	/**
+	 * 查询是不是微炫客的代理商
+	 */
+	@RequestMapping(value ="lookUp")
+	@ResponseBody
+	public boolean deleteVideoId(WasSysUser sysUser, HttpServletRequest request) {
+		boolean result;
+		sysUser.setCompanyName(request.getParameter("agentName"));
+		String isSuccess = wasSysUserService.agentLookUp(sysUser);	
+		if(isSuccess == null||isSuccess.equals("")){
+			result = false;
+		}else{
+			result = true;
+		}
+		return result;
+	}
+	/**
+	 * 查询页面 跳转到用户登录
+	 */
+	@RequestMapping(value ="lookUpLogin")
+	public String loginJump(HttpServletRequest request,HttpServletResponse response){
+		return "modules/sys/sysLoginS";
+	}
+	
+	/**
+	 * 代理商详细信息
+	 */
+	@RequiresPermissions("agency:wasSysUser:view")
+	@RequestMapping(value = {"get"})
+	public String get( WasSysUser sysuser, HttpServletRequest request,HttpServletResponse response, Model model) {
+		WasSysUser agent= wasSysUserService.get(sysuser.getId());
+		BigDecimal multiplicand = new BigDecimal(10);
+		BigDecimal packageDiscount = agent.getPackageDiscount();
+		agent.setPackageDiscount(packageDiscount.multiply(multiplicand));
+		BigDecimal  publicDiscount =  agent.getPublicDiscount();
+		agent.setPublicDiscount(publicDiscount.multiply(multiplicand));
+		BigDecimal minaDiscount = agent.getMinaDiscount();
+		agent.setMinaDiscount(minaDiscount.multiply(multiplicand));
+		model.addAttribute("agent",agent);
+		return "modules/agentsystem/agency/wasAgentDetailInfo";
+	}
+	
+	/*
+	 * 编辑代理商
+	 */
+	@RequiresPermissions("agency:wasSysUser:edit")
+	@RequestMapping(value = {"edit"})
+	public String edit( WasSysUser sysuser, HttpServletResponse response, Model model) {
+		WasSysUser agent= wasSysUserService.get(sysuser.getId());
+		BigDecimal multiplicand = new BigDecimal(10);
+		BigDecimal packageDiscount = agent.getPackageDiscount();
+		agent.setPackageDiscount(packageDiscount.multiply(multiplicand));
+		BigDecimal  publicDiscount =  agent.getPublicDiscount();
+		agent.setPublicDiscount(publicDiscount.multiply(multiplicand));
+		BigDecimal minaDiscount = agent.getMinaDiscount();
+		agent.setMinaDiscount(minaDiscount.multiply(multiplicand));
+		model.addAttribute("agent",agent);
+		//拿到当前代理商的直属上级
+		WasSysUser directAgent= wasSysUserService.getDirectAgent(agent.getCompanyParentId());
+		model.addAttribute("directAgent",directAgent);
+		//当前代理商的销售方针，等级
+		WasAgentLevel currentAgentLevel = wasAgentLevelService.getEnity(agent.getAgentLevelId());
+		model.addAttribute("currentAgentLevel",currentAgentLevel);
+		
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = (Principal)subject.getPrincipal(); 
+		WasSysUser sysUser=wasAgentApplyService.get(principal.getId());
+		//传入总代特有的权限标识符
+		List<WasAgentLevel>	wasAgentLevel=wasAgentApplyService.getAllNotSuperAgentLevel("","agentsystem:edit"); 
+		List<WasAgentLevel> allWasAgentLevel=wasAgentApplyService.getAllAgentLevel();
+		List<WasSysUser> agentUser=wasAgentApplyService.selectAllSuperAgent("","agentsystem:edit");
+		model.addAttribute("allWasAgentLevel", allWasAgentLevel);
+		model.addAttribute("agentUser", agentUser);
+		model.addAttribute("wasAgentLevel", wasAgentLevel);
+		model.addAttribute("sysUser", sysUser);
+		
+		return "modules/agentsystem/agency/wasEditAgent";
+	}
+	/**
+	 * 修改代理商状态
+	 */
+	@RequiresPermissions("agency:wasSysUser:updateState")
+	@ResponseBody
+	@RequestMapping(value = {"updateState"})
+	public Integer update( WasSysUser sysuser, HttpServletResponse response, Model model) {
+		WasSysUser user = wasSysUserService.get(sysuser.getId());
+		//state为0时冻结，为1时正常
+		Integer freeze = 0;
+		Integer unfreeze = 1;
+		if(user.getState() == freeze) {
+			user.setState(unfreeze);
+		}else if(user.getState() == unfreeze){
+			user.setState(freeze);
+		}
+		
+		Date date= new Date();
+		Principal principal = UserUtils.getPrincipal();
+		user.setUpdate_by(principal.toString());
+		user.setUpdate_date(date);
+		Integer result= wasSysUserService.update(user);
+		return  result;
+	}
+	/*
+	 * 代理商续期
+	 */
+	@RequiresPermissions("agency:wasSysUser:renew")
+	@RequestMapping(value = {"getAgent"})
+	public String getAgent( WasSysUser sysuser, HttpServletResponse response, Model model) {
+		WasSysUser agent= wasSysUserService.get(sysuser.getId());
+		BigDecimal multiplicand = new BigDecimal(10);
+		BigDecimal packageDiscount = agent.getPackageDiscount();
+		agent.setPackageDiscount(packageDiscount.multiply(multiplicand));
+		BigDecimal  publicDiscount =  agent.getPublicDiscount();
+		agent.setPublicDiscount(publicDiscount.multiply(multiplicand));
+		BigDecimal minaDiscount = agent.getMinaDiscount();
+		agent.setMinaDiscount(minaDiscount.multiply(multiplicand));
+		model.addAttribute("agent",agent);
+		return "modules/agentsystem/agency/wasRenewAngent" ;
+	}
+	@ResponseBody
+	@RequestMapping(value = {"updateTime"})
+	public Integer updateTime( WasSysUser sysuser, HttpServletResponse response, Model model) throws ParseException {
+		Date date= new Date();
+		Principal principal = UserUtils.getPrincipal();
+		sysuser.setUpdate_by(principal.toString());
+		sysuser.setUpdate_date(date);
+		Integer result = wasSysUserService.updateTime(sysuser);
+		return result ;
+	}
+	/**
+	 * 财务给代理商充值
+	 */
+	@RequiresPermissions("agency:wasSysUser:finance:recharge")
+	@RequestMapping(value = {"getAgentRecharge"})
+	public String getAgentRecharge( WasSysUser sysuser, HttpServletResponse response, Model model) {
+		WasSysUser agent= wasSysUserService.get(sysuser.getId());
+		BigDecimal multiplicand = new BigDecimal(10);
+		BigDecimal packageDiscount = agent.getPackageDiscount();
+		agent.setPackageDiscount(packageDiscount.multiply(multiplicand));
+		BigDecimal  publicDiscount =  agent.getPublicDiscount();
+		agent.setPublicDiscount(publicDiscount.multiply(multiplicand));
+		BigDecimal minaDiscount = agent.getMinaDiscount();
+		agent.setMinaDiscount(minaDiscount.multiply(multiplicand));
+		
+		Principal principal = UserUtils.getPrincipal();
+		WasSysUser genAgent = wasSysUserService.get(principal.toString());
+		model.addAttribute("agent",agent);
+		model.addAttribute("genAgent",genAgent);
+		return "modules/agentsystem/agency/wasFinanceRecharge" ;
+		
+	}
+	/**总代给下级充值
+	 */
+	@RequiresPermissions("agency:wasSysUser:agent:recharge")
+	@RequestMapping(value = {"getLowerAgentRecharge"})
+	public String getLowerAgentRecharge( WasSysUser sysuser, HttpServletResponse response, Model model) {
+		WasSysUser agent= wasSysUserService.get(sysuser.getId());
+		BigDecimal multiplicand = new BigDecimal(10);
+		BigDecimal packageDiscount = agent.getPackageDiscount();
+		agent.setPackageDiscount(packageDiscount.multiply(multiplicand));
+		BigDecimal  publicDiscount =  agent.getPublicDiscount();
+		agent.setPublicDiscount(publicDiscount.multiply(multiplicand));
+		BigDecimal minaDiscount = agent.getMinaDiscount();
+		agent.setMinaDiscount(minaDiscount.multiply(multiplicand));
+		
+		Principal principal = UserUtils.getPrincipal();
+		WasSysUser genAgent = wasSysUserService.get(principal.toString());
+		model.addAttribute("agent",agent);
+		model.addAttribute("genAgent",genAgent);
+		return "modules/agentsystem/agency/wasGeneralRecharge" ;
+		
+	}
+	@ResponseBody
+	@RequestMapping(value = {"updateAccount"})
+	public Integer updateAccount( WasSysUser sysuser,BigDecimal price,String sign,String remarks, HttpServletResponse response, Model model) throws ParseException {
+		WasSysUser agent= wasSysUserService.get(sysuser.getId());
+		Principal principal = UserUtils.getPrincipal();
+		WasRechargeHistory rechargeHistory = new WasRechargeHistory();
+		rechargeHistory.setOperateBy(principal.toString());
+		Date date = new Date();
+		BigDecimal decimal = new BigDecimal("0");
+		//充值单号=R+时间戳(13位)
+		rechargeHistory.setRechargeNo("R"+OrderNumberUtils.OrderNumber());
+		rechargeHistory.setReceivedUserId(sysuser.getId());
+		rechargeHistory.setRemarks(remarks);
+		rechargeHistory.setCreateDate(date);
+		//标识充值方式
+		String cashPledgeName = "cashPledge";
+		String hardwareName = "hardwareAccount";
+		String publicName = "publicAccount";
+		String minaName = "minaAccount";
+		String vipName = "vipAccount";
+		String operation ="充值";
+		String  str = "操作成功";
+		Integer result;
+		String isSuccess = null;
+		if(sign.equals(cashPledgeName)) {
+			BigDecimal cashPledge = agent.getCashPledge().add(price);
+			agent.setCashPledge(cashPledge);
+			isSuccess = MoneyOperation.getInstance().moneyOperation(price,decimal,decimal,decimal,decimal,sysuser.getId(), operation);
+			rechargeHistory.setCashRecharge(price);
+		}else {
+			rechargeHistory.setCashRecharge(decimal);
+		}
+		if(sign.equals(hardwareName)) {
+			BigDecimal hardwareAccount = agent.getHardwareAccount().add(price);	
+			agent.setHardwareAccount(hardwareAccount);
+			isSuccess = MoneyOperation.getInstance().moneyOperation(decimal,decimal,decimal,price,decimal,sysuser.getId(), operation);
+			rechargeHistory.setHardwareRecharge(price);
+		}else {
+			rechargeHistory.setHardwareRecharge(decimal);
+		}
+		if(sign.equals(publicName) ) {
+			BigDecimal publicAccount = agent.getPublicAccount().add(price);		
+			agent.setPublicAccount(publicAccount);
+			isSuccess = MoneyOperation.getInstance().moneyOperation(decimal,price,decimal,decimal,decimal,sysuser.getId(), operation);
+			rechargeHistory.setPublicRecharge(price);
+		}else {
+			rechargeHistory.setPublicRecharge(decimal);
+		}
+		if(sign.equals(minaName)) {
+			BigDecimal minaAccount = agent.getMinaAccount().add(price);	
+			agent.setMinaAccount(minaAccount);
+			isSuccess = MoneyOperation.getInstance().moneyOperation(decimal,decimal,price,decimal,decimal,sysuser.getId(), operation);
+			rechargeHistory.setMinaRecharge(price);
+		}else {
+			rechargeHistory.setMinaRecharge(decimal);
+		}
+		if(sign.equals(vipName)) {
+			BigDecimal vipAccount = agent.getVipAccount().add(price);		
+			agent.setVipAccount(vipAccount);
+			isSuccess = MoneyOperation.getInstance().moneyOperation(decimal,decimal,decimal,decimal,price,sysuser.getId(), operation);
+			rechargeHistory.setVipRecharge(price);
+		}else {
+			rechargeHistory.setVipRecharge(decimal);
+		}
+		agent.setUpdate_by(principal.toString());
+		agent.setUpdate_date(date);
+		//更新代理商记录
+		 
+		//插入充值记录
+		rechargeHistoryService.insert(rechargeHistory);
+		if(isSuccess.equals(str)) {
+			result = 1;
+		}else {
+			result = 0;
+		}
+		return result ;
+	}
+	
+	/**
+	 * 总代给代理商充值押金
+	 * @throws ParseException 
+	 */
+	@ResponseBody
+	@RequestMapping(value = {"updateCashPledgeAccount"})
+	public Integer updateCashPledge( WasSysUser sysuser,HttpServletResponse response, Model model) throws ParseException {
+		BigDecimal hardwareMoney = sysuser.getHardwareAccount();
+		BigDecimal publicMoney = sysuser.getPublicAccount();
+		BigDecimal minaMoney = sysuser.getMinaAccount();
+		BigDecimal vipMoney = sysuser.getVipAccount();
+		BigDecimal totalMoney = hardwareMoney.add(publicMoney).add(minaMoney).add(vipMoney);
+		String operationA ="充值";
+		String operationB ="消费";
+		String str ="操作成功";
+		Integer result;
+		String isSuccessA = null;
+		String isSuccessB = null;
+		//被充值代理商secAgent
+		WasSysUser secAgent  = wasSysUserService.get(sysuser.getId());
+		//充值代理商genAgent
+		Principal principal = UserUtils.getPrincipal();
+		WasSysUser genAgent = wasSysUserService.get(principal.toString());
+		
+		//被充值代理商押金账户余额
+		BigDecimal cashPledge = secAgent.getCashPledge();
+		//充值代理商各账户余额
+		BigDecimal genHardware = genAgent.getHardwareAccount();
+		BigDecimal genPublic = genAgent.getPublicAccount();
+		BigDecimal genMina =  genAgent.getMinaAccount();
+		BigDecimal genVip = genAgent.getVipAccount();
+		
+		if(hardwareMoney != null) {
+			cashPledge = cashPledge.add(hardwareMoney);
+			genHardware = genHardware.subtract(hardwareMoney);
+		}
+		if(publicMoney != null ) {
+			cashPledge = cashPledge.add(publicMoney);
+			genPublic = genPublic.subtract(publicMoney);
+		}
+		if(minaMoney != null) {
+			cashPledge = cashPledge.add(minaMoney);
+			genMina = genMina.subtract(minaMoney);
+		}
+		if(vipMoney != null) {
+			cashPledge = cashPledge.add(vipMoney);
+			genVip = genVip.subtract(vipMoney);
+		}
+		
+		//插入总代充值消费记录
+		WasExpendPay expendPay = new WasExpendPay();
+		Date date = new Date();
+		expendPay.setOrderNo("EP"+OrderNumberUtils.OrderNumber());
+		expendPay.setUserId(genAgent.getId());
+		expendPay.setBehavior("总代充值");
+		expendPay.setPayMoney(cashPledge.subtract(secAgent.getCashPledge()));
+		expendPay.setHardwareExpend(hardwareMoney);
+		expendPay.setPublicExpend(publicMoney);
+		expendPay.setMinaExpend(minaMoney);
+		expendPay.setVipExpend(vipMoney);
+		expendPay.setReceivedUserId(sysuser.getId());
+		expendPay.setRemarks(sysuser.getRemarks());
+		expendPay.setCreateDate(date);
+		expendPay.setCreateId(genAgent.getId());
+		expendPayService.insert(expendPay);
+		//插入被充值代理商充值记录
+		WasRechargeHistory rechargeHistory = new WasRechargeHistory();
+		rechargeHistory.setOperateBy(principal.toString());
+		//充值单号=R+时间戳(13位)
+		BigDecimal decimal = new BigDecimal("0");
+		rechargeHistory.setRechargeNo("R"+OrderNumberUtils.OrderNumber());
+		rechargeHistory.setReceivedUserId(sysuser.getId());
+		rechargeHistory.setRemarks(sysuser.getRemarks());
+		rechargeHistory.setCreateDate(date);
+		rechargeHistory.setCashRecharge(cashPledge.subtract(secAgent.getCashPledge()));
+		rechargeHistory.setHardwareRecharge(decimal);
+		rechargeHistory.setPublicRecharge(decimal);
+		rechargeHistory.setMinaRecharge(decimal);
+		rechargeHistory.setVipRecharge(decimal);
+		rechargeHistory.setOperateBy(genAgent.getId());
+		WasExpendPay wasExpendPay = expendPayService.get(expendPay);
+		rechargeHistory.setExpendPayId(wasExpendPay.getExpendPayId());
+		rechargeHistoryService.insert(rechargeHistory);
+		
+		//更新被充值代理商押金账户
+		secAgent.setCashPledge(cashPledge);
+		secAgent.setUpdate_by(principal.toString());
+		secAgent.setUpdate_date(date);
+		isSuccessA = MoneyOperation.getInstance().moneyOperation(totalMoney,decimal,decimal,decimal,decimal,sysuser.getId(), operationA);
+		//Integer resultA = wasSysUserService.updateAccount(secAgent);
+		
+		//更新充值代理商各个账户
+		genAgent.setHardwareAccount(genHardware);
+		genAgent.setPublicAccount(genPublic);
+		genAgent.setMinaAccount(genMina);
+		genAgent.setVipAccount(genVip);
+		genAgent.setUpdate_by(principal.toString());
+		genAgent.setUpdate_date(date);
+		isSuccessB = MoneyOperation.getInstance().moneyOperation(decimal,publicMoney,minaMoney,hardwareMoney,vipMoney,genAgent.getId(), operationB);
+		//Integer resultB = wasSysUserService.updateAccount(genAgent);
+		
+		//记录更新是否成功
+		if(isSuccessA.equals(str) && isSuccessB.equals(str)) {
+			result  = 1;
+		}else{
+			result  = 0;
+		}
+		return result;
+	
+	}
+	/**
+	 * 总代给代理商充值硬件，小程序，公众号
+	 * @throws ParseException 
+	 */
+	@ResponseBody
+	@RequestMapping(value = {"updateAccountCharge"})
+	public Integer updateAccountCharge( WasSysUser sysuser,BigDecimal price,String sign,String remarks,HttpServletResponse response, Model model) throws ParseException {
+		String operationA ="充值";
+		String operationB ="消费";
+		String str ="操作成功";
+		Integer result;
+		String isSuccessA = null;
+		String isSuccessB = null;
+		BigDecimal vipMoney = sysuser.getVipAccount();
+		BigDecimal totalMoney = price.add(vipMoney);
+		//被充值代理商secAgent
+		WasSysUser secAgent  = wasSysUserService.get(sysuser.getId());
+		
+		//充值代理商genAgent
+		Principal principal = UserUtils.getPrincipal();
+		WasSysUser genAgent = wasSysUserService.get(principal.toString());
+		
+		//被充值代理商各账户余额
+		BigDecimal secHardware = secAgent.getHardwareAccount();
+		BigDecimal secPublic  = secAgent.getPublicAccount();
+		BigDecimal secMina = secAgent.getMinaAccount();
+		//充值代理商各账户余额
+		BigDecimal genHardware = genAgent.getHardwareAccount();
+		BigDecimal genPublic = genAgent.getPublicAccount();
+		BigDecimal genMina =  genAgent.getMinaAccount();
+		BigDecimal genVip = genAgent.getVipAccount();
+		BigDecimal genHardwareExpend = genAgent.getHardwareExpend();
+		BigDecimal genPublicExpend = genAgent.getPublicExpend();
+		BigDecimal genMinaExpend =  genAgent.getMinaExpend();
+		BigDecimal genVipExpend =  genAgent.getVipExpend();
+		
+		WasRechargeHistory rechargeHistory = new WasRechargeHistory();
+		WasExpendPay expendPay = new WasExpendPay();
+		Date date = new Date();
+		BigDecimal decimal = new BigDecimal("0");
+		//标识充值方式
+		String hardwareName = "hardwareAccount";
+		String publicName = "publicAccount";
+		String minaName = "minaAccount";
+		if(sign.equals(hardwareName)) {	
+			genAgent.setHardwareAccount(genHardware.subtract(price));
+			genAgent.setVipAccount(genVip.subtract(vipMoney));
+			genAgent.setHardwareExpend(genHardwareExpend.add(price));
+			genAgent.setVipExpend(genVipExpend.add(vipMoney));
+			secAgent.setHardwareAccount(secHardware.add(price).add(vipMoney));
+			isSuccessB = MoneyOperation.getInstance().moneyOperation(decimal,decimal,decimal,price,vipMoney,genAgent.getId(), operationB);
+			isSuccessA = MoneyOperation.getInstance().moneyOperation(decimal,totalMoney,decimal,decimal,decimal,sysuser.getId(), operationA);
+			rechargeHistory.setHardwareRecharge(price);
+			expendPay.setHardwareExpend(price);
+		}else {
+			rechargeHistory.setHardwareRecharge(decimal);
+			expendPay.setHardwareExpend(decimal);
+		}
+		if(sign.equals(publicName) ) {	
+			genAgent.setPublicAccount(genPublic.subtract(price));
+			genAgent.setVipAccount(genVip.subtract(vipMoney));
+			genAgent.setPublicExpend(genPublicExpend.add(price));
+			genAgent.setVipExpend(genVipExpend.add(vipMoney));
+			secAgent.setPublicAccount(secPublic.add(price).add(vipMoney));
+			isSuccessB = MoneyOperation.getInstance().moneyOperation(decimal,price,decimal,decimal,vipMoney,genAgent.getId(), operationB);
+			isSuccessA = MoneyOperation.getInstance().moneyOperation(decimal,totalMoney,decimal,decimal,decimal,sysuser.getId(), operationA);
+			rechargeHistory.setPublicRecharge(price);
+			expendPay.setPublicExpend(price);
+		}else {
+			rechargeHistory.setPublicRecharge(decimal);
+			expendPay.setPublicExpend(decimal);
+		}
+		if(sign.equals(minaName)) {	
+			genAgent.setMinaAccount(genMina.subtract(price));
+			genAgent.setVipAccount(genVip.subtract(vipMoney));
+			genAgent.setMinaExpend(genMinaExpend.add(price));
+			genAgent.setVipExpend(genVipExpend.add(vipMoney));
+			secAgent.setMinaAccount(secMina.add(price).add(vipMoney));
+			isSuccessB = MoneyOperation.getInstance().moneyOperation(decimal,decimal,price,decimal,vipMoney,genAgent.getId(), operationB);
+			isSuccessA = MoneyOperation.getInstance().moneyOperation(decimal,totalMoney,decimal,decimal,decimal,sysuser.getId(), operationA);
+			rechargeHistory.setMinaRecharge(price);
+			expendPay.setMinaExpend(price);
+		}else {
+			rechargeHistory.setMinaRecharge(decimal);
+			expendPay.setMinaExpend(decimal);
+		}
+		secAgent.setUpdate_by(principal.toString());
+		secAgent.setUpdate_date(date);
+		genAgent.setUpdate_by(principal.toString());
+		genAgent.setUpdate_date(date);
+		//更新代理商记录
+		//Integer resultA = wasSysUserService.updateAccount(genAgent);
+		//Integer resultB = wasSysUserService.updateAccount(secAgent);
+		//插入总代充值消费记录
+		expendPay.setOrderNo("EP"+OrderNumberUtils.OrderNumber());
+		expendPay.setUserId(genAgent.getId());
+		expendPay.setBehavior("总代充值");
+		expendPay.setPayMoney(price.add(vipMoney));
+		expendPay.setVipExpend(vipMoney);
+		expendPay.setReceivedUserId(sysuser.getId());
+		expendPay.setRemarks(remarks);
+		expendPay.setCreateDate(date);
+		expendPay.setCreateId(genAgent.getId());
+		expendPayService.insert(expendPay);
+		//插入充值记录
+		//充值单号=R+时间戳(13位)
+		rechargeHistory.setOperateBy(principal.toString());
+		rechargeHistory.setRechargeNo("R"+OrderNumberUtils.OrderNumber());
+		rechargeHistory.setReceivedUserId(sysuser.getId());
+		rechargeHistory.setCashRecharge(decimal);
+		rechargeHistory.setVipRecharge(vipMoney);
+		rechargeHistory.setRemarks(remarks);
+		rechargeHistory.setCreateDate(date);
+		WasExpendPay wasExpendPay = expendPayService.get(expendPay);
+		rechargeHistory.setExpendPayId(wasExpendPay.getExpendPayId());
+		rechargeHistoryService.insert(rechargeHistory);
+		
+		//记录更新是否成功
+		if(isSuccessA.equals(str) && isSuccessB.equals(str)) {
+			result  = 1;
+		}else{
+			result  = 0;
+		}
+		return result;
+		
+	}
+	/**
+	 * 总代给代理商充值vip账户
+	 * @throws ParseException 
+	 */
+	@ResponseBody
+	@RequestMapping(value = {"updateVipCharge"})
+	public Integer updateVipCharge( WasSysUser sysuser,HttpServletResponse response, Model model) throws ParseException {
+		String operationA ="充值";
+		String operationB ="消费";
+		String str ="操作成功";
+		Integer result;
+		String isSuccessA = null;
+		String isSuccessB = null;
+		BigDecimal vipMoney = sysuser.getVipAccount();
+		//被充值代理商secAgent
+		WasSysUser secAgent  = wasSysUserService.get(sysuser.getId());
+		BigDecimal secVip = secAgent.getVipAccount();
+		
+		//充值代理商genAgent
+		Principal principal = UserUtils.getPrincipal();
+		WasSysUser genAgent = wasSysUserService.get(principal.toString());
+		BigDecimal genVip = genAgent.getVipAccount();
+		BigDecimal genVipExpend = genAgent.getVipExpend();
+		
+		WasRechargeHistory rechargeHistory = new WasRechargeHistory();
+		WasExpendPay expendPay = new WasExpendPay();
+		Date date = new Date();
+		BigDecimal decimal = new BigDecimal("0");
+		
+		//插入总代充值消费记录
+		expendPay.setOrderNo("EP"+OrderNumberUtils.OrderNumber());
+		expendPay.setUserId(genAgent.getId());
+		expendPay.setBehavior("总代充值");
+		expendPay.setPayMoney(vipMoney);
+		expendPay.setHardwareExpend(decimal);
+		expendPay.setPublicExpend(decimal);
+		expendPay.setMinaExpend(decimal);
+		expendPay.setVipExpend(vipMoney);
+		expendPay.setReceivedUserId(secAgent.getId());
+		expendPay.setRemarks(sysuser.getRemarks());
+		expendPay.setCreateDate(date);
+		expendPay.setCreateId(genAgent.getId());
+		expendPayService.insert(expendPay);
+		//插入充值记录
+		//充值单号=R+时间戳(13位)
+		rechargeHistory.setOperateBy(principal.toString());
+		rechargeHistory.setRechargeNo("R"+OrderNumberUtils.OrderNumber());
+		rechargeHistory.setReceivedUserId(sysuser.getId());
+		rechargeHistory.setCashRecharge(decimal);
+		rechargeHistory.setPublicRecharge(decimal);
+		rechargeHistory.setHardwareRecharge(decimal);
+		rechargeHistory.setMinaRecharge(decimal);
+		rechargeHistory.setVipRecharge(vipMoney);
+		rechargeHistory.setRemarks(sysuser.getRemarks());
+		rechargeHistory.setCreateDate(date);
+		WasExpendPay wasExpendPay = expendPayService.get(expendPay);
+		rechargeHistory.setExpendPayId(wasExpendPay.getExpendPayId());
+		rechargeHistoryService.insert(rechargeHistory);
+		
+		
+		secAgent.setVipAccount(secVip.add(vipMoney));
+		secAgent.setUpdate_by(principal.toString());
+		secAgent.setUpdate_date(date);
+		genAgent.setVipAccount(genVip.subtract(vipMoney));
+		genAgent.setVipExpend(genVipExpend.add(vipMoney));
+		genAgent.setUpdate_by(principal.toString());
+		genAgent.setUpdate_date(date);
+		//更新代理商记录
+		isSuccessB = MoneyOperation.getInstance().moneyOperation(decimal,decimal,decimal,decimal,vipMoney,genAgent.getId(), operationB);
+		isSuccessA = MoneyOperation.getInstance().moneyOperation(decimal,decimal,decimal,decimal,vipMoney,sysuser.getId(), operationA);
+		//Integer resultA = wasSysUserService.updateAccount(genAgent);
+		//Integer resultB = wasSysUserService.updateAccount(secAgent);
+		//记录更新是否成功
+		if(isSuccessA.equals(str) && isSuccessB.equals(str)) {
+			result  = 1;
+		}else{
+			result  = 0;
+		}
+		return result;
+	}
+	/**
+	 * 财务退款
+	 * @throws ParseException 
+	 */
+	@RequiresPermissions("agency:wasSysUser:drawback")
+	@ResponseBody
+	@RequestMapping(value = {"updateDrawBackAccount"})
+	public Integer updateDrawBackAccount( WasSysUser sysuser,HttpServletResponse response, Model model) throws ParseException {
+		String operation ="充值";
+		String str ="操作成功";
+		Integer result;
+		String isSuccess = null;
+		BigDecimal decimal = new BigDecimal("0");
+		BigDecimal hardwareMoney = sysuser.getHardwareAccount();
+		BigDecimal publicMoney = sysuser.getPublicAccount();
+		BigDecimal minaMoney = sysuser.getMinaAccount();
+		BigDecimal vipMoney = sysuser.getVipAccount();
+		WasSysUser agent  = wasSysUserService.get(sysuser.getId());
+		Principal principal = UserUtils.getPrincipal();
+		
+		BigDecimal agentHardwareMoney  = agent.getHardwareAccount().add(hardwareMoney);
+		BigDecimal agentPublicMoney = agent.getPublicAccount().add(publicMoney);
+		BigDecimal agentMinaMoney = agent.getMinaAccount().add(minaMoney);
+		BigDecimal agentVipMoney = agent.getVipAccount().add(vipMoney);
+		Date date = new Date();
+		agent.setHardwareAccount(agentHardwareMoney);
+		agent.setPublicAccount(agentPublicMoney);
+		agent.setMinaAccount(agentMinaMoney);
+		agent.setVipAccount(agentVipMoney);
+		agent.setUpdate_by(principal.toString());
+		agent.setUpdate_date(date);
+		
+		//Integer result = wasSysUserService.updateAccount(agent);
+		isSuccess = MoneyOperation.getInstance().moneyOperation(decimal,publicMoney,minaMoney,hardwareMoney,vipMoney,sysuser.getId(), operation);
+		
+		if(isSuccess.equals(str)) {
+			result  = 1;
+		}else{
+			result  = 0;
+		}
+		return result;
+	}
+	/**
+	 * 代理商逻辑删除
+	 */
+	@RequiresPermissions("agency:wasSysUser:del")
+	@ResponseBody
+	@RequestMapping(value = {"updateDelState"})
+	public Integer updateDelState(WasSysUser sysuser,HttpServletResponse response, Model model)  {
+		 List<WasSysUser> listSysUsers = wasSysUserService.findList(sysuser);
+		 WasTerminalUser  wasTerminalUser =  new WasTerminalUser();
+		 wasTerminalUser.setParentId(sysuser.getId());
+		 List<WasTerminalUser> listTerminalUsers = wasTerminalUserService.findList(wasTerminalUser);
+		 Integer delState ;
+		 if(listSysUsers.size() != 0) {
+			delState = 0;
+		 }else if (listTerminalUsers.size() != 0 ){
+			 delState = 2;
+		 }else {
+			 Date date = new Date();
+			 Principal principal = UserUtils.getPrincipal();
+			 sysuser.setUpdate_date(date);
+			 sysuser.setUpdate_by(principal.toString());
+			 delState = wasSysUserService.updateDel(sysuser);
+		 }
+		return delState ;
+	
+	}
+	/**
+	 * 代理商下单
+	 */
+	@RequiresPermissions("agency:wasSysUser:order")
+	@RequestMapping(value = {"getOrderAgent"})
+	public String getOrderAgent( WasSysUser sysuser, HttpServletResponse response, Model model) {
+		WasSysUser agent= wasSysUserService.get(sysuser.getId());
+		model.addAttribute("agent",agent);
+		return "modules/agentsystem/agency/wasAgentOrder";
+	}
+	/**
+	 * 代理商转移
+	 */
+	@RequiresPermissions("agency:wasSysUser:transfer")
+	@RequestMapping(value = {"getTransferAgent"})
+	public String getTransferAgent( WasSysUser sysuser, HttpServletResponse response, Model model) {
+		WasSysUser agent= wasSysUserService.get(sysuser.getId());
+		BigDecimal multiplicand = new BigDecimal(10);
+		BigDecimal packageDiscount = agent.getPackageDiscount();
+		agent.setPackageDiscount(packageDiscount.multiply(multiplicand));
+		BigDecimal  publicDiscount =  agent.getPublicDiscount();
+		agent.setPublicDiscount(publicDiscount.multiply(multiplicand));
+		BigDecimal minaDiscount = agent.getMinaDiscount();
+		agent.setMinaDiscount(minaDiscount.multiply(multiplicand));
+		model.addAttribute("agent",agent);
+		List<WasSysUser> listAgents = wasSysUserService.findAllLowerAgent(sysuser);
+		model.addAttribute("agentList",listAgents);
+		return "modules/agentsystem/agency/wasTransferAgent";
+	}
+	/**
+	 * 硬件，小程序，公众号转移
+	 * @throws ParseException 
+	 */
+	@ResponseBody
+	@RequestMapping(value = {"updateTransferAccount"})
+	public Integer updateTransferAccount(WasSysUser sysuser,String sign,String redoundId, BigDecimal price,BigDecimal cashPledge,HttpServletResponse response, Model model) throws ParseException {
+		String operationA ="充值";
+		String operationB ="消费";
+		String str ="操作成功";
+		Integer result;
+		String isSuccessA = null;
+		String isSuccessB = null;
+		BigDecimal totalMoney = price.add(cashPledge);
+		WasSysUser genAgent = wasSysUserService.get(sysuser.getId());
+		BigDecimal genHardware = genAgent.getHardwareAccount();
+		BigDecimal genPublic = genAgent.getPublicAccount();
+		BigDecimal genMina =  genAgent.getMinaAccount();
+		BigDecimal genHardwareExpend = genAgent.getHardwareExpend();
+		BigDecimal genPublicExpend = genAgent.getPublicExpend();
+		BigDecimal genMinaExpend =  genAgent.getMinaExpend();
+		WasSysUser secAgent = wasSysUserService.get(redoundId);
+		BigDecimal secCashPledge = secAgent.getCashPledge();
+		BigDecimal secHardware = secAgent.getHardwareAccount();
+		BigDecimal secPublic  = secAgent.getPublicAccount();
+		BigDecimal secMina = secAgent.getMinaAccount();
+		WasRechargeHistory rechargeHistory = new WasRechargeHistory();
+		WasExpendPay expendPay = new WasExpendPay();
+		Date date = new Date();
+		BigDecimal decimal = new BigDecimal("0");
+		//标识是那种充值方式
+		String hardwareName = "hardwareAccount";
+		String publicName = "publicAccount";
+		String minaName = "minaAccount";
+		if(sign.equals(hardwareName)) {
+			genHardware = genHardware.subtract(cashPledge).subtract(price);
+			genAgent.setHardwareAccount(genHardware);
+			genHardwareExpend = genHardwareExpend.add(price).add(cashPledge);
+			genAgent.setHardwareExpend(genHardwareExpend);	
+			secCashPledge = secCashPledge.add(cashPledge);
+			secHardware = secHardware.add(price);
+			secAgent.setCashPledge(secCashPledge);
+			secAgent.setHardwareAccount(secHardware);
+			isSuccessB = MoneyOperation.getInstance().moneyOperation(decimal,decimal,decimal,totalMoney,decimal,genAgent.getId(), operationB);
+			isSuccessA = MoneyOperation.getInstance().moneyOperation(cashPledge,decimal,decimal,price,decimal,sysuser.getId(), operationA);
+			rechargeHistory.setHardwareRecharge(price);
+			rechargeHistory.setCashRecharge(cashPledge);
+			expendPay.setHardwareExpend(price.add(cashPledge));
+		}else {
+			rechargeHistory.setHardwareRecharge(decimal);
+			expendPay.setHardwareExpend(decimal);
+		}
+		if(sign.equals(publicName) ) {
+			genPublic = genPublic.subtract(cashPledge).subtract(price);
+			genAgent.setPublicAccount(genPublic);
+			genPublicExpend = genPublicExpend.add(price).add(cashPledge);
+			genAgent.setPublicExpend(genPublicExpend);
+			secCashPledge = secCashPledge.add(cashPledge);
+			secPublic = secPublic.add(price);
+			secAgent.setCashPledge(secCashPledge);
+			secAgent.setPublicAccount(secPublic);
+			isSuccessB = MoneyOperation.getInstance().moneyOperation(decimal,totalMoney,decimal,decimal,decimal,genAgent.getId(), operationB);
+			isSuccessA = MoneyOperation.getInstance().moneyOperation(cashPledge,price,decimal,decimal,decimal,sysuser.getId(), operationA);
+			rechargeHistory.setCashRecharge(cashPledge);
+			rechargeHistory.setPublicRecharge(price);
+			expendPay.setPublicExpend(price.add(cashPledge));
+		}else{
+			rechargeHistory.setPublicRecharge(decimal);
+			expendPay.setPublicExpend(decimal);
+		}
+		if(sign.equals(minaName)) {
+			genMina = genMina.subtract(cashPledge).subtract(price);
+			genAgent.setMinaAccount(genMina);
+			genMinaExpend = genMinaExpend.add(price).add(cashPledge);
+			genAgent.setMinaExpend(genMinaExpend);
+			secCashPledge = secCashPledge.add(cashPledge);
+			secMina = secMina.add(price);
+			secAgent.setCashPledge(secCashPledge);
+			secAgent.setMinaAccount(secMina);
+			isSuccessB = MoneyOperation.getInstance().moneyOperation(decimal,decimal,totalMoney,decimal,decimal,genAgent.getId(), operationB);
+			isSuccessA = MoneyOperation.getInstance().moneyOperation(cashPledge,decimal,price,decimal,decimal,sysuser.getId(), operationA);
+			rechargeHistory.setCashRecharge(cashPledge);
+			rechargeHistory.setMinaRecharge(price);
+			expendPay.setMinaExpend(price.add(cashPledge));
+		}else {
+			rechargeHistory.setMinaRecharge(decimal);
+			expendPay.setMinaExpend(decimal);
+		}
+		Principal principal = UserUtils.getPrincipal();
+		secAgent.setUpdate_by(principal.toString());
+		secAgent.setUpdate_date(date);
+		genAgent.setUpdate_by(principal.toString());
+		genAgent.setUpdate_date(date);
+		//更新代理商记录
+		///Integer resultA = wasSysUserService.updateAccount(genAgent);
+		//Integer resultB = wasSysUserService.updateAccount(secAgent);
+		//插入总代转移消费记录
+		expendPay.setOrderNo("EP"+OrderNumberUtils.OrderNumber());
+		expendPay.setUserId(genAgent.getId());
+		expendPay.setBehavior("财务转移");
+		expendPay.setPayMoney(price.add(cashPledge));
+		expendPay.setReceivedUserId(redoundId);
+		expendPay.setVipExpend(decimal);
+		expendPay.setRemarks(sysuser.getRemarks());
+		expendPay.setCreateDate(date);
+		expendPay.setCreateId(principal.toString());
+		expendPayService.insert(expendPay);
+		//插入转移充值记录
+		//充值单号=R+时间戳(13位)
+		rechargeHistory.setOperateBy(principal.toString());
+		rechargeHistory.setRechargeNo("R"+OrderNumberUtils.OrderNumber());
+		rechargeHistory.setReceivedUserId(sysuser.getId());
+		rechargeHistory.setVipRecharge(decimal);
+		rechargeHistory.setRemarks(sysuser.getRemarks());
+		rechargeHistory.setCreateDate(date);
+		WasExpendPay wasExpendPay = expendPayService.get(expendPay);
+		rechargeHistory.setExpendPayId(wasExpendPay.getExpendPayId());
+		rechargeHistoryService.insert(rechargeHistory);
+		
+		//记录更新是否成功
+		if(isSuccessA.equals(str) && isSuccessB.equals(str)) {
+			result  = 1;
+		}else{
+			result  = 0;
+		}
+		return result;		
+	}
+	/**
+	 * VIP转移
+	 * @throws ParseException 
+	 */
+	@Transactional(readOnly = false)
+	@ResponseBody
+	@RequestMapping(value = {"updateTransferVipAccount"})
+	public Integer updateTransferVipAccount(WasSysUser sysuser,String redoundId,HttpServletResponse response, Model model) throws ParseException {
+		Date date = new Date();
+		BigDecimal decimal = new BigDecimal("0");
+		String operationA ="充值";
+		String operationB ="消费";
+		String str ="操作成功";
+		Integer result;
+		String isSuccessA = null;
+		String isSuccessB = null;
+		Principal principal = UserUtils.getPrincipal();
+		BigDecimal cashPledgeAccount = sysuser.getCashPledge();
+		BigDecimal hardwareAccount = sysuser.getHardwareAccount();
+		BigDecimal publicAccount  = sysuser.getPublicAccount();
+		BigDecimal minaAccount = sysuser.getMinaAccount();
+		BigDecimal vipAccount = sysuser.getVipAccount();
+		BigDecimal totalMoney = cashPledgeAccount.add(hardwareAccount).add(publicAccount).add(minaAccount).add(vipAccount);
+		
+		WasSysUser genAgent = wasSysUserService.get(sysuser.getId());
+		BigDecimal genVipAccount = genAgent.getVipAccount();
+		BigDecimal genVipExpend =  genAgent.getVipExpend();
+		genVipAccount = genVipAccount.subtract(cashPledgeAccount).subtract(hardwareAccount).subtract(publicAccount).subtract(minaAccount).subtract(vipAccount);
+		genAgent.setVipAccount(genVipAccount);
+		genVipExpend = genVipExpend.add(cashPledgeAccount).add(hardwareAccount).add(publicAccount).add(minaAccount).add(vipAccount);
+		genAgent.setVipExpend(genVipExpend);
+		genAgent.setUpdate_by(principal.toString());
+		genAgent.setUpdate_date(date);
+		//Integer resultA = wasSysUserService.updateAccount(genAgent);
+		isSuccessB = MoneyOperation.getInstance().moneyOperation(decimal,decimal,decimal,decimal,totalMoney,genAgent.getId(), operationB);
+		
+		//Integer  test =  12/0;
+		
+		WasSysUser secAgent = wasSysUserService.get(redoundId);
+		BigDecimal secCashPledge = secAgent.getCashPledge();
+		secAgent.setCashPledge(secCashPledge.add(cashPledgeAccount));
+		BigDecimal secHardware = secAgent.getHardwareAccount();
+		secAgent.setHardwareAccount(secHardware.add(hardwareAccount));
+		BigDecimal secPublic  = secAgent.getPublicAccount();
+		secAgent.setPublicAccount(secPublic.add(publicAccount));
+		BigDecimal secMina = secAgent.getMinaAccount();
+		secAgent.setMinaAccount(secMina.add(minaAccount));
+		BigDecimal secVip = secAgent.getVipAccount();
+		secAgent.setVipAccount(secVip.add(vipAccount));
+		secAgent.setUpdate_by(principal.toString());
+		secAgent.setUpdate_date(date);
+		//Integer resultB = wasSysUserService.updateAccount(secAgent);
+		isSuccessA = MoneyOperation.getInstance().moneyOperation(cashPledgeAccount,publicAccount,minaAccount,hardwareAccount,vipAccount,sysuser.getId(), operationA);
+		
+		WasExpendPay expendPay = new WasExpendPay();
+		expendPay.setOrderNo("EP"+OrderNumberUtils.OrderNumber());
+		expendPay.setUserId(genAgent.getId());
+		expendPay.setBehavior("财务转移");
+		expendPay.setPayMoney(cashPledgeAccount.add(hardwareAccount).add(publicAccount).add(minaAccount).add(vipAccount));
+		expendPay.setReceivedUserId(redoundId);
+		expendPay.setHardwareExpend(decimal);
+		expendPay.setPublicExpend(decimal);
+		expendPay.setMinaExpend(decimal);
+		expendPay.setVipExpend(cashPledgeAccount.add(hardwareAccount).add(publicAccount).add(minaAccount).add(vipAccount));
+		expendPay.setRemarks(sysuser.getRemarks());
+		expendPay.setCreateDate(date);
+		expendPay.setCreateId(principal.toString());
+		expendPayService.insert(expendPay);
+		
+		WasRechargeHistory rechargeHistory = new WasRechargeHistory();
+		rechargeHistory.setOperateBy(principal.toString());
+		rechargeHistory.setRechargeNo("R"+OrderNumberUtils.OrderNumber());
+		rechargeHistory.setReceivedUserId(sysuser.getId());
+		rechargeHistory.setCashRecharge(cashPledgeAccount);
+		rechargeHistory.setHardwareRecharge(hardwareAccount);
+		rechargeHistory.setPublicRecharge(publicAccount);
+		rechargeHistory.setMinaRecharge(minaAccount);
+		rechargeHistory.setVipRecharge(vipAccount);
+		rechargeHistory.setRemarks(sysuser.getRemarks());
+		rechargeHistory.setCreateDate(date);
+		WasExpendPay wasExpendPay = expendPayService.get(expendPay);
+		rechargeHistory.setExpendPayId(wasExpendPay.getExpendPayId());
+		rechargeHistoryService.insert(rechargeHistory);
+		//记录更新是否成功
+		if(isSuccessA.equals(str) && isSuccessB.equals(str)) {
+			result  = 1;
+		}else{
+			result  = 0;
+		}
+		return result;
+		
+	}
+}

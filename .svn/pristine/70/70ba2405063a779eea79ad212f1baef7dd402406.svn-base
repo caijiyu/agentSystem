@@ -1,0 +1,228 @@
+package com.jeeplus.modules.agentSystem.agency.web;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentSystem.agency.entity.WasConsumeSynthesis;
+import com.jeeplus.modules.agentSystem.agency.entity.WasExpendPay;
+import com.jeeplus.modules.agentSystem.agency.entity.WasHardwarePurchase;
+import com.jeeplus.modules.agentSystem.agency.entity.WasInvoiceApplication;
+import com.jeeplus.modules.agentSystem.agency.entity.WasPolicyPurchase;
+import com.jeeplus.modules.agentSystem.agency.entity.WasRechargeHistory;
+import com.jeeplus.modules.agentSystem.agency.service.WasConsumeSynthesisService;
+import com.jeeplus.modules.agentSystem.agency.service.WasExpendPayService;
+import com.jeeplus.modules.agentSystem.agency.service.WasHardwarePurchaseService;
+import com.jeeplus.modules.agentSystem.agency.service.WasInvoiceApplicationService;
+import com.jeeplus.modules.agentSystem.agency.service.WasPolicyPurchaseService;
+import com.jeeplus.modules.agentSystem.agency.service.WasRechargeHistoryService;
+
+/**
+ * 记录查看Controller
+ * @author SZP
+ * @version 2017-10-08
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agentSystem/RecordExamine")
+public class WasRecordExamineController  extends BaseController {
+
+	@Autowired
+	private WasRechargeHistoryService rechargeHistoryService;
+	@Autowired
+	private WasConsumeSynthesisService consumeSynthesisService;
+	@Autowired
+	private WasInvoiceApplicationService wasInvoiceApplicationService;
+	
+	@Autowired
+	WasPolicyPurchaseService policyPurchaseService;
+	@Autowired
+	private WasHardwarePurchaseService hardwarePurchaseService;
+	@Autowired
+	WasExpendPayService expendPayService;
+	
+	
+	/**
+	 * 记录查看页面
+	 */
+	/*@RequiresPermissions("agentSystem:wasAgentRecord:look")*/
+	@RequestMapping(value = {"list", ""})
+	public String list(WasConsumeSynthesis consumeSynthesis,WasRechargeHistory rechargeHistory,
+			WasInvoiceApplication wasInvoiceApplication, HttpServletRequest request, HttpServletResponse 
+			response, Model model, String companyName) {
+		
+		Page<WasRechargeHistory> pageA = rechargeHistoryService.findPage(new Page<WasRechargeHistory>(request, response), rechargeHistory);
+		//遍历pageA.getList()集合
+		for(WasRechargeHistory rh : pageA.getList()){
+			BigDecimal amount = new BigDecimal("0.00");
+			if(rh.getPublicRecharge().compareTo(BigDecimal.ZERO) != 0){//判断此条充值记录，公众号中有没充值金额
+				amount = amount.add(rh.getPublicRecharge());//计算充值总额
+				rh.setRechargeDirection("公众号");
+			}
+			if(rh.getHardwareRecharge().compareTo(BigDecimal.ZERO) != 0){//判断此条充值记录，硬件中有没充值金额
+				amount = amount.add(rh.getHardwareRecharge());//计算充值总额
+				if(rh.getRechargeDirection() != null){//判断充值去向是否为null
+					rh.setRechargeDirection(rh.getRechargeDirection()+"，硬件");
+				}else{
+					rh.setRechargeDirection("硬件");
+				}
+			}
+			if(rh.getMinaRecharge().compareTo(BigDecimal.ZERO) != 0){//判断此条充值记录，小程序中有没充值金额
+				amount = amount.add(rh.getMinaRecharge());//计算充值总额
+				if(rh.getRechargeDirection() != null){//判断充值去向是否为null
+					rh.setRechargeDirection(rh.getRechargeDirection()+"，小程序");
+				}else{
+					rh.setRechargeDirection("小程序");
+				}
+			}
+			if(rh.getVipRecharge().compareTo(BigDecimal.ZERO) != 0){//判断此条充值记录，VIP中有没充值金额
+				amount = amount.add(rh.getVipRecharge());//计算充值总额
+				if(rh.getRechargeDirection() != null){//判断充值去向是否为null
+					rh.setRechargeDirection(rh.getRechargeDirection()+"，VIP");
+				}else{
+					rh.setRechargeDirection("VIP");
+				}
+			}
+			if(rh.getCashRecharge().compareTo(BigDecimal.ZERO) != 0){//判断此条充值记录，押金中有没充值金额
+				amount = amount.add(rh.getCashRecharge());//计算充值总额
+				if(rh.getRechargeDirection() != null){//判断充值去向是否为null
+					rh.setRechargeDirection(rh.getRechargeDirection()+"，押金");
+				}else{
+					rh.setRechargeDirection("押金");
+				}
+			}
+			
+			rh.setAmount(amount);//将最后所得的充值总额放入此条充值记录对象中
+		}
+		pageA.setFuncName("pageA");
+		model.addAttribute("receivedUserId",rechargeHistory.getReceivedUserId());
+		model.addAttribute("companyName",companyName);
+		model.addAttribute("pageA", pageA);
+		
+		consumeSynthesis.setUserId(rechargeHistory.getReceivedUserId());
+		Page<WasConsumeSynthesis> pageB = consumeSynthesisService.findPage(new Page<WasConsumeSynthesis>(request, response), consumeSynthesis);
+		pageB.setFuncName("pageB");
+		model.addAttribute("pageB", pageB);
+		
+		wasInvoiceApplication.setApplyBy(rechargeHistory.getReceivedUserId());
+		System.err.println(wasInvoiceApplication);
+		Page<WasInvoiceApplication> pageC = wasInvoiceApplicationService.findPage(new Page<WasInvoiceApplication>(request, response), wasInvoiceApplication); 
+		pageC.setFuncName("pageC");
+		model.addAttribute("pageC", pageC);
+		
+		return "modules/agentSystem/agency/wasRecordExamine";
+	}
+	
+	/**
+	 * 代理商首页消耗折线图
+	 */
+	@ResponseBody
+	@RequestMapping(value = "homePageList")
+	public List<List> homePageList(WasPolicyPurchase wasPolicyPurchase,WasHardwarePurchase wasHardwarePurchase
+			,WasExpendPay wasExpendPay,HttpServletRequest request, HttpServletResponse response) {
+		
+		
+		List<BigDecimal> publicList = new ArrayList<BigDecimal>();
+		List<BigDecimal> minaList = new ArrayList<BigDecimal>();
+		List<BigDecimal> hardwareList = new ArrayList<BigDecimal>();
+		List<BigDecimal> vipList = new ArrayList<BigDecimal>();
+		
+		Calendar today = Calendar.getInstance();//获取当前日期
+		Calendar endToday = Calendar.getInstance();//获取当前日期
+		int lastDay = today.getActualMaximum(Calendar.DAY_OF_MONTH);//获取当月最后一天
+		
+		
+		
+		int count = today.get(Calendar.DAY_OF_MONTH);
+		for(int i = 0;i <= count;i += 4){
+			BigDecimal publicExpend = new BigDecimal("0.00");//公众号消耗
+			BigDecimal minaExpend = new BigDecimal("0.00");//小程序消耗
+			BigDecimal hardwareExpend = new BigDecimal("0.00");//硬件消耗
+			BigDecimal vipExpend = new BigDecimal("0.00");//VIP消耗
+			today.set(Calendar.DAY_OF_MONTH,i+1);//设置查询开始日期
+			today.set(Calendar.HOUR_OF_DAY, 0);
+			today.set(Calendar.MINUTE, 0);
+			today.set(Calendar.SECOND, 0);
+			today.set(Calendar.MILLISECOND, 0);
+			java.util.Date startDate = today.getTime();//转换为date型
+			//将日期分别放入对象中
+			wasPolicyPurchase.setBeginDate(startDate);
+			wasHardwarePurchase.setBeginDate(startDate);
+			wasExpendPay.setBeginDate(startDate);
+			
+			//=================================================
+			endToday.set(Calendar.DAY_OF_MONTH,i+4);//设置查询结束日期
+			if(endToday.get(Calendar.DAY_OF_MONTH) >= lastDay){
+				
+				endToday.set(Calendar.DAY_OF_MONTH,i+lastDay);//设置当前日期为最后一天的23时59分59秒，即本月的最后一天最后一刻
+				
+			}
+			
+			endToday.set(Calendar.HOUR_OF_DAY, 23);
+			endToday.set(Calendar.MINUTE, 59);
+			endToday.set(Calendar.SECOND, 59);
+			endToday.set(Calendar.MILLISECOND, 999);
+			java.util.Date endDate = endToday.getTime();//转换为date型
+			
+			//将日期分别放入对象中
+			wasPolicyPurchase.setOverDate(endDate);
+			wasHardwarePurchase.setEndDate(endDate);
+			wasExpendPay.setEndDate(endDate);
+			
+			//调用page的方法返回结果集
+			Page<WasPolicyPurchase> pageA = policyPurchaseService.findPage(new Page<WasPolicyPurchase>(request, response), wasPolicyPurchase);
+			Page<WasHardwarePurchase> pageB = hardwarePurchaseService.findPage(new Page<WasHardwarePurchase>(request, response), wasHardwarePurchase);
+			Page<WasExpendPay> pageC = expendPayService.findPage(new Page<WasExpendPay>(request, response), wasExpendPay);
+			//遍历集合分别把公众号消耗、硬件消耗、小程序消耗、VIP消耗转换为double并累计相加
+			for(WasPolicyPurchase policyPurchase : pageA.getList()) {//.doubleValue()
+				publicExpend = policyPurchase.getPublicExpend().add(publicExpend);
+				minaExpend = policyPurchase.getMinaExpend().add(minaExpend);
+				hardwareExpend = policyPurchase.getHardwareExpend().add(hardwareExpend);
+				vipExpend = policyPurchase.getVipExpend().add(vipExpend);
+				}
+			for(WasHardwarePurchase hardwarePurchase : pageB.getList()){
+				publicExpend = hardwarePurchase.getPublicExpend().add(publicExpend);
+				minaExpend = hardwarePurchase.getMinaExpend().add(minaExpend);
+				hardwareExpend = hardwarePurchase.getHardwareExpend().add(hardwareExpend);
+				vipExpend = hardwarePurchase.getVipExpend().add(vipExpend);
+			}
+			for(WasExpendPay expendPay : pageC.getList()){
+				publicExpend = expendPay.getPublicExpend().add(publicExpend);
+				minaExpend = expendPay.getMinaExpend().add(minaExpend);
+				hardwareExpend = expendPay.getHardwareExpend().add(hardwareExpend);
+				vipExpend = expendPay.getVipExpend().add(vipExpend);
+			}
+			//把同一天的公众号消耗、硬件消耗、小程序消耗、VIP消耗分别放入各自的集合中
+			publicList.add(publicExpend);
+			minaList.add(minaExpend);
+			hardwareList.add(hardwareExpend);
+			vipList.add(vipExpend);
+		}
+		//把公众号消耗、硬件消耗、小程序消耗、VIP消耗的集合放入list返回页面
+		publicList.add(0,new BigDecimal("0"));
+		minaList.add(0,new BigDecimal("0"));
+		hardwareList.add(0,new BigDecimal("0"));
+		vipList.add(0,new BigDecimal("0"));
+		List<List> list = new ArrayList<List>();
+		list.add(publicList);
+		list.add(minaList);
+		list.add(hardwareList);
+		list.add(vipList);
+		
+		return list;
+	}
+	
+}

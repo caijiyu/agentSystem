@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.agency.dao.WasAgentAnsweredDao">
+    <sql id="WasFeedBackcolumns">
+		a.feedbackId AS "feedbackId",                
+		a.type AS "type",                
+		a.description AS "description",        
+		a.phone AS "phone",        
+		a.reply AS "reply",            
+		a.quizBy AS "quizBy",   
+		a.quizDate AS "quizDate",             
+		a.replyBy AS "replyBy",            
+		a.replyDate AS "replyDate",
+		a.replyState AS "replyState",                      
+		a.state AS "state" ,          		             									 
+	</sql>	
+	<sql id="WasFeedBackcolumnsJoins">	
+	</sql>
+	<sql id="WasFeedBackJoins">
+		was_feedback a left join sys_user b on a.quizBy=b.id 
+		left join was_agent_level c on b.agentLevelId = c.agentLevelId
+	</sql>
+	<select id="findList" resultType="WasFeedBack" >
+		SELECT 
+			<include refid="WasFeedBackcolumns"/> b.companyName,c.name
+		FROM 
+			<include refid="WasFeedBackJoins"/>			
+		<where>
+			a.replyState = #{replyState} 
+			
+			<if test="state !=null">
+			 AND a.state = #{state}
+			</if>
+			<if test="flag == 0">
+			<if test="beginDate != null">
+					AND <![CDATA[ a.quizDate >= #{beginDate} ]]>
+			</if>
+			<if test="endDate != null">
+					AND <![CDATA[ a.quizDate <= #{endDate} ]]>
+			</if>
+			<if test="companyName != null">
+					AND b.companyName LIKE 
+						<if test="dbName == 'oracle'">'%'||#{companyName}||'%'</if>
+						<if test="dbName == 'mssql'">'%'+#{companyName}+'%'</if>
+						<if test="dbName == 'mysql'">concat('%',#{companyName},'%')</if>
+			</if>
+			</if>
+			<if test="flag == 1">
+			<if test="beginDateA != null">
+					AND <![CDATA[ a.replyDate >= #{beginDateA} ]]>
+			</if>
+			<if test="endDateA != null">
+					AND <![CDATA[ a.replyDate <= #{endDateA} ]]>
+			</if> 
+			<if test="companyNameA != null">
+					AND b.companyName LIKE 
+						<if test="dbName == 'oracle'">'%'||#{companyNameA}||'%'</if>
+						<if test="dbName == 'mssql'">'%'+#{companyNameA}+'%'</if>
+						<if test="dbName == 'mysql'">concat('%',#{companyNameA},'%')</if>
+			</if>
+			
+			</if>
+			<if test="feedbackId != null and feedbackId !=''">
+			AND	a.feedbackId = #{feedbackId}
+			 </if>				
+		</where>
+		<if test= "flag == 0" >
+		<choose>							
+				<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+					ORDER BY ${page.orderBy}
+				</when>
+				<otherwise> 
+					order by a.quizDate ASC
+            	</otherwise>            	
+		</choose>
+		</if>
+		<if test="flag == 1">	
+		<choose>
+				<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+					ORDER BY ${page.orderBy}
+				</when>
+				<otherwise> 
+					order by a.replyDate DESC
+            	</otherwise>  
+		</choose>
+		</if>			
+	</select>
+	<update id="deleteAll" >
+		UPDATE was_feedback 
+		<trim prefix="set" suffixOverrides=",">
+			<if test="state != null ">state =#{state},</if>
+			<if test="reply != null ">reply =#{reply},</if>
+			<if test="replyState != null ">replyState =#{replyState},</if>
+			<if test="replyDate != null ">replyDate =#{replyDate},</if>
+		</trim>			 
+		<where>
+			<if test="feedbackId != null and feedbackId !=''">
+			AND	feedbackId = #{feedbackId}
+			 </if>
+		</where>
+	</update>
+	
+	
+</mapper>

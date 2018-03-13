@@ -1,0 +1,131 @@
+ 
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">
+					</div> 
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentSystem/terminal/wasTerminalUser/terminalUserRecord" method="post" style="width: 100%" id="searchForm"> 
+							<input name="id" type="hidden" value="1" /> 
+							<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}" /> 
+							<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}" />
+							<button type="button" class="btn waves-effect waves-light btn-info" onclick="search()" style="float: right; margin-left: 15px">搜索</button>
+							<input autocomplete="off" type="text" class="form-control height-control col-4" placeholder="请输入公司名称" name="companyName" value="${wasPolicyPurchase.companyName}" style="float: right;">
+							<div class="form-group col-6" style="margin-bottom: 0px; float: right;">
+								<div class=" input-group input-daterange" id="date-range">
+									<div style="display:inline-block;padding-top: 8px;">添加时间范围：&nbsp;&nbsp;</div>
+									<input value="<fmt:formatDate value="${wasPolicyPurchase.beginDate}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control" placeholder="开始时间" name="beginDate" style="text-align: left;" />
+									<span class="input-group-addon bg-info b-0 text-white height-control addCentreControl">至</span>
+									<input value="<fmt:formatDate value="${wasPolicyPurchase.overDate}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control" placeholder="结束时间" name="overDate" style="text-align: left;" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<table id="contentTable" class="display nowrap table table-hover table-striped table-bordered" cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th class="tableControl">公司名称</th>
+								<th class="tableControl">用户名</th>
+								<th class="tableControl">版本信息</th>
+								<th class="tableControl">添加时间</th>
+								<!-- <th class="tableControl">到期时间</th> -->
+								<th class="tableControl">所属代理商</th>
+								<th class="tableControl">费用</th>
+								<th class="tableControl">年限</th>
+								<th class="tableControl">说明</th>
+								<shiro:hasPermission name="terminal:wasTerminalPolicyPurchase:delete">
+									<th class="tableControl">操作</th>
+								</shiro:hasPermission>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach items="${page.list}" var="wasPolicyPurchase">
+								<tr>
+									<td class="tableControl" style="max-width:200px;white-space: pre-wrap;word-wrap: break-word;">${wasPolicyPurchase.info[0]}</td>
+									<td class="tableControl">${wasPolicyPurchase.info[1]}</td>
+									<td class="tableControl" style="max-width:200px;white-space: pre-wrap;word-wrap: break-word;">${wasPolicyPurchase.info[2]}</td>
+									<td class="tableControl"><fmt:formatDate value="${wasPolicyPurchase.createDate}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
+									<%-- <td class="tableControl"><fmt:formatDate value="${wasPolicyPurchase.endDate}" pattern="yyyy-MM-dd HH:mm:ss"/></td> --%>
+									<td class="tableControl" style="max-width:200px;white-space: pre-wrap;word-wrap: break-word;">${wasPolicyPurchase.info[3]}</td>
+									<td class="tableControl">${wasPolicyPurchase.payMoney}</td>
+									<td class="tableControl">${wasPolicyPurchase.info[4]}</td>
+									<td class="tableControl" style="max-width:200px;white-space: pre-wrap;word-wrap: break-word;">${wasPolicyPurchase.remarks}</td>
+									<shiro:hasPermission name="terminal:wasTerminalPolicyPurchase:delete">
+										<td class="tableControl">
+											<button type="button" data-toggle="tooltip" style="padding:0px" data-original-title="查看" class="btn btn-danger btn-circle btn-xs show" onclick="deletePolicyPurchase(${wasPolicyPurchase.policyPurchaseId})">
+												<i class="fa fa-times"></i>
+											</button>
+										</td>
+									</shiro:hasPermission>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${page.count gt 10}">
+						<table:page page="${page}"></table:page>
+					</c:if>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<script type="text/javascript">
+	//日期范围选择
+	jQuery('#date-range').datepicker({
+		toggleActive : true,
+		autoclose: true,
+		format : "yyyy-mm-dd"
+	});
+	//分页方法
+	function page(n,s) {
+		$("#pageNo").val(n);
+		$("#pageSize").val(s);
+		$("#searchForm").submit();
+		$("span.page-size").text(s);
+	}
+	//查询方法
+	function search(){//查询，页码清零
+		$("#pageNo").val(0);
+		$("#searchForm").submit();
+	}
+	//逻辑删除
+	function deletePolicyPurchase(id){
+		var index = layer.load(1, {shade: [0.1,'#fff']});
+		var locked=false;
+		if(!locked){
+			locked=true;
+    		layer.confirm('确认解冻当前账户？', {closeBtn : 0,icon : 3 ,skin : 'layui-layer-molv',btn: ['确认','取消']},function(){
+    			$.post("${ctx}/agentSystem/terminal/wasTerminalUser/deleteById",{"policyPurchaseId":id},function(data){
+    				if("success" == data){
+    					layer.close(index);
+    					locked = false;
+    					layer.msg("保存成功",{icon:1,time:1000},function(){
+    						$("form").submit()
+    					}); 
+    				}else{
+    					layer.close(index);
+    					locked = false;
+    					layer.msg("保存失败",{icon:2,time:1000},function(){
+    						return;  
+    					}); 
+    				}
+    			})
+    		})
+		}
+	}
+		
+	</script>
+
+</body>
+</html>

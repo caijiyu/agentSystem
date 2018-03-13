@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.sysdata.dao.WasSalesPolicyDao">
+    
+	<sql id="wasSalesPolicyColumns">
+		a.salesPolicyId AS "salesPolicyId",
+		a.createBy AS "createBy",
+		a.softwareIds AS "softwareIds",
+		a.title AS "title",
+		a.dredgeYear AS "dredgeYear",
+		a.giveYear AS "giveYear",
+		a.price AS "price",
+		a.renewDiscount AS "renewDiscount",
+		a.classify AS "classify",
+		a.startDate AS "startDate",
+		a.endDate AS "endDate",
+		a.sort AS "sort",
+		a.remarks AS "remarks",
+		a.createDate AS "createDate",
+		a.updateDate AS "updateDate",
+		a.updateBy AS "updateBy",
+		a.state AS "state"
+	</sql>
+	
+	<sql id="wasSalesPolicyJoins">
+	</sql>
+    
+	<select id="get" resultType="WasSalesPolicy">
+		SELECT 
+			<include refid="wasSalesPolicyColumns"/>
+		FROM was_sales_policy a
+		<include refid="wasSalesPolicyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WasSalesPolicy">
+		SELECT <include refid="wasSalesPolicyColumns"/> 
+		FROM (SELECT s.*,if(s.endDate &gt;= now(),1,2) 
+		as outOfUse FROM was_sales_policy s) a 
+		 <where>
+			AND a.state=1
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+		</where> 
+		ORDER BY a.outOfUse ASC,a.createDate DESC
+	</select>
+	<!-- 未过期方针 -->
+	<select id="findUnexpiredPolicy" resultType="WasSalesPolicy">
+	     SELECT 
+			<include refid="wasSalesPolicyColumns"/>
+		FROM was_sales_policy a
+		<include refid="wasSalesPolicyJoins"/>
+		<where>
+		AND a.state=1
+		AND a.endDate &gt;= now()
+		</where>
+		ORDER BY a.createDate DESC
+	</select>
+	
+	
+	<select id="findAllList" resultType="WasSalesPolicy">
+		SELECT 
+			<include refid="wasSalesPolicyColumns"/>
+		FROM was_sales_policy a
+		<include refid="wasSalesPolicyJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findBySalesPolicyId" resultType="WasSalesPolicy">
+	SELECT * FROM was_sales_policy a WHERE salesPolicyId = #{salesPolicyId}
+	</select>
+	
+
+	<select id="findPolicy" resultType="WasSalesPolicy">
+	SELECT * FROM was_sales_policy  
+		<where>
+				salesPolicyId = #{salesPolicyId}
+			<if test="title != null and title != ''">
+				AND title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+		</where> 
+	</select>
+	<!-- 根据套餐名查找 -->
+	<select id="findByTitle" resultType="Integer">
+	SELECT COUNT(*) FROM was_sales_policy a WHERE title = #{0} AND a.state=1
+	</select>
+	
+	<select id="findUseablePolicies" resultType="WasSalesPolicy">
+	SELECT * FROM was_sales_policy  WHERE  state=1 AND startDate &lt;= now() AND endDate &gt;= now()
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO was_sales_policy(
+			createBy,
+			softwareIds,
+			title,
+			dredgeYear,
+			giveYear,
+			price,
+			renewDiscount,
+			classify,
+			startDate,
+			endDate,
+			sort,
+			remarks,
+			createDate,
+			updateDate,
+			updateBy
+		) VALUES (
+			#{createBy.id},
+			#{softwareIds},
+			#{title},
+			#{dredgeYear},
+			#{giveYear},
+			#{price},
+			#{renewDiscount},
+			#{classify},
+			#{startDate},
+			#{endDate},
+			#{sort},
+			#{remarks},
+			#{createDate},
+			#{updateDate},
+			#{updateBy.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE was_sales_policy SET 	
+			softwareIds = #{softwareIds},
+			title = #{title},
+			dredgeYear = #{dredgeYear},
+			giveYear = #{giveYear},
+			price = #{price},
+			renewDiscount = #{renewDiscount},
+			classify = #{classify},
+			startDate = #{startDate},
+			endDate = #{endDate},
+			sort = #{sort},
+			remarks = #{remarks},
+			updateDate = #{updateDate},
+			updateBy = #{updateBy.id}
+		WHERE salesPolicyId = #{salesPolicyId}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM was_sales_policy
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_sales_policy SET 
+			state = #{state}
+		WHERE salesPolicyId = #{salesPolicyId}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WasSalesPolicy" statementType="STATEMENT">
+		select * FROM was_sales_policy  where ${propertyName} = '${value}'
+	</select>
+</mapper>

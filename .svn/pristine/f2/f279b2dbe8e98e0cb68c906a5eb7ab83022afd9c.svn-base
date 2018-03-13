@@ -1,0 +1,433 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+
+<html>
+<head>
+<!-- 菜单管理 -->
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<%@ include file="/webpage/include/treetable.jsp" %>
+<%@ include file="/webpage/include/treeview.jsp" %>
+<link href="${ctxStatic}/agentSystem/css/iconfont.css" rel="stylesheet" />
+<style type="text/css">
+	/* .layui-layer{
+   		top: 200px!important;
+	} */
+</style>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">
+					<shiro:hasPermission name="sysdata:menu:add">
+						<button type="button" class="btn btn-info" onclick="show(this)" style="margin-bottom:16.35px;">
+							<i class="fa fa-plus-circle"></i> 添加
+						</button>
+					</shiro:hasPermission>
+					</div>
+					<table id="contentTable" class="display  nowrap table table-hover table-bordered tableControl " cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th >名称</th>
+								<th >链接</th>
+								<th >排序</th>
+								<th >可见</th>
+								<th >权限标识</th>
+								<th width="15%">备注</th>
+								<th >操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach items="${list}" var="menu">
+								<tr id="${menu.id}" pId="${menu.parent.id ne '1'?menu.parent.id:'0'}">
+									<td >${fn:escapeXml(menu.name)}</td>
+									<td title="${fn:escapeXml(menu.href)}">${fn:escapeXml(menu.href)}</td>
+									<td >${menu.sort}</td>
+									<td >${menu.isShow eq '1'?'显示':'隐藏'}</td>
+									<td >${fn:escapeXml(menu.permission)}</td>
+									<td style="word-break:break-all;">${fn:escapeXml(menu.remarks)}</td>
+									<td >
+										<shiro:hasPermission name="sysdata:menu:edit">  
+											<button type="button" data-toggle="tooltip" data-original-title="编辑" class="btn btn-info btn-circle btn-xs" onclick="editMenu('${menu.id}',this)">
+												<i class="fa fa-edit"></i>
+											</button>
+										</shiro:hasPermission>
+										<shiro:hasPermission name="sysdata:menu:addNext"> 
+											<button type="button" data-toggle="tooltip" data-original-title="添加下级菜单" class="btn btn-info btn-circle btn-xs" onclick="addNext('${menu.id}',this)" >
+												<i style="margin-left:-1px" class="iconfont icon-tianjiazicaidan"></i>
+											</button>
+										</shiro:hasPermission> 
+										<shiro:hasPermission name="sysdata:menu:del">
+											<button type="button" data-toggle="tooltip" data-original-title="删除" class="btn btn-danger btn-circle btn-xs " onclick="deleteMenu('${menu.id}',this)">
+												<i class="fa fa-times"></i>
+											</button>
+										</shiro:hasPermission>
+									</td>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 模态框 -->
+	<div class="modal fade" id="modal" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<span id="modal-header-title">添加菜单</span>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="inputForm" action="" method="post" modelAttribute="menu">
+					<input id="menuIdaaa" name="menuIdaaa" value="" type="hidden">
+					<input id="menuIda" name="id" type="hidden">
+					<input id="parentIds" name="parentIds" type="hidden">
+						<sys:message content="${message}"/>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								style="color: red">*</span>&nbsp;上级菜单：</label>
+							<div class="col-8 controls ">
+									<input id="menuIdbata" name="parent.id" class="form-control required" type="hidden" value="">
+									<div>
+									<div>
+									<sys:treeselect id="menu" name="parent.id" value="${menu.parent.id}" labelName="parent.name" labelValue="${menu.parent.name}"
+					title="菜单" url="/sys/menu/treeData" extId="${menu.id}" cssClass="form-control required"/> </div></div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								style="color: red">*</span>&nbsp;名称：</label>
+							<div class="col-8 controls">
+							<div>
+								<input autocomplete="off" type="text" name="name" id="name"
+									class="form-control height-control"  maxlength="10">
+							</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label">链接：</label>
+							<div class="col-8 controls">
+								<input autocomplete="off" type="text" name="href" id="href"
+									class="form-control height-control" maxlength="100">
+									<span style="font-size: 12px;">点击菜单跳转的页面</span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								style="color: red">*</span>&nbsp;排序：</label>
+							<div class="col-8 controls">
+							<div>
+								<input autocomplete="off" type="text" name="sort" id="sort"
+									class="form-control height-control" maxlength="6">
+							</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label">图标：</label>
+							<div class="col-8 controls">
+								<input autocomplete="off" type="text" name="icon" id="icon"
+									class="form-control height-control" maxlength="50">
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label">可见：</label>
+							<div class="col-8 controls">
+								<input id="isShow" type="hidden" name="isShow">
+								<input type="radio" id="one" class="check"  name="square-radio" data-radio="iradio_square-blue" value="1" onclick="divClick(this)">
+                                <label for="square-radio-1">显示</label>
+                                <input type="radio"  id="two" class="check" name="square-radio" data-radio="iradio_square-blue" value="0"  onclick="divClick(this)">
+                                <label for="square-radio-2">隐藏</label><br>
+								<span style="font-size: 12px;">该菜单或操作是否显示到系统菜单中</span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label">权限标识：</label>
+							<div class="col-8 controls">
+								<input autocomplete="off" type="text" name="permission" id="permission"
+									class="form-control height-control" maxlength="50">
+									<span style="font-size: 12px;">控制器中定义的权限标识，如：@RequiresPermissions("权限标识")</span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label">备注：</label>
+							<div class="col-8 controls">
+								<textarea class="form-control" rows="3" id="remarks" name="remarks" style="word-break:break-all;" maxlength="100"></textarea>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer" style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="save()">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			//treeTable显示
+			$("#contentTable").treeTable({expandLevel : 1,column:0}).show();
+			//获取菜单ID
+			$("#menuIdaaa").val($("#btnId",parent.document).val());
+			
+			$("#menuName").rules("add",{required:true,messages:{required:"上级菜单不能为空"}});
+		});
+		
+		
+		//弹框显示
+		function show(obj){
+			$("#inputForm").data("validator").resetForm();
+			$("#modal-header-title").html("添加菜单");
+			$("#menuName").val("功能菜单");
+			$("#menuId").val("1");
+			$("#name").val("");
+			$("#href").val("");
+			$("#sort").val("");
+			$("#icon").val("");
+			$("#isShow").val("0");
+			var isShow = $("#isShow").val();
+			if(isShow != 0){
+				$('#one').iCheck('check');
+			}else{
+				//单选选中
+				$('#two').iCheck('check');
+			}
+			$("#permission").val("");
+			$("#remarks").val("");
+ 			$("#modal").modal("show");
+ 			$(obj).blur();
+		}
+		
+		//编辑
+		function editMenu(id,obj){
+			$("#inputForm").data("validator").resetForm();
+			$("#name").removeClass("error");
+			$("#sort").removeClass("error");
+			$("#menuName").removeClass("error");
+			$("#modal-header-title").html("编辑菜单");
+			var index = layer.load(1, {shade: [0.1,'#fff']});
+			$.ajax({
+				url : "${ctx}/sysdata/menu/get",
+				dataType : "json",
+				type : "post",
+				data : {'id':id},//通过ajax传过去
+				success : function(result) {//control成功了在传回来用的
+					layer.close(index);
+					$("#menuIda").val(result.id);
+					$("#menuId").val(result.parentId);
+					$("#menuName").val(result.parentName);
+					$("#parentIds").val(result.parentIds);
+					$("#name").val(result.name);
+					$("#href").val(result.href);
+					$("#sort").val(result.sort);
+					$("#icon").val(result.icon);
+					$("#isShow").val(result.isShow);
+					var isShow = $("#isShow").val();
+					if(isShow != 0){
+						$('#one').iCheck('check');
+					}else{
+						$('#two').iCheck('check');
+					}
+					$("#permission").val(result.permission);
+					$("#remarks").val(result.remarks);
+ 					$("#modal").modal("show");
+				}
+			});
+			$(obj).blur();
+		}
+		
+		//添加下级菜单
+		function addNext(id,obj){
+			$("#inputForm").data("validator").resetForm();
+			$("#menuName").removeClass("error");
+			$("#modal-header-title").html("添加下级菜单");
+			var index = layer.load(1, {shade: [0.1,'#fff']});
+			$.ajax({
+				url : "${ctx}/sysdata/menu/get",
+				dataType : "json",
+				type : "post",
+				data : {'id':id},//通过ajax传过去
+				success : function(result) {//control成功了在传回来用的
+					layer.close(index);
+					$("#menuName").val(result.name);
+					$("#menuId").val(result.id);
+					$("#name").val("");
+					$("#href").val("");
+					$("#sort").val("");
+					$("#icon").val("");
+					$("#isShow").val("0");
+					var isShow = $("#isShow").val();
+					if(isShow != 0){
+						$('#one').iCheck('check');
+					}else{
+						$('#two').iCheck('check');
+					}
+					$("#permission").val("");
+					$("#remarks").val("");
+ 					$("#modal").modal("show");
+				}
+			});
+			$(obj).blur();
+		}
+		
+		
+		
+		//form表单验证
+		$("#inputForm").validate({
+			rules : {
+				
+				name : {
+					required : true,
+					maxlength : 10
+				},
+				sort : {
+					required : true,
+					number : true,
+					digits:true,
+					min:1
+				},
+			},
+			messages : {
+				
+				name : {
+					required : "名称不能为空",
+					maxlength : $.validator.format("最多输入10个字符")
+				},
+				sort : {
+					required : "排序不能为空",
+					number : $.validator.format("请输入有效的数字"),
+					digits:"请输入大于零的整数",
+					min:"请输入大于零的整数"
+				},
+			},
+			errorPlacement : function(error, element) {
+            	error.insertAfter(element.parent());
+			}
+		});
+		
+		//保存菜单
+		function save(){
+			$("#isShow").val($(":radio:checked").val());
+			var locked = false;
+			var isValid = $("#inputForm").valid();
+			if (isValid) {
+				layer.confirm('是否确认保存？', { icon : 3 ,closeBtn: 0,
+					 skin : 'layui-layer-lan',btn: ['确认','取消']},function(){
+						 if(!locked){
+							locked=true;
+							var index = layer.load(1, {shade: [0.1,'#fff']});
+								$.ajax({
+										type : "POST",
+										dataType : "json",
+										url : "${ctx}/sysdata/menu/save",
+										data : $('#inputForm').serialize(),
+										success : function(result) {
+											layer.close(index);
+											if (result >0) {
+												$("#modal").modal("hide");
+												layer.msg("保存成功！",{icon:1,time:1000},function(){
+													location.href="${ctx}/sysdata/menu/list";
+												});
+											}
+										},
+										error:function(){
+									    	layer.close(index);
+									    	layer.msg('保存失败！', { icon : 2,time : 1000, });
+									    	location.href="${ctx}/sysdata/menu/list";
+									    },
+									});
+						 }
+					 });
+			}
+		}
+		
+		//删除
+		function deleteMenu(id){
+			var menuIdaaa = $("#menuIdaaa").val();
+			layer.confirm('确认要彻底删除数据吗?', {
+				skin : 'layui-layer-molv',
+				icon : 3,
+				closeBtn: 0,
+				btn : [ '确认', '取消' ]
+			//按钮
+			}, function() {
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+					type : "POST",
+					dataType : "json",
+					url : "${ctx}/sysdata/menu/delete",
+					data :  {'id': id,'menuIdaaa' : menuIdaaa},
+					success : function(result) {
+						layer.close(index);
+						if (result > 0) {
+							layer.msg("删除成功", {
+								time:1000,
+								icon:1,
+							},function(data){
+								location.href="${ctx}/sysdata/menu/list";	
+							});
+						}
+					},
+					error:function(){
+				    	layer.close(index);
+				    	layer.msg('删除失败！', { icon : 2,time : 1000, });
+				    	location.href="${ctx}/sysdata/menu/list";
+				    },
+				});
+			});
+		}
+		
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n,s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		//查询方法
+		function search(){//查询，页码清零
+			$("#pageNo").val(0);
+			$("#searchForm").submit();
+		}
+		//checkbox监听
+		$('#ischange').on('ifChecked', function(event){ //ifCreated 事件应该在插件初始化之前绑定 
+			$('.check').iCheck('check');
+		});
+		$('#ischange').on('ifUnchecked', function(event){ //ifUnchecked 事件应该在插件初始化之前绑定 
+			$('.check').iCheck('uncheck');
+		});
+		//针对tab切换会出现其他的问题
+		function switchover(){
+			$('#home2').removeClass("active");
+			$('#home2').attr("aria-expanded", false);
+			$('#profile2').removeClass("active");
+			$('#profile2').attr("aria-expanded", false);
+			$('#messages2').removeClass("active");
+			$('#messages2').attr("aria-expanded", false);
+		}
+		
+		
+		
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,1147 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<style>
+	select.error{
+		color:#67757c;
+	}
+	input.error{
+		color:#67757c;
+	}
+</style>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Nav tabs -->
+			<ul class="nav nav-tabs customtab" role="tablist">
+				<li class="nav-item">
+					<a class="nav-link active" data-toggle="tab" href="#home" role="tab" onclick="switchover()"> 
+						<span class="hidden-sm-up"><i class="ti-home"></i></span> 
+						<span class="hidden-xs-down">软件下单</span>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" data-toggle="tab" href="#profile" role="tab" onclick="switchover()"> 
+						<span class="hidden-sm-up"><i class="ti-user"></i></span> 
+						<span class="hidden-xs-down">硬件下单</span>
+					</a>
+				</li>
+			</ul>
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<!-- 当前代理商四个账户余额 -->
+				<input id="publicAccount" name="publicAccount" type="hidden" value="${agent.publicAccount}">
+				<input id="minaAccount" name="minaAccount" type="hidden" value="${agent.minaAccount}">
+				<input id="hardwareAccount" name="hardwareAccount" type="hidden" value="${agent.hardwareAccount}">
+				<input id="vipAccount" name="vipAccount" type="hidden" value="${agent.vipAccount}">
+				<!-- 软件下单 -->
+				<div class="tab-pane p-20 active" id="home" role="tabpanel">
+					<form class="form" id="bugPolicy">
+						<input id="agentLevelId" type="hidden" value="${agent.agentLevelId}">
+						<input name="parentId" type="hidden" value="${agent.id}"><!-- 当前代理商ID -->
+						<input name="companyParentId" type="hidden" value="${agent.companyParentId}"><!-- 当前代理商上级ID -->
+						<input id="listPolicy" name="listPolicy" type="hidden">
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">当前代理商：</label>
+							<div class="col-9 controls">
+								<input autocomplete="off" type="text" name="text" class="form-control height-control"  readonly value="${agent.companyName}">
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">所属上级：</label>
+							<div class="col-9 controls">
+								<input autocomplete="off" type="text" name="companyParent" class="form-control height-control" readonly value="${agent.companyParent.companyName}">
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">套餐折扣：</label>
+							<div class="col-9 controls input-group">
+								<input autocomplete="off" type="text" class="form-control height-control rightAngle" readonly value="${agent.packageDiscount}"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">折</span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">公众号折扣：</label>
+							<div class="col-9 controls input-group">
+								<input autocomplete="off" type="text" class="form-control height-control rightAngle" readonly value="${agent.publicDiscount}"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">折</span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">小程序折扣：</label>
+							<div class="col-9 controls input-group">
+								<input autocomplete="off" type="text" class="form-control height-control rightAngle" readonly value="${agent.minaDiscount}"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">折</span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;公司名称：</label>
+							<div class="col-9 controls">
+								<div>
+                            		<input name="companyName" autocomplete="off" type="text" class="form-control height-control" >
+                            	</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;负责人：</label>
+							<div class="col-9 controls">
+								<div>
+                            		<input name="name" autocomplete="off" type="text" class="form-control height-control" >
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;联系方式：</label>
+							<div class="col-9 controls">
+								<div>
+                            		<input name="phone" autocomplete="off" type="text" class="form-control height-control">
+                            	</div>
+							</div>
+						</div>
+						<div class="form-group row ">
+							<label class="control-label text-right col-md-2"><span
+								style="color: red; height: 27px">*&nbsp;&nbsp;&nbsp;</span>地区:</label>
+							<div data-toggle="distpicker" class="col-md-9 area">
+								<div class="row" style="height: 35px">
+									<div class="col-md-4 ">
+										<div class="form-group row">
+											<div class="col-sm-12 col-xs-12">
+												<div>
+													<select class="form-control" id="province" name="province"></select>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group row">
+											<div class="col-sm-12 col-xs-12">
+												<div>
+													<select class="form-control" id="city" name="city"></select>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group row">
+											<div class="col-sm-12 col-xs-12">
+												<div>
+													<select class="form-control" id="county" name="county"></select>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;详细地址：</label>
+							<div class="col-9 controls">
+								<div>
+                            		<input name="address" autocomplete="off" type="text" class="form-control height-control">
+                            	</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;账号：</label>
+							<div class="col-9 controls">
+								<div>
+                            		<input name="loginName" autocomplete="off" type="text" class="form-control height-control">
+                            	</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;密码：</label>
+							<div class="col-9 controls">
+								<div>
+                            		<input name="password" autocomplete="off" type="text" class="form-control height-control">
+                            	</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">选择产品：</label>
+							<div class="col-9 controls" id="policy">
+                                <div class="input-group policyOrder" id="policyOrder0">
+                                    <span class="input-group-addon height-control rightAngle ">版本</span>
+                                    <div>
+                                    	<div>
+	                                        <select onchange="getPolicyPrice(0)" class="form-control custom-select height-control leftAngle rightAngle" tabindex="1"
+	                                            id="selectPolicy0" name="selectPolicy" style="width:100%">
+	                                            <option value="">请选择</option>
+	                                        </select>
+                                    	</div>
+                                    </div>
+                                        <input type="hidden" id="classify0" name="classify">
+                                        <span class="input-group-addon height-control leftAngle rightAngle">数量</span>
+                                        <div>
+                                        	<div>
+                                        		<input id="policyNumber0" name="policyNumber" type="text" style="width:100%" class="form-control height-control leftAngle rightAngle"  onkeyup="countPolicy(0)" >
+                                        	</div>
+                                        </div>
+                                        <span class="input-group-addon height-control leftAngle rightAngle">折扣单价</span>
+                                        <input id="policyPrice0" type="text" class="form-control height-control leftAngle " readonly>
+                                        <input type="hidden" id="year0" name="year">
+                                        <input type="hidden" id="totalYear0" name="totalYear">
+                                        <input type="hidden" id="singlePrice0" name="singlePrice">
+                                        <input type="hidden" id="money0" name="money">
+                                        <span class="input-group-addon height-control leftAngle rightAngle">总价</span>
+	                					<input id="policyTotal0" name="policyTotal" type="text" class="form-control height-control leftAngle " readonly>
+	                					<a href="javascript:;" onclick="deletePolicy(0)" class="input-group-addon"><i class="fa fa-times-circle"> </i></a>
+                                   </div>
+							</div>
+						</div>
+						<div class="form-group row">
+						<label for="example-text-input" class="col-2 col-form-label"></label>
+							<div class="col-9 controls">
+							<a href="javascript:;" onclick="addPolicyOrder()" style="color:#495057"><i class="fa fa-plus-circle"></i> 添加产品</a>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">折扣总价：</label>
+							<div class="col-9 controls input-group">
+								<input id="allPolicyPrice" autocomplete="off" type="text" class="form-control height-control rightAngle" readonly> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">扣款方式：</label>
+							<div class="col-9 controls">
+								<div class="input-group">
+									<input   type="text" id="debitwayPolicy" name="debitway" class="form-control singleGraph height-control rightAngle" value=""  readonly />
+									<span class="input-group-btn " >
+										<button class="btn btn-default leftAngle height-control" onclick="show(0)" type="button" style=" height: 36px;font-size: 12px;">扣款方式</button>
+									</span>
+								</div>
+								<span class="help-block"></span>
+							</div>
+							<input id="publicExpendPolicy" name="publicExpend" type="hidden">
+							<input id="minaExpendPolicy" name="minaExpend" type="hidden">
+							<input id="hardwareExpendPolicy" name="hardwareExpend" type="hidden">
+							<input id="vipExpendPolicy" name="vipExpend" type="hidden">
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;备注：</label>
+							<div class="col-9 controls " >
+								<div>
+                            		<input autocomplete="off" type="text" name="remarks" class="form-control height-control" >
+                            	</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label class="col-2 col-form-label"></label>
+							<div class="col-9">
+								<div class="text-xs-right" style="text-align: right;">
+									<button type="button" class="btn btn-default" onclick="jump()">返回</button>
+									<button type="button" class="btn waves-effect waves-light btn-info" onclick="savePolicy(0)">保存</button>
+								</div>
+							</div>
+						</div>
+
+					</form>	
+				</div>
+				
+				<!-- 硬件下单 -->
+				<div class="tab-pane p-20" id="profile" role="tabpanel">
+					<form class="form" id="buyHardware">
+						<input id="agentId" name="id" type="hidden" value="${agent.id}">
+						<input id="listHardware" name="listHardware" type="hidden">
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">当前代理商：</label>
+							<div class="col-9 controls">
+								<input autocomplete="off" type="text" name="text" class="form-control height-control"  readonly value="${agent.companyName}">
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">所属上级：</label>
+							<div class="col-9 controls">
+								<input autocomplete="off" type="text" name="companyParent" class="form-control height-control" readonly value="${agent.companyParent.companyName}">
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;硬件选择：</label>
+							<div class="col-9 controls" id="hardware">
+                                <div class="input-group hardwareOrder" id="hardwareOrder0" >
+                                    <span class="input-group-addon height-control rightAngle ">硬件产品</span>
+                                    <div>
+                                    	<div>
+                                    		<select onchange="getHardwarePrice(0)" class="form-control custom-select height-control leftAngle rightAngle" style="width:100%"
+                                              tabindex="1" id="selectHardware0" name="selectHardware">
+                                           		<option value="">请选择</option>
+                                        	</select>
+                                        </div>
+                                    </div>
+                                        <span class="input-group-addon height-control leftAngle rightAngle">数量</span>
+                                        <div>
+                                        	<div>
+                                        		<input id="hardwareNumber0" name="hardwareNumber" type="text" style="width:100%" class="form-control height-control leftAngle rightAngle" onkeyup="countHardware(0)">
+                                        	</div>
+                                        </div>
+                                         <span class="input-group-addon height-control leftAngle rightAngle">单价</span>
+                                        <input id="hardwarePrice0" type="text" class="form-control height-control leftAngle " readonly>
+                                        <span class="input-group-addon height-control leftAngle rightAngle">总价</span>
+                                        <input id="hardwareTotal0" type="text" name="hardwareTotal" class="form-control height-control leftAngle " readonly >
+                                        <a href="javascript:;" onclick="deleteHardware(0)" class="input-group-addon"><i class="fa fa-times-circle"> </i></a>  
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"></label>
+							<div class="col-9 controls input-group">
+								<a href="javascript:;" onclick="addHardwareOrder()" style="color:#495057"><i class="fa fa-plus-circle"></i> 添加硬件</a>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">硬件总价：</label>
+							<div class="col-9 controls input-group">
+								<input id="allHardwarePrice" autocomplete="off" type="text" class="form-control height-control rightAngle" readonly > 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">扣款方式：</label>
+							<div class="col-9 controls">
+								<div class="input-group">
+									<input type="text" id="debitwayHardware" name="debitway" class="form-control singleGraph height-control rightAngle" value=""  readonly />
+									<span class="input-group-btn " >
+										<button class="btn btn-default leftAngle height-control" onclick="show(1)" type="button" style=" height: 36px;font-size: 12px;">扣款方式</button>
+									</span>
+								</div>
+								<span class="help-block"></span>
+							</div>
+							<input id="publicExpendHardware" name="publicExpend" type="hidden">
+							<input id="minaExpendHardware" name="minaExpend" type="hidden">
+							<input id="hardwareExpendHardware" name="hardwareExpend" type="hidden">
+							<input id="vipExpendHardware" name="vipExpend" type="hidden">
+						</div>
+						<div class="form-group row">
+							<label for="example-month-input" class="col-2 col-form-label">收货方式：</label>
+							<div class="col-9 controls">
+								<input type="hidden" id="deliveryMethod" name="deliveryMethod">
+                                <input type="radio" class="check" id="square-radio-one" name="square-radio" data-radio="iradio_square-blue" value="0">
+                                <label for="square-radio-1">自提</label>
+                                <input type="radio" class="check" id="square-radio-two" name="square-radio" data-radio="iradio_square-blue" checked="checked" value="1">
+                                <label for="square-radio-2">快递</label>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;收货人：</label>
+							<div class="col-9 controls ">
+								<div>
+                            		<input autocomplete="off" type="text" name="name" id="consignee" class="form-control height-control" required data-validation-required-message="这是必填项">
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;联系电话：</label>
+							<div class="col-9 controls">
+								<div>
+                            		<input autocomplete="off" type="text" name="phone" id="contactNumber" class="form-control height-control" required data-validation-required-message="这是必填项">
+								</div>
+							</div>
+						</div>
+						<div class="form-group row" id="select">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;收货地址：</label>
+							<div class="col-9 controls">
+								<div>
+                            		<input autocomplete="off" type="text" name="address" id="receivingAddress" class="form-control height-control" required data-validation-required-message="这是必填项">
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span
+								style="color: red">*</span>&nbsp;&nbsp;备注：</label>
+							<div class="col-9 controls">
+								<div>
+                            		<input autocomplete="off" type="text" name="remarks" id="hardwareRemarks" class="form-control height-control" required data-validation-required-message="这是必填项">
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label class="col-2 col-form-label"></label>
+							<div class="col-9">
+								<div class="text-xs-right" style="text-align: right;">
+									<button type="button" class="btn btn-default" onclick="jump()">返回</button>
+									<button type="button" class="btn waves-effect waves-light btn-info" onclick="saveHardware(1)">保存</button>
+								</div>
+							</div>
+						</div>
+
+					</form>				
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 模态框 -->
+	<div class="modal fade" id="modal" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<span id="modal-header-title">扣款方式</span>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="debitwayForm">
+						<input id="difference" name="difference" type="hidden">
+						<div class="form-group row">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">公司名称:</label>
+                        <div class="col-8">
+                            <input type="text" class="form-control" id="agentName"  value="${agent.companyName}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">硬件账户扣款:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input autocomplete="off" type="text" class="form-control height-control rightAngle ExpendA" id="hardwarerow" name="hardwarerow"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+                            </div>
+                            <span class="height-control">硬件账户余额为：${agent.hardwareAccount}元</span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">公众号账户扣款:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input autocomplete="off" type="text" class="form-control height-control rightAngle ExpendA" id="publicrow" name="publicrow"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+                            </div>
+                            <span class="height-control">公众号账户余额为：${agent.publicAccount}元</span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">小程序账户扣款:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input autocomplete="off" type="text" class="form-control height-control rightAngle ExpendA" id="minarow" name="minarow"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+                            </div>
+                            <span class="height-control">小程序账户余额为：${agent.minaAccount}元</span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">VIP账户扣款:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input autocomplete="off" type="text" class="form-control height-control rightAngle ExpendA" id="viprow" name="viprow"> 
+								<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+                            </div>
+                            <span class="height-control">VIP账户余额为：${agent.vipAccount}元</span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+	                	<div class="col-11" >
+	                		<div style="float: right">总价格：<span id="totalAccountMoney">0</span>元</div>
+	                	</div>
+	                </div>
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer" style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="saveDebitway()">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="ModalSure" tabindex="-1" role="dialog"
+		aria-labelledby="ModalLabela" aria-hidden="true"
+		style="display: none; margin-top: 200px; margin-left: 100PX;">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="background-color: #F4F5F9;">
+					<p class="modal-title" id="exampleModalLabela"
+						style="font-size: 14px;">信息确认</p>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<div class="modal-body">
+				<input id="different" name="different" type="hidden">
+					<form id="orderForm" action="" style="font-size: 13px;">
+						<table class="table noboder" style="font-size: 13px;">
+							<thead>
+								<tr>
+									<th>名称</th>
+									<th>数量</th>
+									<th>单价</th>
+									<th>总价</th>
+								</tr>
+							</thead>
+							<tbody id="order">
+							</tbody>
+						</table>
+						<hr>
+						<div  style="margin-left: 10px">
+							<div class="form-group row">
+			                	<div class="col-6" >
+			                		<div>硬件扣款：<span id="totalHMoney"></span>元</div>
+			                	</div>
+			                	<div class="col-6" >
+			                		<div>公众号扣款：<span id="totalPMoney"></span>元</div>
+			                	</div>
+			                </div>
+			                <div class="form-group row">
+			                	<div class="col-6" >
+			                		<div>小程序扣款：<span id="totalMMoney"></span>元</div>
+			                	</div>
+			                	<div class="col-6" >
+			                		<div>VIP扣款：<span id="totalVMoney"></span>元</div>
+			                	</div>
+		                	</div>
+							<div class="form-group row">
+			                	<div class="col-11" >
+			                		<div style="float: right">总价格：<span id="totalMoney"></span>元</div>
+			                	</div>
+		                	</div>
+	                	</div>
+					</form>
+				</div>
+				<div class="modal-footer" style="background-color: #F4F5F9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+						<button type="button" class="btn  btn-info" id="sure"  onclick="saveOrder()">确认</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="${ctxStatic}/agentSystem/js/distpicker.data.js"></script>
+	<script src="${ctxStatic}/agentSystem/js/distpicker.js"></script>
+	<script src="${ctxStatic}/agentSystem/js/main.js"></script>
+	<script type="text/javascript">
+	
+	$(document).ready(function(){
+		findHardware(0);
+		findSalesPolicy(0);
+		
+		//验证手机和座机
+		jQuery.validator.addMethod("isPhone", function(value,element) {
+		    var length = value.length;
+		    var mobile =  /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(14[0-9]{1})|(17[0-9]{1}))+\d{8})$/;
+		    var tel = /^\d{3,4}-?\d{7,9}$/;
+		
+		    if(/-/.test(value)){
+		        return this.optional(element) || tel.test(value);
+		    }else{
+		        return this.optional(element) || (length == 11 && mobile.test(value));
+		    }
+		
+		}, "请正确填写您的联系电话");
+		
+		//自定义validate验证输入的数字小数点位数不能大于两位
+		jQuery.validator.addMethod("minNumber",function(value, element){
+            var returnVal = true;
+            inputZ=value;
+            var ArrMen= inputZ.split(".");    //截取字符串
+            if(ArrMen.length==2){
+                if(ArrMen[1].length>2){    //判断小数点后面的字符串长度
+                    returnVal = false;
+                    return false;
+                }
+            }
+            return returnVal;
+        },"小数点后最多为两位");
+		
+		jQuery.validator.addMethod("isRightLoginNameForm", function(value, element) {
+            var rightLoginNameForm = /^[a-zA-z][a-zA-Z0-9]{5,14}$/;
+            return (rightLoginNameForm.test(value));
+        }, "账号只能由字母数字组成，且只能以字母开头"); 
+        jQuery.validator.addMethod("isRightPasswordForm", function(value, element) {
+            var rightPasswordForm = /^[a-zA-Z0-9]{5,19}$/;
+            return (rightPasswordForm.test(value));
+        }, "密码只能由字母数字组成"); 
+        jQuery.validator.addMethod("validateArea", function(value, element) {
+            var str = "";
+            return (str != value);
+        }, "请选择地区"); 
+        
+	});
+	
+	//获取硬件下拉菜单
+	function findHardware(aa){
+		$.ajax({
+			url : "${ctx}/agency/wasAgentOrder/list",
+			dataType : "json",
+			type : "post",
+			success : function(data) {//control成功了在传回来用的
+				$.each(data,function(i,li){
+					var str='<option value="'+li.hardwareId+','+li.name+'">'+li.name+'</option>';
+					$("#selectHardware"+aa).append(str);
+				});
+            }
+		});
+	}
+	
+	//获取硬件单价
+	function getHardwarePrice(bb){
+		var id=$("#selectHardware"+bb).val().split(",")[0];
+		if(id != ""){
+			$.ajax({
+				url : "${ctx}/sysdata/wasHardware/get",
+				dataType : "json",
+				type : "post",
+				data : {'hardwareId':id},
+				success : function(data) {//control成功了在传回来用的
+					$("#hardwarePrice"+bb).val(data.price);
+					$("#hardwareNumber"+bb).val(1);
+					$("#hardwareTotal"+bb).val(($("#hardwarePrice"+bb).val())*($("#hardwareNumber"+bb).val()));
+					countAllTotalH();
+	            }
+			});
+		}else{
+			$("#hardwarePrice"+bb).val("");
+			$("#hardwareNumber"+bb).val("");
+			$("#hardwareTotal"+bb).val("");
+			countAllTotalH();
+		}
+	}
+	
+	//获取当前代理商等级下的所有销售方针
+	function findSalesPolicy(aa){
+		var agentLevelId=$("#agentLevelId").val();
+		$.ajax({
+			url : "${ctx}/agency/wasAgentOrder/findPolicy",
+			dataType : "json",
+			type : "post",
+			data : {'agentLevelId':agentLevelId},
+			success : function(data) {//control成功了在传回来用的
+				 $.each(data,function(i,li){
+					var str='<option value="'+li.salesPolicyId+','+li.title+'">'+li.title+'</option>';
+					$("#selectPolicy"+aa).append(str);
+				}); 
+            },
+		});
+	}
+	
+	//获取方针单价、折扣单价
+	function getPolicyPrice(bb){
+		var id=$("#selectPolicy"+bb).val().split(",")[0];
+		if(id != ""){
+			$.ajax({
+				url : "${ctx}/agency/wasAgentOrder/getPolicy",
+				dataType : "json",
+				type : "post",
+				data : {'salesPolicyId':id},
+				success : function(data) {//control成功了在传回来用的
+					$("#classify"+bb).val(data.classify);
+					if($("#classify"+bb).val() == 0){//公众号
+						var publicDiscount = ${agent.publicDiscount};
+						$("#policyPrice"+bb).val((data.price * publicDiscount).toFixed(2));
+					}else if($("#classify"+bb).val() == 1){//小程序
+						var minaDiscount = ${agent.minaDiscount};
+						$("#policyPrice"+bb).val((data.price * minaDiscount).toFixed(2));
+					}else if($("#classify"+bb).val() == 2){//套餐
+						var packageDiscount = ${agent.packageDiscount};
+						$("#policyPrice"+bb).val((data.price * packageDiscount).toFixed(2));
+					}
+					$("#singlePrice"+bb).val(data.price);
+					$("#policyNumber"+bb).val(1);
+					$("#year"+bb).val(data.dredgeYear+data.giveYear);
+					$("#totalYear"+bb).val((($("#year"+bb).val())*($("#policyNumber"+bb).val())));
+					$("#money"+bb).val(data.price*($("#policyNumber"+bb).val()));
+					$("#policyTotal"+bb).val((($("#policyPrice"+bb).val())*($("#policyNumber"+bb).val())).toFixed(2));
+					countAllTotalP();
+	            }
+			});
+		}else{
+			$("#classify"+bb).val("");
+			$("#policyPrice"+bb).val("");
+			$("#singlePrice"+bb).val("");
+			$("#policyNumber"+bb).val("");
+			$("#year"+bb).val("");
+			$("#totalYear"+bb).val("");
+			$("#money"+bb).val("");
+			$("#policyTotal"+bb).val("");
+			countAllTotalP();
+		}
+		
+	}
+	 	var i = 1;
+	 	var j = 1;
+	 	//添加软件订单
+		function addPolicyOrder(){
+	 		if($(".policyOrder").length < 6){
+				$("#policy").append('<div id="policyOrder'+i+'" class="input-group policyOrder" style="margin-top:5px"><span class="input-group-addon height-control rightAngle ">版本</span>'+
+						'<div><div><select onchange="getPolicyPrice('+i+')" class="form-control custom-select height-control leftAngle rightAngle" tabindex="1"'+
+							'id="selectPolicy'+i+'" name="selectPolicy'+i+'" style="width:100%"><option value="">请选择</option></select></div></div>'+
+							'<input type="hidden" id="classify'+i+'" name="classify">'+
+		                    '<span class="input-group-addon height-control leftAngle rightAngle">数量</span>'+
+		                    '<div><div><input id="policyNumber'+i+'" name="policyNumber'+i+'" style="width:100%" type="text" class="form-control height-control leftAngle rightAngle" onkeyup="countPolicy('+i+')"></div></div>'+
+		                    '<span class="input-group-addon height-control leftAngle rightAngle">折扣单价</span>'+
+		                	'<input id="policyPrice'+i+'" type="text" class="form-control height-control leftAngle rightAngle" readonly>'+
+		                	'<input type="hidden" id="year'+i+'" name="year">'+
+		                	'<input type="hidden" id="totalYear'+i+'" name="totalYear">'+
+		                	'<input type="hidden" id="singlePrice'+i+'" name="singlePrice">'+
+		                	'<input type="hidden" id="money'+i+'" name="money">'+
+		                    '<span class="input-group-addon height-control leftAngle rightAngle">总价</span>'+
+		                	'<input id="policyTotal'+i+'" name="policyTotal" type="text" class="form-control height-control leftAngle " readonly>'+
+		                	'<a href="javascript:;" onclick="deletePolicy('+i+')" class="input-group-addon"><i class="fa fa-times-circle"> </i></a></div>');
+				findSalesPolicy(i);
+				$("#selectPolicy"+i).rules("add",{required:true,messages:{required:"请选择版本"}});
+				$("#policyNumber"+i).rules("add",{required:true,digits:true,min:0.1,messages:{required : "请输入数量",digits:"请输入大于零的整数",min:"请输入大于零的整数"}});
+				i = i + 1;
+				
+	 		}else{
+	 			layer.msg("最多添加6个！",{icon:7,time:1500});
+	 		}
+		}
+	 	//添加硬件订单
+		function addHardwareOrder(){
+	 		debugger;
+	 		if($(".hardwareOrder").length < 6){
+	 			$("#hardware").append('<div id="hardwareOrder'+j+'"  class="input-group hardwareOrder" style="margin-top:5px"><span class="input-group-addon height-control rightAngle ">硬件产品</span>'+
+						'<div><div><select onchange="getHardwarePrice('+j+')" name="selectHardware'+j+'" style="width:100%" class="form-control custom-select height-control leftAngle rightAngle"'+
+						    'tabindex="1" id="selectHardware'+j+'" ><option value="">请选择</option></select></div></div>'+
+		                    '<span class="input-group-addon height-control leftAngle rightAngle">数量</span>'+
+		                    '<div><div><input id="hardwareNumber'+j+'" name="hardwareNumber'+j+'" type="text" style="width:100%" class="form-control height-control leftAngle rightAngle" onkeyup="countHardware('+j+')" ></div></div>'+
+		                    '<span class="input-group-addon height-control leftAngle rightAngle">单价</span>'+
+		                	'<input id="hardwarePrice'+j+'" type="text" class="form-control height-control leftAngle rightAngle" readonly>'+
+		                	'<span class="input-group-addon height-control leftAngle rightAngle">总价</span>'+
+	                        '<input id="hardwareTotal'+j+'" name="hardwareTotal" type="text" class="form-control height-control leftAngle " readonly >'+
+	                        '<a href="javascript:;" onclick="deleteHardware('+j+')" class="input-group-addon"><i class="fa fa-times-circle"> </i></a></div>');
+				findHardware(j);
+				$("#selectHardware"+j).rules("add",{required:true,messages:{required:"请选择硬件产品"}});
+				$("#hardwareNumber"+j).rules("add",{required:true,digits:true,min:0.1,messages:{required : "请输入数量",digits:"请输入大于零的整数",min:"请输入大于零的整数"}});
+				j = j + 1;
+	 		}else{
+	 			layer.msg("最多添加6个！",{icon:7,time:1500});
+	 		}
+			
+			
+		}
+		//删除软件订单
+		function deletePolicy(o){
+			document.getElementById("policy").removeChild(document.getElementById("policyOrder"+o));
+			$("#selectPolicy"+o).rules("remove",{required:true,messages:{required:"请选择版本"}});
+			$("#policyNumber"+o).rules("remove",{required:true,digits:true,min:0.1,messages:{required : "请输入数量",digits:"请输入大于零的整数",min:"请输入大于零的整数"}});
+			countAllTotalP();
+		}
+		//删除硬件订单
+		function deleteHardware(o){
+			 document.getElementById("hardware").removeChild(document.getElementById("hardwareOrder"+o));
+			 $("#selectHardware"+o).rules("remove",{required:true,messages:{required:"请选择硬件产品"}});
+			 $("#hardwareNumber"+o).rules("remove",{required:true,digits:true,min:0.1,messages:{required : "请输入数量",digits:"请输入大于零的整数",min:"请输入大于零的整数"}});
+			 countAllTotalH();
+		}
+		//计算硬件总价onkeyup事件
+		function countHardware(cc){
+            var a= $("#hardwareNumber"+cc).val();
+            if(a == ""){
+            	$("#hardwareTotal"+cc).val(0);
+            	countAllTotalH();
+            }else{
+            	$("#hardwareTotal"+cc).val(parseFloat(a)*($("#hardwarePrice"+cc).val()));
+            	countAllTotalH();
+            }
+        }
+		//计算硬件所有订单的总价
+		function countAllTotalH(){
+			var input = document.getElementsByName("hardwareTotal"); //返回的是多个input元素的集合
+			var total = 0;
+			for(var i =0;i < input.length;i++){
+			    if(input[i].value != null && input[i].value != ""){
+			    	total += parseFloat(input[i].value);
+			    } 
+			}
+			$("#allHardwarePrice").val(total);
+		}
+		//计算方针总价onkeyup事件
+		function countPolicy(cc){
+            var a= $("#policyNumber"+cc).val();
+            if(a == ""){
+            	$("#policyTotal"+cc).val(0);
+            	$("#money"+cc).val(0);
+            	countAllTotalP();
+            }else{
+            	$("#policyTotal"+cc).val(parseFloat(a)*($("#policyPrice"+cc).val()));
+            	$("#money"+cc).val(parseFloat(a)*($("#singlePrice"+cc).val()));
+            	$("#totalYear"+cc).val(parseFloat(a)*($("#year"+cc).val()));
+            	countAllTotalP();
+            }
+        }
+		//计算方针所有订单的总价
+		function countAllTotalP(){
+			var input = document.getElementsByName("policyTotal"); //返回的是多个input元素的集合
+			var total = 0;
+			for(var i =0;i < input.length;i++){
+			    if(input[i].value != null && input[i].value != ""){
+			    	total += parseFloat(input[i].value);
+			    } 
+			}
+			$("#allPolicyPrice").val(total.toFixed(2));
+		}
+		//扣款弹框显示
+		function show(a) {
+			$("#debitwayForm").data("validator").resetForm();
+			$("#hardwarerow").val("");
+			$("#publicrow").val("");
+			$("#minarow").val("");
+			$("#viprow").val("");
+			$("#totalAccountMoney").val("0");
+			$("#difference").val(a);
+			var Total = parseFloat($("#publicAccount").val())+parseFloat($("#minaAccount").val())+parseFloat($("#hardwareAccount").val())+parseFloat($("#vipAccount").val());
+			if(a == 1){
+				var allHardwarePrice = $("#allHardwarePrice").val();
+				if(Total > allHardwarePrice){
+					$("#modal").modal("show");
+				}else{
+					layer.msg("账户余额不足！",{icon:7,time:1500});
+				}
+			}else if(a == 0){
+				var allPolicyPrice = $("#allPolicyPrice").val();
+				if(Total > allPolicyPrice){
+					$("#modal").modal("show");
+				}else{
+					layer.msg("账户余额不足！",{icon:7,time:1500});
+				}
+			}
+		}
+		
+		//form表单验证
+		$("#buyHardware").validate({
+			rules : {
+				selectHardware : {required : true,},
+				hardwareNumber : {required : true,digits:true,min:0.1,},
+				debitway : {required : true,},
+				name : {required : true,maxlength: 10,
+				},
+				phone : {required : true,isPhone : true,},
+				address : {required : true,},
+				remarks : {required : true,maxlength : 50,},
+			},
+			messages : {
+				selectHardware : {required : "请选择硬件产品",},
+				hardwareNumber : {required : "请输入数量",digits:"请输入大于零的整数",min:"请输入大于零的整数",},
+				debitway : {required : "请选择扣款方式",},
+				name : {required : "请输入收货人",maxlength : "最多输入十个字符"},
+				phone : {required : "请输入联系电话",},
+				address : {required : "请输入收货地址",},
+				remarks : {required : "请输入备注",maxlength : "最多输入50个字符"},
+			},
+			errorPlacement : function(error, element) {
+				error.insertAfter(element.parent());
+			}
+		});
+		
+		$("#bugPolicy ").validate({
+			rules:{
+    			companyName:{required:true,minlength:2, maxlength:30,
+        			remote: "${ctx}/agentsystem/terminal/wasTerminalUser/validateCompanyName",
+    			},
+    			name:{required:true,minlength:2, maxlength:10,},
+    			phone:{required:true,isPhone:true,},
+    			province:{validateArea:true,},
+    			address:{required:true,minlength:2,maxlength:50,},
+    			loginName:{required:true,minlength:6, maxlength:15,isRightLoginNameForm:true,
+        			remote: "${ctx}/agentsystem/terminal/wasTerminalUser/validateLoginName",
+    			},
+    			password:{required:true,minlength:6, maxlength:20,isRightPasswordForm:true,},
+    			selectPolicy:{required : true,},
+    			policyNumber:{required : true,digits:true,min:0.1,},
+    			debitway : {required : true,},
+				remarks : {required : true,},
+    		},
+    		messages:{
+    			companyName:{required:"请输入公司名称",minlength:"公司名称至少为2个字符",maxlength:"公司名称最多为30个字符",remote: "此公司名已经注册过"},
+    			name:{required:"请输入负责人名字",minlength:"负责人名字至少为2个字符",maxlength:"负责人名字最多为10个字符"},
+    			phone:{required: "请输入联系方式",},
+    			address:{required:"请输入详细地址",minlength:"地址至少为2个字符",maxlength:"地址最多为50个字符"},
+    			loginName:{required:"请输入账号",minlength:"账号至少6个字符",maxlength:"账号最多15个字符",remote:"此账号已经注册过"},    
+    			password:{required:"请输入密码",minlength:"密码至少6个字符",maxlength:"密码最多20个字符"}, 
+    			selectPolicy:{required : "请选择版本",},
+    			policyNumber:{required : "请输入数量",digits:"请输入大于零的整数",min:"请输入大于零的整数"},
+    			debitway : {required : "请选择扣款方式"},
+    			remarks : {required : "请输入备注"},
+    		},
+    		 errorPlacement: function(error, element) {
+              	if(element.attr("id")=="province"){
+             		$(".area").append(error);
+             	}else{
+                 	error.insertAfter(element.parent());
+             	}          	
+             }
+		});
+		
+		$("#debitwayForm").validate({
+			rules : {
+				hardwarerow : {
+					number : true,
+					range : [0,'${agent.hardwareAccount}'],
+					minNumber: true
+				},
+				publicrow : {
+					number : true,
+					range : [0,'${agent.publicAccount}'],
+					minNumber: true
+				},
+				minarow : {
+					number : true,
+					range : [0,'${agent.minaAccount}'],
+					minNumber: true
+				},
+				viprow : {
+					number : true,
+					range : [0,'${agent.vipAccount}'],
+					minNumber: true
+				},
+			},
+			messages : {
+				hardwarerow : {
+					number : "请正确输入金额",
+					range: "请输入0-"+'${agent.hardwareAccount}'+"以内的金额",
+					length: "输入数字最多小数点后两位"
+				},
+				publicrow : {
+					number : "请正确输入金额",
+					range : "请输入0-"+'${agent.publicAccount}'+"以内的金额",
+					length: "输入数字最多小数点后两位"
+				},
+				minarow : {
+					number : "请正确输入金额", 
+					range : "请输入0-"+'${agent.minaAccount}'+"以内的金额",
+					length: "输入数字最多小数点后两位"
+				},
+				viprow : {
+					number : "请正确输入金额",
+					range: "请输入0-"+'${agent.vipAccount}'+"以内的金额",
+					length: "输入数字最多小数点后两位"
+				},
+			},
+			errorPlacement : function(error, element) {
+				error.insertAfter(element.parent());
+			}
+		});
+		
+		//计算总金额
+		$('.ExpendA').bind('input propertychange', function() {
+			var total=0;
+			$('.ExpendA').each(
+				function(){
+					if(!isNaN(this.value)){
+						total+=Number(this.value);
+					}
+			});
+			$('#totalAccountMoney').html(total);
+		});
+		
+		//保存扣款方式
+		function saveDebitway(){
+			var isValid = $("#debitwayForm").valid();
+			if (isValid) {
+				if($("#hardwarerow").val() == "" || $("#hardwarerow").val() == null){
+					$("#hardwarerow").val(0);
+				}
+				if($("#publicrow").val() == "" || $("#publicrow").val() == null){
+					$("#publicrow").val(0);
+				}
+				if($("#minarow").val() == "" || $("#minarow").val() == null){
+					$("#minarow").val(0);
+				}
+				if($("#viprow").val() == "" || $("#viprow").val() == null){
+					$("#viprow").val(0);
+				}
+				var totalDebitway = parseFloat($("#hardwarerow").val())+parseFloat($("#publicrow").val())+parseFloat($("#minarow").val())+parseFloat($("#viprow").val());
+				var allHardwarePrice = $("#allHardwarePrice").val();
+				var allPolicyPrice = $("#allPolicyPrice").val();
+				if($("#difference").val()==1){
+					if(totalDebitway == allHardwarePrice){
+						var str = '硬件扣款：'+$("#hardwarerow").val()+'元;公众号扣款:'+$("#publicrow").val()+'元;小程序扣款：'+$("#minarow").val()+'元;VIP扣款:'+$("#viprow").val()+'元;';
+						$("#publicExpendHardware").val($("#publicrow").val());
+						$("#minaExpendHardware").val($("#minarow").val());
+						$("#hardwareExpendHardware").val($("#hardwarerow").val());
+						$("#vipExpendHardware").val($("#viprow").val());
+						$("#debitwayHardware").val(str);
+						$("#modal").modal("hide");
+					}else{
+						layer.msg("扣款总金额与硬件总价不等！",{icon:7,time:1500});
+					}
+				}else if($("#difference").val()==0){
+					if(totalDebitway == allPolicyPrice){
+						var str = '硬件扣款：'+$("#hardwarerow").val()+'元;公众号扣款:'+$("#publicrow").val()+'元;小程序扣款：'+$("#minarow").val()+'元;VIP扣款:'+$("#viprow").val()+'元;';
+						$("#publicExpendPolicy").val($("#publicrow").val());
+						$("#minaExpendPolicy").val($("#minarow").val());
+						$("#hardwareExpendPolicy").val($("#hardwarerow").val());
+						$("#vipExpendPolicy").val($("#viprow").val());
+						$("#debitwayPolicy").val(str);
+						$("#modal").modal("hide");
+					}else{
+						layer.msg("扣款总金额与软件总价不等！",{icon:7,time:1500});
+					}
+				}
+				
+			}
+		}
+		//展示方针信息确认
+		function savePolicy(a){
+			$("#order").empty();
+			var isValid = $("#bugPolicy").valid();
+			if (isValid) {
+				var pay = Number($("#hardwareExpendPolicy").val()) + Number($("#publicExpendPolicy").val()) + Number($("#minaExpendPolicy").val()) + Number($("#vipExpendPolicy").val());
+				if($("#allPolicyPrice").val() == pay){
+					var list = [];
+					$("#policy :input").each(function(){
+						if($(this).val() != "" && $(this).val() != null){
+							list = list + $(this).val()+",";
+						}
+					}); 
+					$("#listPolicy").val(list);
+					var string = list.split(",");
+					var str = "";
+					for(var i = 0; i < string.length-1; i+=10){
+						var name = string[i+1];
+						var number = string[i+3];
+						var unitPrice =string[i+4];
+						var price = string[i+9];
+						str +='<tr><td>'+name+'</td><td>'+number+'</td><td>'+unitPrice+'</td><td>'+price+'</td></tr>';
+					}
+					$("#order").append(str);
+					$("#totalMoney").html($("#allPolicyPrice").val());
+					$("#totalHMoney").html($("#hardwareExpendPolicy").val());
+					$("#totalPMoney").html($("#publicExpendPolicy").val());
+					$("#totalMMoney").html($("#minaExpendPolicy").val());
+					$("#totalVMoney").html($("#vipExpendPolicy").val());
+					$("#different").val(a);
+					$("#ModalSure").modal("show");
+				}else{
+					layer.msg("扣款总金额与软件总价不等！",{icon:7,time:1500});
+				}
+			}
+		}
+		//展示硬件信息确认
+		function saveHardware(a){
+			$("#order").empty();
+			var isValid = $("#buyHardware").valid();
+			if (isValid) {
+				var pay = Number($("#hardwareExpendHardware").val()) + Number($("#publicExpendHardware").val()) + Number($("#minaExpendHardware").val()) + Number($("#vipExpendHardware").val());
+				if($("#allHardwarePrice").val() == pay){
+					var list = [];
+					$("#hardware :input").each(function(){
+						if($(this).val() != "" && $(this).val() != null){
+							list = list + $(this).val()+",";
+						}
+					}); 
+					$("#listHardware").val(list);
+					var string = list.split(",");
+					var str = "";
+					for(var i = 0; i < string.length-1; i+=5){
+						var name = string[i+1];
+						var number = string[i+2];
+						var unitPrice =string[i+3];
+						var price = string[i+4];
+						str +='<tr><td>'+name+'</td><td>'+number+'</td><td>'+unitPrice+'</td><td>'+price+'</td></tr>';
+					}
+					$("#order").append(str);
+					$("#totalMoney").html($("#allHardwarePrice").val());
+					$("#totalHMoney").html($("#hardwareExpendHardware").val());
+					$("#totalPMoney").html($("#publicExpendHardware").val());
+					$("#totalMMoney").html($("#minaExpendHardware").val());
+					$("#totalVMoney").html($("#vipExpendHardware").val());
+					$("#different").val(a);
+					$("#ModalSure").modal("show");
+				}else{
+					layer.msg("扣款总金额与硬件总价不等！",{icon:7,time:1500});
+				}
+			}
+		}
+		
+		//保存订单
+		function saveOrder(){
+			if($("#different").val() == 0){//保存方针订单
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+					url : "${ctx}/agency/wasAgentOrder/insertPolicy",
+					dataType : "json",
+					type : "post",
+					data : $('#bugPolicy').serialize(),//通过ajax传过去
+					success : function(result) {//control成功了在传回来用的
+						if (result > 0) {
+							layer.close(index);
+							$("#ModalSure").modal("hide");
+							layer.msg("购买成功", {
+								time : 1000,
+								icon : 1,
+							}, function(data) {
+								window.location.href = "${ctx}/agentSystem/SysUser/list";
+							});
+						}
+					}
+				});
+			}else if($("#different").val() == 1){//保存硬件订单
+				$("#deliveryMethod").val($(":radio:checked").val());
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+					url : "${ctx}/agency/wasAgentOrder/insertHardware",
+					dataType : "json",
+					type : "post",
+					data : $('#buyHardware').serialize(),//通过ajax传过去
+					success : function(result) {//control成功了在传回来用的
+						if (result > 0) {
+							layer.close(index);
+							$("#ModalSure").modal("hide");
+							layer.msg("购买成功", {
+								time : 1000,
+								icon : 1,
+							}, function(data) {
+								window.location.href = "${ctx}/agentSystem/SysUser/list";
+							});
+						}
+					}
+				});
+			}
+			
+		}
+		//返回
+		function jump() {
+			window.location.href = "${ctx}/agentSystem/SysUser/list";
+		}
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n,s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		//查询方法
+		function search(){//查询，页码清零
+			$("#pageNo").val(0);
+			$("#searchForm").submit();
+		}
+		//checkbox监听
+		$('#square-radio-one').on('ifChecked', function(event) { //ifCreated 事件应该在插件初始化之前绑定 (ifUnchecked)
+			document.getElementById("select").style.display="none";    
+		});
+		$('#square-radio-two').on('ifChecked', function(event) { //ifCreated 事件应该在插件初始化之前绑定 (ifUnchecked)
+			document.getElementById("select").style.display="";    
+		});
+		//针对tab切换会出现其他的问题
+		function switchover(){
+			$('#home').removeClass("active");
+			$('#home').attr("aria-expanded", false);
+			$('#profile').removeClass("active");
+			$('#profile').attr("aria-expanded", false);
+		}
+	</script>
+
+</body>
+</html>

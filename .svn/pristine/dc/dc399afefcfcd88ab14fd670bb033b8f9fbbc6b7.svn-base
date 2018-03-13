@@ -1,0 +1,31 @@
+package com.jeeplus.modules.agentSystem.agency.dao;
+
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentSystem.agency.entity.WasConsumeSynthesis;
+
+/**
+ * 代理商消费综合实体DAO接口
+ * @author SZP
+ * @version 2017-09-29
+ */
+@MyBatisDao
+public interface WasConsumeSynthesisDao extends CrudDao<WasConsumeSynthesis> {
+
+	public int updateInvoiceY(WasConsumeSynthesis consumeSynthesis);
+
+	public int updateInvoiceR(WasConsumeSynthesis consumeSynthesis);
+
+	public int updateInvoiceC(WasConsumeSynthesis consumeSynthesis);
+
+	public List<WasConsumeSynthesis> findForList(WasConsumeSynthesis consumeSynthesis);
+
+	public int updateOrderC(WasConsumeSynthesis consumeSynthesis);
+
+	public int updateOrderY(WasConsumeSynthesis consumeSynthesis);
+
+	public int updateOrderR(WasConsumeSynthesis consumeSynthesis);
+	
+}

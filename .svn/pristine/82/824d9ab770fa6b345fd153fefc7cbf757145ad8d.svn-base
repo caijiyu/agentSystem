@@ -1,0 +1,297 @@
+ package com.jeeplus.modules.agentsystem.terminal.web;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasPolicyPurchase;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.agency.service.WasPolicyPurchaseService;
+import com.jeeplus.modules.agentsystem.agency.service.WasSysUserService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentSystemLog;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentSystemLogService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasSalesPolicyService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasUserService;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+import com.jeeplus.modules.agentsystem.terminal.service.WasTerminalUserService;
+import com.jeeplus.modules.sys.entity.User;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.utils.UserUtils;
+/**
+ * 
+ * @author Hua
+ *
+ */
+@Controller
+@RequestMapping(value="${adminPath}/agentSystem/terminal/wasTerminalUser")
+@Transactional(readOnly = false,rollbackFor=Exception.class)
+public class WasTerminalUserController extends BaseController{
+
+	@Autowired
+	private WasTerminalUserService wasTerminalUserService;
+	@Autowired
+	private WasAgentSystemLogService wasAgentSystemLogService;
+	@Autowired
+	private WasSalesPolicyService wasSalesPolicyService;
+	@Autowired
+	WasPolicyPurchaseService policyPurchaseService;
+	@Autowired
+	WasSysUserService wasSysUserService;
+	@Autowired
+	private WasUserService wasUserService;
+	
+	public static final String  AGENT="代理商";		
+	/**
+	 * 
+	 * @param wasTerminalUser
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 * @throws ParseException 
+	 */
+	@RequiresPermissions("terminal:wasTerminalUser:list")
+	@RequestMapping(value = {"list", ""})
+	public String list(WasTerminalUser wasTerminalUser, HttpServletRequest request, HttpServletResponse response, Model model) throws ParseException {
+		String date = request.getParameter("beginDate");
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		if(!StringUtils.isBlank(date)){
+			Date startTime=sdf.parse(date); 
+			wasTerminalUser.setBeginDate(startTime);
+			model.addAttribute("startTime",startTime);
+		}
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = (Principal)subject.getPrincipal(); 
+		WasSysUser wasSysUser=wasUserService.get(principal.getId());
+		 Page<WasTerminalUser> page = null;
+		 //区分  内部人员  与  代理商
+		if(AGENT.equals(wasSysUser.getRoleList().get(0).getRoleType())){User user = UserUtils.getUser();
+		    //代理商
+			List<String> subUserIds= wasTerminalUserService.findSubUsers(user.getId());
+			subUserIds.add(user.getId());
+			wasTerminalUser.setSubUserIds(subUserIds);
+		}else{
+			//内部人员
+			wasTerminalUser.setSubUserIds(null);
+		}
+       page = wasTerminalUserService.findPage(new Page<WasTerminalUser>(request, response), wasTerminalUser); 
+        model.addAttribute("page", page);
+		return "modules/agentsystem/terminal/wasTerminalUserList";
+	}
+	/**
+	 * 添加或编辑
+	 * @param terminalUserId
+	 * @param model
+	 * @return
+	 */
+	@RequiresPermissions(value={"terminal:wasTerminalUser:add","terminal:wasTerminalUser:edit"},logical=Logical.OR)
+	@RequestMapping(value = "form")
+	public String form(Integer terminalUserId,Model model) {
+		if(terminalUserId!=null){
+			model.addAttribute("wasTerminalUser", wasTerminalUserService.findByTerminalUserId(terminalUserId));
+		}
+		return "modules/agentsystem/terminal/wasTerminalUserForm";
+	}
+	/**
+	 * 保存
+	 * @param wasTerminalUser
+	 * @return
+	 */
+	@RequiresPermissions("terminal:wasTerminalUser:save")
+	@RequestMapping(value = "save")
+	@ResponseBody
+	public String save(WasTerminalUser wasTerminalUser) {
+		if(wasTerminalUser.getTerminalUserId()!=null){
+			insertLog("terminal:wasTerminalUser:edit", "更新了终端用户表", wasTerminalUser.getLoginName());
+		}else{
+			insertLog("terminal:wasTerminalUser:add", "添加了终端用户表", wasTerminalUser.getLoginName());
+			wasTerminalUser.setParentId(UserUtils.getUser().getId());
+		}
+		Integer num = -1;
+		num = wasTerminalUserService.saveWasTerminalUser(wasTerminalUser);
+		return num>0?"success":"failure";
+	}
+	/**
+	 * 逻辑删除
+	 * @param terminalUserId
+	 * @return
+	 */
+	@RequiresPermissions("terminal:wasTerminalUser:delete")
+	@RequestMapping(value = "delete")
+	@ResponseBody
+	public String delete(Integer terminalUserId) {
+		insertLog("terminal:wasTerminalUser:delete", "删除了终端用户", wasTerminalUserService.findByTerminalUserId(terminalUserId).getLoginName());
+		int num = -1;
+		num =  wasTerminalUserService.deleteLogic(terminalUserId);
+		return num>0?"success":"failure";
+	}
+	/**
+	 * 冻结
+	 * @param terminalUserId
+	 * @param reason
+	 * @return
+	 */
+	@RequiresPermissions("terminal:wasTerminalUser:freeze")
+	@RequestMapping(value = "freeze")
+	@ResponseBody
+	public String freeze(Integer terminalUserId,String reason) {
+		insertLog("terminal:wasTerminalUser:delete", "冻结了终端用户", wasTerminalUserService.findByTerminalUserId(terminalUserId).getLoginName());
+		int num = -1;
+		num = wasTerminalUserService.freeze(reason, terminalUserId);
+		return num>0?"success":"failure";
+	}
+	/**
+	 * 解冻
+	 * @param terminalUserId
+	 * @param reason
+	 * @return
+	 */
+	@RequiresPermissions("terminal:wasTerminalUser:thaw")
+	@RequestMapping(value = "thaw")
+	@ResponseBody
+	public String thaw(Integer terminalUserId,String reason) {
+		insertLog("terminal:wasTerminalUser:delete", "解冻了终端用户", wasTerminalUserService.findByTerminalUserId(terminalUserId).getLoginName());
+		int num = -1;
+		num = wasTerminalUserService.thaw(reason, terminalUserId);
+		return num>0?"success":"failure";
+	}	
+	/**
+	 * 公司名唯一性验证
+	 * @param companyName
+	 * @return
+	 */
+	@RequestMapping(value = "validateCompanyName")
+	@ResponseBody
+	public Boolean validateCompanyName(String companyName) {
+		return wasTerminalUserService.validateCompanyName(companyName);
+	}
+	/**
+	 * 账号唯一性验证
+	 * @param loginName
+	 * @return
+	 */
+	@RequestMapping(value = "validateLoginName")
+	@ResponseBody
+	public Boolean validateLoginName(String loginName) {
+		return wasTerminalUserService.validateLoginName(loginName);
+	}
+	/**
+	 * 编辑时的伪验证
+	 * @return
+	 */
+	@RequestMapping(value = "validate")
+	@ResponseBody
+	public Boolean validate() {
+		return true;
+	}
+
+	/**
+	 * 插入日志
+	 * @param permission
+	 * @param description
+	 * @param terminalUserName
+	 * @return
+	 */
+	private Integer insertLog(String permission,String description,String terminalUserName){
+		User user = UserUtils.getUser();
+		String menuId = wasTerminalUserService.getMenuIdByPermission(permission);
+		WasAgentSystemLog log = new WasAgentSystemLog(menuId, new Date(), user.getId(),"用户"+ user.getLoginName()+description + terminalUserName);
+		return wasAgentSystemLogService.insert(log);
+	}
+	/**
+	 * 转发到终端记录页面
+	 * @param wasPolicyPurchase
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 * @throws ParseException 
+	 */
+	@RequiresPermissions("terminal:terminalUserRecord:list")
+	@RequestMapping(value = {"terminalUserRecord", ""})
+	public String terminalUserRecord(WasPolicyPurchase wasPolicyPurchase, HttpServletRequest request, HttpServletResponse response, Model model) throws ParseException {
+		
+		String date = request.getParameter("beginDate");
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		if(!StringUtils.isBlank(date)){
+			Date startTime=sdf.parse(date); 
+			wasPolicyPurchase.setBeginDate(startTime);
+			model.addAttribute("startTime",startTime);
+		}
+		Subject subject = SecurityUtils.getSubject();
+		Principal principal = (Principal)subject.getPrincipal(); 
+		WasSysUser sysUser=wasUserService.get(principal.getId());
+		 Page<WasPolicyPurchase> page = null;
+		 //区分 内部人员  与  代理商
+		if(AGENT.equals(sysUser.getRoleList().get(0).getRoleType())){User user = UserUtils.getUser();
+			//代理商
+			List<String> subUserIds= wasTerminalUserService.findSubUsers(user.getId());
+			subUserIds.add(user.getId());
+			wasPolicyPurchase.setSubUserIds(subUserIds);
+		}else{
+			//内部人员
+			wasPolicyPurchase.setSubUserIds(null);
+		}
+		page = policyPurchaseService.findRecord(new Page<WasPolicyPurchase>(request, response), wasPolicyPurchase);
+        model.addAttribute("page", page);
+        List<WasPolicyPurchase> list = page.getList();
+        for(WasPolicyPurchase a : list){
+        	Integer days = (int) Math.abs((a.getEndDate().getTime() - a.getCreateDate().getTime())/ (24 * 60 * 60 * 1000)) + 1;
+        	Float years = (float) (days/365.0);
+        	years = (float) (Math.round(years*100)/100);
+        	Integer terminalUserId = a.getTerminalUserId();
+        	WasTerminalUser wasTerminalUser = wasTerminalUserService.findByTerminalUserId(terminalUserId);
+        	WasSysUser wasSysUser = wasSysUserService.get(wasTerminalUser.getParentId());
+        	String salesName =  wasSalesPolicyService.findById(a.getSalesPolicyId()).getTitle();
+        	String companyName = wasTerminalUser.getCompanyName();
+        	String loginName = wasTerminalUser.getLoginName();
+        	String agentName = wasSysUser.getCompanyName();
+        	String[] info = new String[5];
+        	//终端公司名称
+        	info[0] = companyName;
+        	//终端用户名
+        	info[1] = loginName;
+        	//方针名
+        	info[2] = salesName;
+        	//所属代理商
+        	info[3] = agentName;
+        	//年限
+        	info[4] = Float.toString(years);
+        	a.setInfo(info);
+        }
+		return "modules/agentsystem/terminal/wasTerminalRecord";
+	}
+	/**
+	 * 删除终端记录
+	 * @param policyPurchaseId
+	 * @return
+	 */
+	@RequiresPermissions("terminal:terminalUserRecord:delete")
+	@RequestMapping(value="deleteById")
+	@ResponseBody
+	public String deleteById(Integer policyPurchaseId) {
+		Integer num=-1;
+		num = policyPurchaseService.deleteByPolicyPurchaseId(policyPurchaseId);
+		return num>0?"success":"failure";
+	}
+	
+	
+}

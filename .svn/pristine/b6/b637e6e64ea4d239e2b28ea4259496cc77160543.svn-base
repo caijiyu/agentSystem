@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.sysdata.dao.WasHardwareDao">
+    <resultMap id="WasHardware" type="com.jeeplus.modules.agentsystem.sysdata.entity.WasHardware">
+	  <id property="hardwareId" column="hardwareId"/>
+	  <result property="picture" column="picture"/>
+	  <result property="name" column="name"/>
+	  <result property="classify" column="classify"/>
+	  <result property="price" column="price"/>
+	  <result property="sellNum" column="sellNum"/>
+	  <result property="createDay" column="createDay"/>
+	  <result property="createId" column="createId"/>
+	  <result property="updateDay" column="updateDay"/>
+	  <result property="updateId" column="updateId"/>
+	  <result property="state" column="state"/>
+	  <result property="hardwareAccount" column="hardwareAccount"/>
+	  <result property="vipAccount" column="vipAccount"/>
+	</resultMap>
+	
+	<sql id="wasHardwareColumns">
+		a.hardwareid AS "hardwareId",
+		a.picture AS "picture",
+		a.name AS "name",
+		a.classify AS "classify",
+		a.price AS "price",
+		a.sellnum AS "sellNum",
+		a.createdate AS "createDay",
+		a.createby AS "createId",
+		a.updatedate AS "updateDay",
+		a.updateby AS "updateId",
+		a.state AS "state"
+	</sql>
+	
+	<sql id="wasHardwareJoins">
+	
+	</sql>
+    
+	<select id="get" resultType="WasHardware">
+		SELECT 
+			<include refid="wasHardwareColumns"/>,us.hardwareAccount as "hardwareAccount",us.vipAccount as "vipAccount",us.hardwareExpend as "userHardwareExpend",us.vipExpend as "userVipExpend"
+		FROM was_hardware a
+		LEFT JOIN sys_user us ON us.id = a.createBy
+		WHERE a.hardwareid = #{hardwareId}
+	</select>
+	
+	<select id="findList" resultType="WasHardware">
+		SELECT 
+			<include refid="wasHardwareColumns"/>
+		FROM was_hardware a
+		<include refid="wasHardwareJoins"/>
+		<where>
+			a.state = 1
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		ORDER BY a.createdate desc
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WasHardware">
+		SELECT 
+			<include refid="wasHardwareColumns"/>
+		FROM was_hardware a
+		<include refid="wasHardwareJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO was_hardware(
+			hardwareId,
+			picture,
+			name,
+			classify,
+			price,
+			createDate,
+			createBy,
+			updateDate,
+			updateBy
+		) VALUES (
+			#{hardwareId},
+			#{picture},
+			#{name},
+			#{classify},
+			#{price},
+			#{createDay},
+			#{createId},
+			#{updateDay},
+			#{updateId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE was_hardware SET 	
+			picture = #{picture},
+			name = #{name},
+			classify = #{classify},
+			price = #{price},
+			updateDate = #{updateDay},
+			updateBy = #{updateId}
+		WHERE hardwareId = #{hardwareId}
+	</update>
+	
+	<update id="updateSellNum">
+		UPDATE was_hardware SET 	
+			sellNum = #{sellNum}
+		WHERE hardwareId = #{hardwareId}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM was_hardware
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_hardware SET 
+			state = #{state}
+		WHERE hardwareId = #{hardwareId}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WasHardware" statementType="STATEMENT">
+		select * FROM was_hardware  where ${propertyName} = '${value}'
+	</select>
+</mapper>

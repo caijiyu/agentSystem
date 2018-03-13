@@ -1,0 +1,233 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<!-- 开票列表 -->
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<style type="text/css">
+#details-error{
+    margin-left:97px;
+    color:red;
+}
+</style>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Nav tabs -->
+			
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">
+						 <shiro:hasPermission name="sysdata:wasInvoiceContent:add">
+								<button type="button" class="btn btn-info" onclick="show()">
+							<i class="fa fa-plus-circle"></i> 添加
+						</button>  			
+						</shiro:hasPermission>
+					</div>
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentSystem/wasInvoiceContent/list" method="post" style="width: 100%" id="searchForm">
+							<button type="button" class="btn waves-effect waves-light btn-info" onclick="search()" style="float: right;">搜索</button>
+							<input autocomplete="off" type="hidden" id="startDatea" value="${time.startCreateDate}"  name="startCreateDate" />
+							<input autocomplete="off" type="hidden" id="endDatea"  value="${time.endCreateDate}"   name="endCreateDate" />
+								<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}" /> 
+								<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}" />
+							<div class="form-group col-6" style="margin-bottom: 0px; float: right;">
+								<div class=" input-group input-daterange" id="date-range">
+									<div style="display:inline-block;padding-top: 8px;">添加时间范围:&nbsp;&nbsp;</div>
+									<input autocomplete="off" id="startDate"  type="text" value="<fmt:formatDate value="${time.startCreateDate}" pattern="yyyy-MM-dd"/>" class="form-control height-control" placeholder="选择开始时间"  style="border-right:0px;border-radius:0.25rem 0 0 0.25rem;text-align: left;" />
+									<span style="border-radius:0px" class="input-group-addon bg-info b-0 text-white height-control">至</span>
+									<input autocomplete="off" id="endDate" type="text" value="<fmt:formatDate value="${time.endCreateDate}" pattern="yyyy-MM-dd"/>" class="form-control height-control" placeholder="选择结束时间"  style="border-left:0px;text-align: left;" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<table id="contentTable" class="display nowrap table table-hover table-striped table-bordered">
+						<thead>
+							<tr>
+								<th class="tableControl">内容</th>
+								<th class="tableControl">添加时间</th>
+								<th class="tableControl">操作</th>
+							</tr>
+						</thead>
+						
+						<tbody>
+							<c:forEach items="${page.list}" var="invoiceContent">
+								<tr>
+									<td class="tableControl" style="white-space:pre">${fn:escapeXml(invoiceContent.details)}</td>
+									<td class="tableControl"><fmt:formatDate value="${invoiceContent.createDate}" type="both" /></td>
+									<td class="tableControl">
+										 
+										<shiro:hasPermission name="sysdata:wasInvoiceContent:del">
+											<button type="button" data-toggle="tooltip" onclick="deleteContent(${invoiceContent.contentId})" data-original-title="删除" class="btn btn-danger btn-circle btn-xs ">
+												<i class="fa fa-times"></i>
+											</button>
+										</shiro:hasPermission>
+										
+									</td>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${page.count gt 10}">
+						<table:page page="${page}"></table:page>
+					</c:if>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+
+	<!-- 模态框 -->
+	<div class="modal fade" id="modal" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content" style="margin-top: 225px">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+						<h6 id="title" class="modal-title">添加</h6>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="inputForm">
+					<input type="hidden" id="softwareId" name="softwareId" />
+					<input type="hidden" id="menuId" name="menuId" />
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span style="color:red">*&nbsp;</span>内容：</label>
+							<div class="col-9 controls input-group">
+								<input maxlength="20"  id="details" autocomplete="off" type="text" name="details"
+									class="form-control" >
+							</div>
+						</div>
+						
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer" style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="save()">保存</button>						
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		//弹框显示
+		function show() {
+			$("#details").val("");
+			$("#inputForm").data("validator").resetForm();
+			$("#modal").modal("show");
+		}
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n,s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		//查询方法
+		function search(){//查询，页码清零
+			$("#pageNo").val(0);
+		    $("#startDatea").val($("#startDate").val()); 
+		    $("#endDatea").val($("#endDate").val()+" 23:59:59"); 
+			$("#searchForm").submit();
+		}
+		
+		
+		//保存
+		function save(){
+			var isValid = $("#inputForm").valid();
+			$("#menuId").val($("#btnId",parent.document).val());
+			if(isValid){
+			 var lock=true;
+				layer.confirm('是否确认保存？', {closeBtn:0,icon : 3 ,
+				 skin : 'layui-layer-molv',btn: ['确认','取消']},function(){
+					if(lock){
+						lock=false;
+					 $("#modal").modal("hide");
+					 var index = layer.load(1, {shade: [0.1,'#fff']});
+					 $.ajax({
+							url : "${ctx}/agentSystem/wasInvoiceContent/save",
+							dataType : "json",
+							type : "post",
+							data : $('#inputForm').serialize(),
+							success : function(result) {
+								layer.close(index);
+								if (result >0) {
+									layer.msg("保存成功",{icon:1,time:1000},function(){
+										location.href="${ctx}/agentSystem/wasInvoiceContent/list";
+									});
+								}
+							},error : function(){
+								layer.close(index);
+								layer.msg("保存失败",{icon:2,time:1000},function(){
+									location.href="${ctx}/agentSystem/wasInvoiceContent/list";
+								});
+							}
+						});  
+					}
+					});
+			}
+		}
+		
+		//删除
+		function deleteContent(id){
+			var menuId=$("#btnId",parent.document).val();
+			layer.confirm("确认要彻底删除数据吗?",{closeBtn:0,skin : "layui-layer-molv",btn : [ "确认","取消" ],icon:3},
+					function() {
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+					url :"${ctx}/agentSystem/wasInvoiceContent/delete",
+					dataType : "json",
+					Type : "post",
+					data : {"contentId":id,"menuId":menuId},
+					success : function(result){
+						layer.close(index);
+						if(result>0){
+							layer.msg("删除成功",{icon:1,time:1000},function(){
+								location.href="${ctx}/agentSystem/wasInvoiceContent/list";
+							});
+						}
+					},
+					error : function(){
+						layer.close(index);
+						layer.msg("删除失败",{icon:2,time:1000},function(){
+							location.href="${ctx}/agentSystem/wasInvoiceContent/list";
+						});
+					}
+				});
+			});
+			}
+	
+		$("#inputForm").validate({
+			rules : {
+				details : {
+					required : true,
+					
+				},
+				},messages : {
+					details : {
+						required : "请填写内容！",
+						
+					},
+				},errorPlacement : function(error, element) {
+					error.insertAfter(element.parent());
+				}
+			
+		});
+		
+	</script>
+
+</body>
+</html>

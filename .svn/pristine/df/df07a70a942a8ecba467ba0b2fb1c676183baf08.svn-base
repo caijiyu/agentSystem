@@ -1,0 +1,126 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentsystem.sysdata.entity;
+
+import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Length;
+import org.springframework.web.util.HtmlUtils;
+
+import java.util.Date;
+
+import com.jeeplus.common.persistence.DataEntity;
+import com.jeeplus.common.utils.excel.annotation.ExcelField;
+
+/**
+ * 文件列表Entity
+ * @author WB
+ * @version 2017-09-27
+ */
+public class WasFile extends DataEntity<WasFile> {
+	
+	private static final long serialVersionUID = 1L;
+	private Integer fileId;		// 主键ID
+	private String name;		// 文件名称
+	private Integer classifyId;		// 文件分类
+	private Integer number;		// 文件数量
+	private String urlink;		// 地址
+	private String fetchCode;		// 提取码
+	private Date beginCreatedate;		// 开始 添加时间
+	private Date endCreatedate;		// 结束 添加时间
+	private String classifyName;   //文件分类名
+	
+	public WasFile() {
+		super();
+	}
+
+	public WasFile(String id){
+		super(id);
+	}
+
+	@NotNull(message="主键ID不能为空")
+	@ExcelField(title="主键ID", align=2, sort=0)
+	public Integer getFileId() {
+		return fileId;
+	}
+
+	public void setFileId(Integer fileId) {
+		this.fileId = fileId;
+	}
+	
+	@Length(min=1, max=100, message="文件名称长度必须介于 1 和 100 之间")
+	@ExcelField(title="文件名称", align=2, sort=1)
+	public String getName() {
+		return HtmlUtils.htmlUnescape(name);
+	}
+
+	public void setName(String name) {
+		this.name = HtmlUtils.htmlUnescape(name);
+	}
+	
+	@NotNull(message="文件分类不能为空")
+	@ExcelField(title="文件分类", align=2, sort=2)
+	public Integer getClassifyId() {
+		return classifyId;
+	}
+
+	public void setClassifyId(Integer classifyId) {
+		this.classifyId = classifyId;
+	}
+	
+	@NotNull(message="文件数量不能为空")
+	@ExcelField(title="文件数量", align=2, sort=3)
+	public Integer getNumber() {
+		return number;
+	}
+
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
+	
+	@Length(min=1, max=1000, message="地址长度必须介于 1 和 1000 之间")
+	@ExcelField(title="地址", align=2, sort=4)
+	public String getUrlink() {
+		return urlink;
+	}
+
+	public void setUrlink(String urlink) {
+		this.urlink = urlink;
+	}
+	
+	@Length(min=1, max=20, message="提取码长度必须介于 1 和 20 之间")
+	@ExcelField(title="提取码", align=2, sort=5)
+	public String getFetchCode() {
+		return fetchCode;
+	}
+
+	public void setFetchCode(String fetchCode) {
+		this.fetchCode = fetchCode;
+	}
+	
+	
+	public Date getBeginCreatedate() {
+		return beginCreatedate;
+	}
+
+	public void setBeginCreatedate(Date beginCreatedate) {
+		this.beginCreatedate = beginCreatedate;
+	}
+	
+	public Date getEndCreatedate() {
+		return endCreatedate;
+	}
+
+	public void setEndCreatedate(Date endCreatedate) {
+		this.endCreatedate = endCreatedate;
+	}
+
+	public String getClassifyName() {
+		return classifyName;
+	}
+
+	public void setClassifyName(String classifyName) {
+		this.classifyName = classifyName;
+	}
+		
+}

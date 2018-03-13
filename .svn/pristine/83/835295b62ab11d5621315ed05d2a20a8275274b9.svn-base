@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.agency.dao.WasFeedBackDao">
+    <sql id="WasFeedBackcolumns">
+		a.feedbackId AS "feedbackId",                
+		a.type AS "type",                
+		a.description AS "description",        
+		a.phone AS "phone",        
+		a.reply AS "reply",            
+		a.quizBy AS "quizBy",   
+		a.quizDate AS "quizDate",             
+		a.replyBy AS "replyBy",            
+		a.replyDate AS "replyDate",                      
+		a.state AS "state"           
+		             
+									 
+	</sql>
+    <!-- <sql id="WasFeedBackJoins">
+    	LEFT JOIN sys_user u ON u.id = a.quizBy AND 
+    </sql>	 -->	
+	<select id="findList" resultType="WasFeedBack">
+		SELECT 
+			<include refid="WasFeedBackcolumns"/> 
+		FROM was_feedback a
+			
+		<where>
+			AND a.state = 1
+			<if test="quizBy != null and quizBy != ''">
+				AND a.quizBy = #{quizBy} 
+				
+			</if>
+			<!-- 时间范围搜索 -->
+			<if test="beginDate != null and beginDate != ''">
+				<![CDATA[   AND DATE_FORMAT(a.quizDate, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')   ]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				<![CDATA[  AND DATE_FORMAT(a.quizDate, '%Y-%m-%d') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d')    ]]>
+			</if>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			order by (CASE WHEN a.reply  is null THEN 10 ELSE 20 END) ASC,a.quizDate DESC
+			</otherwise>
+		</choose>
+		
+	</select>
+	
+	<select id="get" resultType="WasFeedBack">
+		SELECT 
+			* 
+		FROM was_feedback a
+			
+		<where>
+			AND a.state = 1
+			<if test="feedbackId != null and feedbackId != ''">
+				AND a.feedbackId = #{feedbackId} 
+				
+			</if>
+			
+			
+		</where>
+		<choose>
+			
+		</choose>
+		
+	</select>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_feedback SET 
+			state = 0
+		WHERE feedbackId = #{feedbackId}
+	</update>
+	
+	<insert id="insertFeedBack">
+		INSERT INTO was_feedback(
+			
+			type,
+			description,
+			phone,
+			reply,
+			quizBy,
+			quizDate,
+			replyBy,
+			replyDate
+			
+			
+		) VALUES (
+			
+			#{type},
+			#{description},
+			#{phone},
+			#{reply},
+			#{quizBy},
+			#{quizDate},
+			#{replyBy},
+			#{replyDate}
+			
+			
+		)
+	</insert>
+	
+</mapper>

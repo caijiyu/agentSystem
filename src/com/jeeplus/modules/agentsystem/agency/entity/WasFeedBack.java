@@ -1,0 +1,202 @@
+package com.jeeplus.modules.agentsystem.agency.entity;
+
+import java.util.Date;
+
+import org.springframework.web.util.HtmlUtils;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jeeplus.common.persistence.DataEntity;
+/**
+ * 反馈
+ * @author SZP
+ * @version 2017-10-20
+ */
+
+public class WasFeedBack extends DataEntity<WasFeedBack> {
+
+	private static final long serialVersionUID = 1L;
+	/**主键ID*/
+	private Integer feedbackId;			
+	/**问题类型：1.公众号、2.小程序、3.硬件、4.售后、5.文档*/
+	private Integer type;				
+	/**问题描述*/
+	private String description;			
+	/**联系电话*/
+	private String phone;				
+	/**问题回复*/
+	private String reply;				
+	/**反馈账户*/
+	private String quizBy;				
+	/**反馈时间*/
+	private Date quizDate;				
+	/**回复账户*/
+	private String replyBy;				
+	/**回复时间*/
+	private Date replyDate;				
+	/**回复状态*/
+	private Integer replyState;			
+	/**代理商名称*/
+	private String name;				
+	/**公司的名称*/
+	private String companyName;	
+	/**公司的名称A*/
+	private String companyNameA;
+	public String getCompanyNameA() {
+		return HtmlUtils.htmlUnescape(companyNameA);
+	}
+	public void setCompanyNameA(String companyNameA) {
+		this.companyNameA = HtmlUtils.htmlUnescape(companyNameA);
+	}
+	/**已结束开始时间*/
+	private Date beginDateA;			
+	/**已回复结束时间*/
+	private Date endDateA;				
+	public Integer getFlag() {
+		return flag;
+	}
+	public void setFlag(Integer flag) {
+		this.flag = flag;
+	}
+	/**选择标志*/
+	private Integer flag;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	public Date getBeginDateA() {
+		return beginDateA;
+	}
+	public void setBeginDateA(Date beginDateA) {
+		this.beginDateA = beginDateA;
+	}
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	public Date getEndDateA() {
+		return endDateA;
+	}
+	public void setEndDateA(Date endDateA) {
+		this.endDateA = endDateA;
+	}
+	public String getName() {
+		return HtmlUtils.htmlUnescape(name) ;
+	}
+	public void setName(String name) {
+		this.name = HtmlUtils.htmlUnescape(name);
+	}
+	public String getCompanyName() {
+		return HtmlUtils.htmlUnescape(companyName);
+	}
+	public void setCompanyName(String companyName) {
+		this.companyName = HtmlUtils.htmlUnescape(companyName);
+	}
+	/**查询开始时间*/
+	private Date beginDate;				
+	/**查询结束时间*/
+	private Date endDate;				
+
+	public Integer getReplyState() {
+		return replyState;
+	}
+	public void setReplyState(Integer replyState) {
+		this.replyState = replyState;
+	}
+	/**状态（0：删除，1：正常）*/
+	private Integer state;				
+	public WasFeedBack() {
+		super();
+	}
+	public WasFeedBack(Integer feedbackId, Integer type, String description, String phone, String reply, String quizBy,
+			Date quizDate, String replyBy, Date replyDate,Integer replyState,Integer state) {
+		super();
+		this.feedbackId = feedbackId;
+		this.type = type;
+		this.description = description;
+		this.phone = phone;
+		this.reply = reply;
+		this.quizBy = quizBy;
+		this.quizDate = quizDate;
+		this.replyBy = replyBy;
+		this.replyDate = replyDate;
+		this.replyState = replyState;
+		this.state = state;
+	}
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	public Date getBeginDate() {
+		return beginDate;
+	}
+	public void setBeginDate(Date beginDate) {
+		this.beginDate = beginDate;
+	}
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	public Date getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+	public Integer getFeedbackId() {
+		return feedbackId;
+	}
+	public void setFeedbackId(Integer feedbackId) {
+		this.feedbackId = feedbackId;
+	}
+	public Integer getType() {
+		return type;
+	}
+	public void setType(Integer type) {
+		this.type = type;
+	}
+	public String getDescription() {
+		return HtmlUtils.htmlUnescape(description);
+	}
+	public void setDescription(String description) {
+		this.description = HtmlUtils.htmlUnescape(description);
+	}
+	public String getPhone() {
+		return HtmlUtils.htmlUnescape(phone);
+	}
+	public void setPhone(String phone) {
+		this.phone = HtmlUtils.htmlUnescape(phone);
+	}
+	public String getReply() {
+		return HtmlUtils.htmlUnescape(reply);
+	}
+	public void setReply(String reply) {
+		this.reply = HtmlUtils.htmlUnescape(reply);
+	}
+	public String getQuizBy() {
+		return HtmlUtils.htmlUnescape(quizBy);
+	}
+	public void setQuizBy(String quizBy) {
+		this.quizBy = HtmlUtils.htmlUnescape(quizBy);
+	}
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	public Date getQuizDate() {
+		return quizDate;
+	}
+	public void setQuizDate(Date quizDate) {
+		this.quizDate = quizDate;
+	}
+	public String getReplyBy() {
+		return HtmlUtils.htmlUnescape(replyBy);
+	}
+	public void setReplyBy(String replyBy) {
+		this.replyBy = HtmlUtils.htmlUnescape(replyBy);
+	}
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	public Date getReplyDate() {
+		return replyDate;
+	}
+	public void setReplyDate(Date replyDate) {
+		this.replyDate = replyDate;
+	}
+	public Integer getState() {
+		return state;
+	}
+	public void setState(Integer state) {
+		this.state = state;
+	}
+	@Override
+	public String toString() {
+		return "WasFeedBack [feedbackId=" + feedbackId + ", type=" + type + ", description=" + description + ", phone="
+				+ phone + ", reply=" + reply + ", quizBy=" + quizBy + ", quizDate=" + quizDate + ", replyBy=" + replyBy
+				+ ", replyDate=" + replyDate + ", state=" + state + "]";
+	}
+	
+}

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.terminal.dao.WasTerminalUserDao">
+    
+    <sql id="wasTerminalUserColumns">
+		a.terminalUserId AS "terminalUserId",
+		a.companyName AS "companyName",
+		a.parentId  AS "parentId",
+		a.name AS "name",
+		a.phone AS "phone",
+		a.province AS "province",
+		a.city AS "city",
+		a.county AS "county",
+		a.address AS "address",
+		a.loginName AS "loginName",
+		a.password AS "password",
+		a.createDate AS "createDate",
+		a.createBy AS "createBy.id",
+		a.updateDate AS "updateDate",
+		a.updateBy AS "updateBy.id",
+		a.state AS "state",
+		a.reason AS "reason"
+	</sql>
+	
+	<!-- 暂给接口使用 -->
+	<resultMap id="terminalResult" type="WasTerminalUser">
+		<id property="terminalUserId" column="terminalUserId" />
+		<result property="companyName" column="companyName" />
+		<result property="parentId" column="parentId" />
+		<result property="name" column="name" />
+		<result property="phone" column="phone" />
+		<result property="province" column="province" />
+		<result property="city" column="city" />
+		<result property="county" column="county" />
+		<result property="address" column="address" />
+		<result property="loginName" column="loginName" />
+		<result property="password" column="password" />
+		<result property="createDate" column="createDate" />
+		<result property="createBy.id" column="createBy" />
+		<result property="updateDate" column="updateDate" />
+		<result property="updateBy.id" column="updateBy" />
+		<collection property="terminalProducts" ofType="com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalProduct" select="selectSpec" column="terminalUserId">
+			<id property="terminalProductId" column="terminalProductId" />
+			<id property="terminalUserId" column="terminalUserId" />
+			<id property="softwareId" column="softwareId" />
+			<id property="softName" column="softName" />
+			<id property="softClassify" column="softClassify" />
+			<id property="softVersion" column="softVersion" />
+			<id property="startDate" column="startDate" />
+			<id property="endDate" column="endDate" />
+			<id property="state" column="state" />
+		</collection>
+	</resultMap>
+	
+	<select id="selectSpec" resultType="com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalProduct">
+		SELECT t.*,s.name AS softName, s.classify AS softClassify, s.newVersion AS softVersion FROM was_terminal_product t LEFT JOIN was_software s ON t.softwareId = s.softwareId WHERE t.terminalUserId = #{terminalUserId} AND t.state = 1
+	</select>
+	
+	<select id="getTerminalInfo" resultMap="terminalResult">
+		SELECT 
+			<include refid="wasTerminalUserColumns"/>
+		FROM was_terminal_user a
+		<where>
+			<if test="loginName != null">
+				AND a.loginName = #{loginName}
+			</if>
+			<if test="terminalUserId != null">
+				AND a.terminalUserId = #{terminalUserId}
+			</if>
+		</where> 
+		ORDER BY createDate DESC
+	</select>
+	<!-- 暂给接口使用 -->
+	
+	<!-- 根据id查找终端用户 -->
+	<select id="get" resultType="WasTerminalUser">
+		SELECT
+			<include refid="wasTerminalUserColumns"/>
+		FROM was_terminal_user a
+		WHERE a.id = #{id}
+	</select>
+	<!-- 根据条件列表查询 -->
+	<select id="findList" resultType="WasTerminalUser">
+		SELECT 
+			<include refid="wasTerminalUserColumns"/>
+		FROM was_terminal_user a
+		<where>
+				<if test="subUserIds != null">
+					AND a.parentId IN
+					<foreach item="item" index="index" collection="subUserIds"  open="(" separator="," close=")">  
+                        #{item}  
+                	</foreach>  
+				</if>
+				<if test="companyName != null and companyName != ''">
+					AND a.companyName LIKE CONCAT('%', #{companyName}, '%')
+				</if>
+				<if test="beginDate!=null and endDate!=null and beginDate!='' and endDate!=''">
+					AND a.createDate BETWEEN #{beginDate} AND #{endDate}
+				</if>
+				<if test="beginDate!=null and beginDate!='' and (endDate==null or endDate=='')">
+					AND a.createDate &gt;= #{beginDate}
+				</if>
+				<if test="endDate!=null and endDate!='' and (beginDate==null or beginDate=='')">
+					AND a.createDate &lt;= #{endDate}
+				</if>
+		            AND a.state != 2
+		</where> 
+		            ORDER BY createDate DESC
+	</select>
+	<!-- 插入 -->
+	<insert id="insertWasTerminalUser">
+		INSERT INTO was_terminal_user(
+			parentId,
+			companyName,
+			name,
+			phone,
+			province,
+			city,
+			county,
+			address,
+			loginName,
+			password,
+			createDate,
+			createBy,
+			updateDate,
+			updateBy,
+			state,
+			reason
+		) VALUES (
+			#{parentId},
+			#{companyName},
+			#{name},
+			#{phone},
+			#{province},
+			#{city},
+			#{county},
+			#{address},
+			#{loginName},
+			#{password},
+			#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id},
+			#{state},
+			#{reason}
+		)
+	</insert>
+	<!-- 更新 -->
+	<update id="updateWasTerminalUser">
+		UPDATE was_terminal_user SET 
+			companyName = #{companyName},
+			name = #{name},
+			phone = #{phone},
+			province = #{province},
+			city = #{city},
+			county = #{county},
+			address = #{address},
+			loginName = #{loginName},
+			password = #{password},
+			updateDate = #{updateDate},
+			updateBy = #{updateBy.id}
+		WHERE terminalUserId = #{terminalUserId}
+	</update>
+	<!-- 根据公司名称查找终端 -->
+	<select id="findIdBycompanyName" resultType="int">
+	SELECT terminalUserId FROM was_terminal_user  WHERE companyName = #{companyName}
+	</select>
+	<!-- 根据id查找终端用户 -->
+	<select id="findByTerminalUserId" resultType="WasTerminalUser">
+		select * from was_terminal_user  where terminalUserId=#{0}
+	</select>
+	<!-- 逻辑删除 -->
+	<update id="deleteLogic">
+		update was_terminal_user set state=2 where terminalUserId=#{0}
+	</update>
+	<!-- 解冻 -->
+	<update id="thaw">
+		update was_terminal_user set reason=#{0},state=0 where terminalUserId=#{1}
+	</update>	
+	<!-- 冻结 -->
+	<update id="freeze">
+		update was_terminal_user set reason=#{0},state=1 where terminalUserId=#{1}
+	</update>
+	<!-- 公司名唯一性验证 -->
+	<select id="validateCompanyName" resultType="int" parameterType="string">
+		select count(1) from was_terminal_user where companyName=#{0}
+	</select>
+	<!-- 登录名唯一性验证 -->
+	<select id="validateLoginName" resultType="int" parameterType="string">
+		select count(1) from was_terminal_user where loginName=#{0}
+	</select>
+	<!-- 插入更新者更新时间信息 -->
+	<update id="insertUpdateInfo">
+		update was_terminal_user set updateBy=#{0},updateDate=#{1} where terminalUserId=#{2}
+	</update>
+	<!-- 登录名唯一性验证 -->
+	<select id="findSubUsers" resultType="string" >
+		select id from sys_user where find_in_set(#{0},companyParentIds) AND del_flag=0
+	</select>
+</mapper>

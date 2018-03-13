@@ -1,0 +1,546 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+</head>
+<body class="fix-header card-no-border">
+	<div class="divControl">
+		
+			<div class="row" id="AccountBalance">
+				<!-- Column -->
+				<div
+					style="width: 18.38% !important; margin: 0px 12.5px 0px 12.5px;">
+					<div class="card">
+						<div class="card-body">
+							<div class="d-flex flex-row">
+								<div class="round round-lg align-self-center round-info"
+									title="软件余额">
+									<i style="font-size: 30px;" class="iconfont icon-qianbao"></i>
+								</div>
+								<div class="m-l-10 align-self-center">
+									<h3 class="m-b-0 font-lgiht"></h3>
+									<h5 class="text-muted m-b-0">公众号余额</h5>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Column -->
+				<!-- Column -->
+				<div
+					style="width: 18.38% !important; margin: 0px 12.5px 0px 12.5px;">
+					<div class="card">
+						<div class="card-body">
+							<div class="d-flex flex-row">
+								<div class="round round-lg align-self-center round-warning"
+									title="硬件余额">
+									<i style="font-size: 30px;" class="iconfont icon-qianbao"></i>
+								</div>
+								<div class="m-l-10 align-self-center">
+									<h3 class="m-b-0 font-lgiht"></h3>
+									<h5 class="text-muted m-b-0">硬件余额</h5>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Column -->
+				<!-- Column -->
+				<div
+					style="width: 18.38% !important; margin: 0px 12.5px 0px 12.5px;">
+					<div class="card">
+						<div class="card-body">
+							<div class="d-flex flex-row">
+								<div class="round round-lg align-self-center round-primary"
+									title="小程序余额">
+									<i style="font-size: 30px;" class="iconfont icon-qianbao"></i>
+								</div>
+								<div class="m-l-10 align-self-center">
+									<h3 class="m-b-0 font-lgiht"></h3>
+									<h5 class="text-muted m-b-0">小程序余额</h5>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Column -->
+				<!-- Column -->
+				<div
+					style="width: 18.38% !important; margin: 0px 12.5px 0px 12.5px;">
+					<div class="card">
+						<div class="card-body">
+							<div class="d-flex flex-row">
+								<div class="round round-lg align-self-center round-success"
+									title="VIP余额">
+									<i style="font-size: 30px;" class="iconfont icon-qianbao"></i></i>
+								</div>
+								<div class="m-l-10 align-self-center">
+									<h3 class="m-b-0 font-lgiht"></h3>
+									<h5 class="text-muted m-b-0">VIP余额</h5>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Column -->
+				<div
+					style="width: 18.38% !important; margin: 0px 12.5px 0px 12.5px;">
+					<div class="card">
+						<div class="card-body">
+							<div class="d-flex flex-row">
+								<div class="round round-lg align-self-center round-danger"
+									title="平台押金">
+									<i style="font-size: 30px;" class="iconfont icon-qianbao"></i></i>
+								</div>
+								<div class="m-l-10 align-self-center">
+									<h3 class="m-b-0 font-lgiht"></h3>
+									<h5 class="text-muted m-b-0">平台押金</h5>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row" id="AccountInformation">
+				<div class="col-lg-4">
+					<div class="card">
+						<div class="card-body">
+							<h4 class="card-title">金牌代理-代理商信息</h4>
+							<!--<h6 class="card-subtitle">Add class <code>.full-color-table .full-primary-table .hover-table</code></h6>-->
+							<div class="table-responsive">
+								<table
+									class="table full-color-table full-primary-table hover-table">
+
+									<tbody>
+										<tr>
+											<th>账号名称</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>负责人</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>联系方式</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>所属战区</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>公司地址</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>平台状态</th>
+											<td></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-4">
+					<div class="card">
+						<div class="card-body">
+							<h4 class="card-title">金牌代理-代理商账户信息</h4>
+							<!--<h6 class="card-subtitle">Add class <code>.full-color-table .full-primary-table .hover-table</code></h6>-->
+							<div class="table-responsive">
+								<table
+									class="table full-color-table full-primary-table hover-table">
+									<tbody>
+										<tr>
+											<th>代理商等级</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>公众号折扣</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>小程序折扣</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>套餐折扣</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>开始时间</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th>结束时间</th>
+											<td></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-4">
+					<div class="card">
+						<div class="card-body">
+							<h4 class="card-title">金牌代理-代理商消耗信息</h4>
+							<!--<h6 class="card-subtitle">Add class <code>.full-color-table .full-primary-table .hover-table</code></h6>-->
+							<div class="table-responsive">
+								<table
+									class="table full-color-table full-primary-table hover-table">
+									<tbody>
+										<tr>
+											<td
+												style="height: 110px; padding-bottom: 7px; padding-top: 25px;">
+												<div class="ribbon-wrapper card"
+													style="height: 100x; margin-bottom: 15px;">
+													<div class="ribbon ribbon-danger ribbon-right">公众号消耗</div>
+													<h3 class="ribbon-content"></h3>
+												</div>
+											</td>
+											<td
+												style="height: 110px; padding-bottom: 7px; padding-top: 25px;">
+												<div class="ribbon-wrapper card"
+													style="height: 100x; margin-bottom: 15px;">
+													<div class="ribbon ribbon-success ribbon-right">硬件消耗</div>
+													<h3 class="ribbon-content"></h3>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td style="height: 110px; padding-bottom: 2px;">
+												<div class="ribbon-wrapper card"
+													style="height: 100x; margin-bottom: 22px;">
+													<div class="ribbon ribbon-info ribbon-right">小程序消耗</div>
+													<h3 class="ribbon-content"></h3>
+												</div>
+											</td>
+											<td style="height: 110px; padding-bottom: 2px;">
+												<div class="ribbon-wrapper card"
+													style="height: 100x; margin-bottom: 22px;">
+													<div class="ribbon ribbon-warning ribbon-right">VIP消耗</div>
+													<h3 class="ribbon-content"></h3>
+												</div>
+											</td>
+										</tr>
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<!-- Column -->
+				<div class="col-lg-12">
+					<div class="card">
+						<div class="card-body">
+
+							<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+							<div id="main" style="height: 400px;"></div>
+
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+	<div>
+		<input id="id" value="${id}" hidden="hidden">
+	</div>
+
+
+	<!--Echarts-->
+	<!-- ECharts单文件引入 -->
+	<script src="http://echarts.baidu.com/build/dist/echarts-all.js"></script>
+	<script src="http://echarts.baidu.com/dist/echarts.min.js"></script>
+	<script type="text/javascript">
+		var test;
+		$("document").ready(
+				function() {
+					var id = $("#id").val();
+					$.ajax({
+						url : "${ctx}/agentSystem/SysUser/homePage",
+						type : "post",
+						dataType : "json",
+						data : {
+							id : id
+						},
+						success : function(data) {
+							//账户余额
+							$("#AccountBalance h3:eq(0)").html(
+									"￥" + data.publicAccount);
+							$("#AccountBalance h3:eq(1)").html(
+									"￥" + data.hardwareAccount);
+							$("#AccountBalance h3:eq(2)").html(
+									"￥" + data.minaExpend);
+							$("#AccountBalance h3:eq(3)").html(
+									"￥" + data.vipExpend);
+							$("#AccountBalance h3:eq(4)").html(
+									"￥" + data.cashPledge);
+							//代理商账户信息
+							$("#AccountInformation td:eq(0)").html(
+									data.login_name);
+							$("#AccountInformation td:eq(1)").html(data.name);
+							$("#AccountInformation td:eq(2)").html(data.phone);
+							$("#AccountInformation td:eq(3)").html(data.theater);
+							$("#AccountInformation td:eq(4)").html(data.address);
+							switch(data.state){
+							case 0:
+								$("#AccountInformation td:eq(5)").html("冻结");
+							break;
+							case 1:
+								$("#AccountInformation td:eq(5)").html("正常");
+							break;
+							case 2:
+								$("#AccountInformation td:eq(5)").html("申请中");
+							break;
+							case 3:
+								$("#AccountInformation td:eq(5)").html("驳回");
+							break;
+							}
+							
+							function day(t){
+								var time = new Date(t);
+								var y = time.getFullYear();//年
+								var m = time.getMonth() + 1;//月
+								var d = time.getDate();//日
+								var h = time.getHours();//时
+								var mm = time.getMinutes();//分
+								var s = time.getSeconds();//秒
+								/* alert(y+"-"+m+"-"+d+" "+h+":"+mm+":"+s) */
+								m<10 ? m='0'+m:m; 
+								h<10 ? h='0'+h:h; 
+								mm<10?mm='0'+mm:mm; 
+								s<10?s='0'+s:s;
+								return y+"-"+m+"-"+d+" "+h+":"+mm+":"+s;
+							}
+							var startDate = day(data.startDate);
+							var endDate = day(data.endDate);
+							
+							
+							if(data.customerLevel==0){
+								$("#AccountInformation td:eq(6)").html("普通客户");
+							}else if(data.customerLevel==1){
+								$("#AccountInformation td:eq(6)").html("VIP客户");
+							}
+							$("#AccountInformation td:eq(7)").html(
+									data.publicDiscount*10+"折");
+							$("#AccountInformation td:eq(8)").html(
+									data.minaDiscount*10+"折");
+							$("#AccountInformation td:eq(9)").html(
+									data.packageDiscount*10+"折");
+							$("#AccountInformation td:eq(10)").html(startDate);
+							$("#AccountInformation td:eq(11)").html(endDate);
+
+							$("#AccountInformation h3:eq(0)").html(
+									"￥" + data.publicExpend);
+							$("#AccountInformation h3:eq(1)").html(
+									"￥" + data.hardwareExpend);
+							$("#AccountInformation h3:eq(2)").html(
+									"￥" + data.minaExpend);
+							$("#AccountInformation h3:eq(3)").html(
+									"￥" + data.vipExpend);
+
+							$("#AccountInformation h4:eq(0)").html(
+									data.agentLevel + "-基本信息");
+							$("#AccountInformation h4:eq(1)").html(
+									data.agentLevel + "-账户信息");
+							$("#AccountInformation h4:eq(2)").html(
+									data.agentLevel + "-消耗信息");
+						},
+						error : function(e) {
+							layer.msg('系统数据出错！', {
+								icon : 2
+							});
+
+						}
+					});
+					//发送请求到后台，返回折线图所需要的数据集合
+					$.post("${ctx}/agentSystem/RecordExamine/homePageList", {
+						userId : id
+					}, function(data, status) {
+						if (status == "success") {
+							test = data;
+							$(option.series).each(function(index, item) {
+								item.data = test[index];
+							})
+
+							// 为echarts对象加载数据
+							myChart.setOption(option);
+						} else {
+							layer.msg('系统数据出错！', {
+								icon : 2
+							});
+						}
+
+					})
+
+					/* 		$.ajax({
+					 url : "${ctx}/agentSystem/RecordExamine/homePageList",
+					 type : "post",
+					 async:false,
+					 dataType:"text",
+					 data : {userId : id},
+					 success : function(data) {
+					 test = data;
+					 $(option.series).each(function(index,item){
+					 item.data=test[index];
+					 })
+					
+					 // 为echarts对象加载数据
+					 myChart.setOption(option);
+					 },
+					 error : function(data) {
+					 test = data;
+					 $(option.series).each(function(index,item){
+					 item.data=test[index];
+					 })
+					 // 为echarts对象加载数据
+					 myChart.setOption(option);
+					 layer.msg('系统数据出错！', { icon : 2 });
+
+					 }
+					 }); */
+
+				});
+
+		//echarts图表数据准备
+		var date = new Date();
+		var year = date.getFullYear();
+		var month = date.getMonth() + 1;
+		month < 10 ? month = '0' + month : month;
+		var days = year + '年 ' + month + '月 ';
+		var software = '公众号消耗';
+		var hardware = '硬件消耗';
+		var miniapps = '小程序消耗';
+		var VIP = 'VIP消耗';
+		var legend = new Array(software, hardware, miniapps, VIP);
+
+		var symbolSize = 5;
+
+		var d = new Date(year, month, 0);
+		var num = d.getDate();
+		var j = 0;
+		var xAxisData = new Array();
+		for (var i = 0; i <= num; i += 4) {
+
+			if (num - i >= 4) {
+				xAxisData[j] = i;
+			} else {
+				xAxisData[j] = num;
+			}
+			j++;
+		}
+
+		// 基于准备好的dom，初始化echarts图表
+		var myChart = echarts.init(document.getElementById("main"));
+		var option = {
+			title : { //标题
+				text : '消耗统计',
+				subtext : days
+			},
+			tooltip : { //图标悬停的提示内容
+				trigger : 'axis'
+			},
+			legend : { //图标
+				data : legend
+			},
+			toolbox : {
+				show : true,
+				feature : {
+
+					magicType : {
+						show : true,
+						type : [ 'line', 'bar'/* ,'stack','tiled' */]
+					},
+					restore : {
+						show : true
+					},
+					saveAsImage : {
+						show : true
+					}
+				}
+			},
+			grid : {
+				top : '16%', //grid组件离容器顶部的距离，可以为像具体素值也可以为百分比
+				left : '1%', //grid组件离容器左侧的距离，可以为像具体素值也可以为百分比
+				right : '3%', //grid组件离容器右侧的距离，可以为像具体素值也可以为百分比
+				bottom : '10%', //grid组件离容器底部的距离，可以为像具体素值也可以为百分比
+				width : 'auto',
+				containLabel : true
+			},
+			containLabel : true,
+			xAxis : [ //X轴
+			{
+				type : 'category',
+				boundaryGap : false,
+				data : xAxisData
+			} ],
+			yAxis : [ // Y轴
+			{
+				type : 'value',
+				axisLabel : {
+					formatter : '{value} ￥'
+				},
+				boundaryGap : [ 0, 0.1 ],
+
+			} ],
+			dataZoom : [ {
+				type : 'slider',
+				xAxisIndex : 0,
+				filterMode : 'filter'
+			}, {
+				type : 'slider',
+				yAxisIndex : 0,
+				filterMode : 'filter'
+			}, {
+				type : 'inside',
+				xAxisIndex : 0,
+				filterMode : 'empty'
+			} /* ,
+															{
+																type: 'inside',
+																yAxisIndex: 0,
+																filterMode: 'empty'
+															} */
+			],
+
+			series : [ { //指定图标的类型（折线line、柱状bar）
+				id : 'a',
+				name : software,
+				type : 'line',
+				data : xAxisData,
+				symbolSize : symbolSize
+			}, {
+				id : 'b',
+				name : hardware,
+				type : 'line',
+				data : xAxisData,
+				symbolSize : symbolSize
+			}, {
+				id : 'c',
+				name : miniapps,
+				type : 'line',
+				data : xAxisData,
+				symbolSize : symbolSize
+
+			}, {
+				id : 'd',
+				name : VIP,
+				type : 'line',
+				data : xAxisData,
+				symbolSize : symbolSize
+			} ]
+
+		};
+	</script>
+
+</body>
+</html>

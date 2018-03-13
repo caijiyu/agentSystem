@@ -1,0 +1,198 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<style>
+	.error{
+		color:red;
+	}
+	select.error{
+		color:#67757c;
+	}
+</style>
+</head>
+<body>
+	<div class="row divControl">
+		<div class="col-sm-12">
+			<div class="card">
+				<div class="card-body">
+					<h4 class="card-title">
+						${(empty wasTerminalUser.terminalUserId)?"添加终端":"编辑终端"}
+					</h4>
+					<form class="form">
+					<div class="row">
+						<div class="col-md-12">
+                                            <input type="text" class="form-control" name="terminalUserId" value="${(empty wasTerminalUser.terminalUserId)?"":wasTerminalUser.terminalUserId}"  hidden>
+                                            
+                                            <input type="text" class="form-control" name="parentId" value="${wasTerminalUser.parentId}"  hidden>
+						
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-2"><span style="color: red">*&nbsp;&nbsp;&nbsp;</span>公司名称:</label>
+                                                <div class="col-md-9">
+                                                    <input type="text" class="form-control" name="companyName" value="${wasTerminalUser.companyName}"  placeholder="公司名称"  ${(empty wasTerminalUser.terminalUserId)?'':"readonly"}>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-2"><span style="color: red">*&nbsp;&nbsp;&nbsp;</span>负责人:</label>
+                                                <div class="col-md-9">
+                                                    <input type="text" class="form-control form-control-danger" name="name" value="${wasTerminalUser.name}" placeholder="负责人名字">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-2"><span style="color: red">*&nbsp;&nbsp;&nbsp;</span>联系方式:</label>
+                                                <div class="col-md-9">
+                                                    <input type="text" class="form-control" name="phone" value="${wasTerminalUser.phone}" placeholder="联系电话">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-2"><span style="color: red">*&nbsp;&nbsp;&nbsp;</span>地区:</label>
+                                                <div class="col-md-9  area" >
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <select id="s_province" class="form-control custom-select" tabindex="1" name ="province"  value="sss">
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select id="s_city" class="form-control custom-select" tabindex="1"  name="city" style="padding: 0px" name="city">
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select id="s_county" class="form-control custom-select" tabindex="1" name="county" style="padding: 0px" name="county">
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-2"><span style="color: red">*&nbsp;&nbsp;&nbsp;</span>详细地址:</label>
+                                                <div class="col-md-9">
+                                                    <input type="text" class="form-control" name="address" value="${wasTerminalUser.address}" placeholder="详细地址">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-2"><span style="color: red">*&nbsp;&nbsp;&nbsp;</span>账号:</label>
+                                                <div class="col-md-9">
+                                                    <input type="text" class="form-control" name="loginName" value="${wasTerminalUser.loginName}" placeholder="账号"  ${(empty wasTerminalUser.terminalUserId)?'':"readonly"}>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label class="control-label text-right col-md-2"><span style="color: red">*&nbsp;&nbsp;&nbsp;</span>密码:</label>
+                                                <div class="col-md-9">
+                                                    <input type="text" class="form-control" name="password" value="${wasTerminalUser.password}" placeholder="密码">
+                                                </div>
+                                            </div>
+											<div class="form-group row">
+												<label class="col-2 col-form-label"></label>
+												<div class="col-9">
+													<div class="text-xs-right" style="text-align: right;">
+														<c:if test="${!empty wasTerminalUser.terminalUserId}">
+															<a href="${ctx}/agentSystem/terminal/wasTerminalUser/list"  style="color:black" type="button" class="btn waves-effect waves-light">返回</a>
+                                                         </c:if>
+														<shiro:hasPermission name="terminal:wasTerminalUser:add">
+															<button type="button" class="btn waves-effect waves-light btn-info" onclick="save()">保存</button>
+														</shiro:hasPermission>
+													</div>
+												</div>
+											</div>
+                                        </div>
+					</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script src="${ctxStatic}/agentsystem/js/area.js"></script>
+	<script type="text/javascript">
+	//省市区初值
+	var opt0 = ["省份","地级市","市、县级市"];
+	var opt1 = ["${wasTerminalUser.province }","${wasTerminalUser.city}","${wasTerminalUser.county}"];
+	if(opt1[2]!=""){
+		opt0[0]=opt1[0],opt0[1]=opt1[1],opt0[2]=opt1[2]
+	}
+    $(document).ready(function(){ 
+    	//初始化三级联动
+        _init_area();
+    	opt0 = ["省份","地级市","市、县级市"];
+    	//表单验证
+    	$("form").validate({
+    		rules:{
+    			companyName:{required:true,minlength:2, maxlength:30,
+        			remote: "${ctx}/agentSystem/terminal/wasTerminalUser/" + "${(empty wasTerminalUser.terminalUserId)?'validateCompanyName':'validate'}",
+    			},
+    			name:{required:true,minlength:2, maxlength:10,},
+    			phone:{required:true,isphone:true,},
+    			county:{validateArea:true,},
+    			address:{required:true,minlength:2,maxlength:50,},
+    			loginName:{required:true,minlength:6, maxlength:15,isRightLoginNameForm:true,
+        			remote: "${ctx}/agentSystem/terminal/wasTerminalUser/" + "${(empty wasTerminalUser.terminalUserId)?'validateLoginName':'validate'}"
+    			},
+    			password:{required:true,minlength:6, maxlength:20,isRightPasswordForm:true,
+    			}
+    		},
+    		messages:{
+    			companyName:{required:"请输入公司名称",minlength:"公司名称至少为2个字符",maxlength:"公司名称最多为30个字符",remote: "此公司名已经注册过"},
+    			name:{required:"请输入负责人名字",minlength:"负责人名字至少为2个字符",maxlength:"负责人名字最多为10个字符"},
+    			phone:{required: "请输入联系方式",},
+    			address:{required:"请输入详细地址",minlength:"地址至少为2个字符",maxlength:"地址最多为50个字符"},
+    			loginName:{required:"请输入账号",minlength:"账号至少6个字符",maxlength:"账号最多15个字符",remote:"此账号已经注册过"},    
+    			password:{required:"请输入密码",minlength:"密码至少6个字符",maxlength:"密码最多20个字符"},    		
+    		},
+            errorPlacement: function(error, element) {
+             	if(element.attr("id")=="s_county"){
+            		$(".area").append(error)
+            	}else{
+                	error.insertAfter(element);
+            	}          	
+            }
+    	});
+		jQuery.validator.addMethod("isphone", function (value, element) {  
+		    var isphone =  /^((0\d{2,3}-\d{7,8})|(1[3567984]\d{9})|(^400-?[0-9]{3}-?[0-9]{4})|(^800-?[0-9]{3}-?[0-9]{4}))$/;   
+		    return this.optional(element) || (isphone.test(value));  
+		}, $.validator.format("请输入正确的电话号码"));
+        jQuery.validator.addMethod("isRightLoginNameForm", function(value, element) {
+            var rightLoginNameForm = /^[a-zA-z][a-zA-Z0-9]{5,14}$/;
+            return (rightLoginNameForm.test(value));
+        }, "账号只能由字母数字组成，且只能以字母开头"); 
+        jQuery.validator.addMethod("isRightPasswordForm", function(value, element) {
+            var rightPasswordForm = /^[a-zA-Z0-9]{5,19}$/;
+            return (rightPasswordForm.test(value));
+        }, "密码只能由字母数字组成"); 
+        jQuery.validator.addMethod("validateArea", function(value, element) {
+            var str = "市、县级市";
+            return (str != value);
+        }, "请选择地区"); 
+        //保存数据
+        var locked = false;
+        $("form button").click(function(){
+        	if(!locked && $("form").valid()){
+        		locked = true;
+        		layer.confirm('是否确认保存？', {icon : 3 ,skin : 'layui-layer-molv',btn: ['确认','取消']},function(){
+	    				$.post("${ctx}/agentSystem/terminal/wasTerminalUser/save",$('form').serialize(),function(data,status){
+		    					if("success" == data){
+			    						locked = false;
+										layer.msg("保存成功",{icon:1,time:1000},function(){
+			        						window.location.href="${ctx}/agentSystem/terminal/wasTerminalUser/list"
+										}); 
+		    					}else{
+		    							locked = false;
+										layer.msg("保存失败",{icon:2,time:1000},function(){
+											return;  
+										}); 
+		    					}
+	    				});        			
+        			}
+        		);
+        	} 	
+        })
+    });
+	</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+ package com.jeeplus.modules.agentsystem.terminal.web;
+
+import java.math.BigDecimal;
+/**
+ * 
+ * @author Hua
+ *
+ */
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.agency.service.WasSysUserService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasSoftware;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasSoftwareModifyPrice;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasSoftwareModifyPriceService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasSoftwareService;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalProduct;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+import com.jeeplus.modules.agentsystem.terminal.service.WasTerminalProductService;
+import com.jeeplus.modules.agentsystem.terminal.service.WasTerminalUserService;
+import com.jeeplus.modules.agentsystem.utils.MoneyOperation;
+import com.jeeplus.modules.sys.entity.User;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+@Controller
+@RequestMapping(value="${adminPath}/agentSystem/terminal/wasTerminalProduct")
+@Transactional(readOnly = false,rollbackFor=Exception.class)
+public class WasTerminalProductController  extends BaseController{
+	@Autowired
+	private WasTerminalProductService wasTerminalProductService;
+	@Autowired
+	private WasTerminalUserService wasTerminalUserService;
+	@Autowired
+	private WasSysUserService wasSysUserService;
+	@Autowired
+	private WasSoftwareService wasSoftwareService;
+	@Autowired
+	private WasSoftwareModifyPriceService wasSoftwareModifyPriceService;
+	/**
+	 * 变更产品支付
+	 * @param terminalUserId
+	 * @param oldSoftWareId
+	 * @param newSoftWareId
+	 * @param money
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value="changeProduct")
+	public String changeProduct(Integer terminalUserId,Integer oldSoftWareId,Integer newSoftWareId,BigDecimal money) {
+		System.err.println(terminalUserId);
+		System.err.println(oldSoftWareId);
+		System.err.println(newSoftWareId);
+		WasTerminalProduct wasTerminalProduct = wasTerminalProductService.findByTerminalUserIdAndSoftWareId(terminalUserId, oldSoftWareId);
+		wasTerminalProduct.setSoftwareId(newSoftWareId);
+		//更新终端表
+		wasTerminalProductService.updateProduct(wasTerminalProduct);
+		WasSoftware wasSoftware = wasSoftwareService.findSoftwareById(oldSoftWareId);
+		Boolean classify = wasSoftware.getClassify();
+		String userId = UserUtils.getUser().getId();
+		//取账号信息
+		WasTerminalUser wasTerminalUser = wasTerminalUserService.findByTerminalUserId(terminalUserId);
+		String id = wasTerminalUser.getParentId();
+    	WasSysUser sysUser = wasSysUserService.get(id);
+		BigDecimal pubA = sysUser.getPublicAccount();
+		BigDecimal minaA = sysUser.getMinaAccount();
+		BigDecimal publicExpend =new BigDecimal("0.00");				
+		BigDecimal minaExpend = new BigDecimal("0.00");						
+		BigDecimal vipExpend = new BigDecimal("0.00");	
+		String accountResult = null;
+		if (classify) {
+			//小程序
+			Integer temp = money.compareTo(minaA);
+			if(temp==-1||temp==0){
+				minaExpend = money;
+				accountResult = MoneyOperation.getInstance().moneyOperation(null,null, minaExpend, null, null, userId, null);
+			}else{
+				//1,各个账户支出
+				minaExpend = minaA;
+				vipExpend = money.subtract(minaA);
+				accountResult = MoneyOperation.getInstance().moneyOperation(null,null, minaExpend, null, vipExpend, userId, null);
+			}
+		}else{
+			//公众号
+			Integer temp = money.compareTo(minaA);
+			if(temp==-1||temp==0){
+				publicExpend = money;
+				MoneyOperation.getInstance().moneyOperation(null,publicExpend, null, null, null, userId, null);
+			}else{
+				//1,各个账户支出
+				publicExpend = pubA;
+				vipExpend = money.subtract(pubA);
+				accountResult = MoneyOperation.getInstance().moneyOperation(null,publicExpend, null, null, vipExpend, userId, null);
+			}
+		}
+		return accountResult!=null?"success":"error";
+	}
+	/**
+	 *  查找所有软件
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value="findAllSofts")
+	public List<WasSoftware> findAllSofts() {
+		return 	wasSoftwareService.findAllSofts();
+	}
+
+	/**
+	 * 查找更换更换产品需求话费的money
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value="findChangeMoney")
+	public List<WasSoftwareModifyPrice> findChangeMoney() {
+		List<WasSoftwareModifyPrice> a = wasSoftwareModifyPriceService.findChangeMoney();
+		System.err.println("================");
+		for(WasSoftwareModifyPrice b : a){
+			System.err.println(b.getPrice());
+		}
+		return 	wasSoftwareModifyPriceService.findChangeMoney();
+	}
+	/**
+	 * 当前终端拥有的产品
+	 * @param terminalUserId
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value="showProducts")
+	public List<WasTerminalProduct> findProductsByTerminalUserId(Integer terminalUserId) {
+		 List<WasTerminalProduct> list = wasTerminalProductService.findProductsByTerminalUserId(terminalUserId);
+		for(WasTerminalProduct wasTerminalProduct : list){
+			Integer softId = wasTerminalProduct.getSoftwareId();
+			WasSoftware wasSoftware = wasSoftwareService.findSoftwareById(softId);
+			Boolean isFlag = wasSoftware.getClassify();
+			if(isFlag){
+				wasTerminalProduct.setIsNewRecord(true);
+			}else{
+				wasTerminalProduct.setIsNewRecord(false);
+			}
+			wasTerminalProduct.setId(wasSoftware.getName());
+		}
+		System.err.println(list.size());
+		return list;
+	}
+	/**
+	 * 终端产品列表管理页面
+	 * @param wasTerminalUser
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	@RequiresPermissions("terminal:wasTerminalProduct:productList")
+	@RequestMapping(value = {"productList", ""})
+	public String productList(WasTerminalUser wasTerminalUser, HttpServletRequest request, HttpServletResponse response, Model model) {
+		//管理员,财务，parentId置空
+		//总代，找二级代和自己
+		//一级二级不做处理
+		//时间限制在前端
+		User user = UserUtils.getUser();
+		List<String> subUserIds= wasTerminalUserService.findSubUsers(user.getId());
+		subUserIds.add(user.getId());
+		wasTerminalUser.setSubUserIds(subUserIds);
+		Page<WasTerminalUser> page = wasTerminalUserService.findPage(new Page<WasTerminalUser>(request, response), wasTerminalUser); 
+        for(WasTerminalUser terminalUser : page.getList()){
+        	String companyName = wasSysUserService.get(terminalUser.getParentId()).getCompanyName();
+        	terminalUser.setParentId(companyName);
+        }
+        model.addAttribute("page", page);
+		return "modules/agentsystem/terminal/wasTerminalProductList";
+	}
+}

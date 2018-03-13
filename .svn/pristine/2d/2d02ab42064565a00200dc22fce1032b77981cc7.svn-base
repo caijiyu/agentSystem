@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.agency.dao.WasAgentApplyDao">
+    <resultMap type="com.jeeplus.modules.agentsystem.agency.entity.WasSysUser" id="userResultMap">
+          <id column="userId" property="id"/>
+          <result column="startDate" property="startDate" />
+          <result column="endDate" property="endDate" />
+           <result column="companyName" property="companyName" />
+           <result column="agentLevelId" property="agentLevelId" />
+           <result column="agentLevel" property="agentLevel" />
+            <result column="state" property="state" />
+            <result column="packageDiscount" property="packageDiscount" />
+            <result column="publicDiscount" property="publicDiscount" />
+            <result column="minaDiscount" property="minaDiscount" />
+             <result column="remarks" property="remarks" />
+             <result column="createDate" property="create_date" />
+             <result column="publicAccount" property="publicAccount" />
+             <result column="minaAccount" property="minaAccount" />
+             <result column="hardwareAccount" property="hardwareAccount" />
+             <result column="vipAccount" property="vipAccount" />
+           <association  property="companyParent" javaType="com.jeeplus.modules.agentsystem.agency.entity.WasSysUser">
+               <id column="userIdP" property="id"/>
+	          <result column="startDateP" property="startDate" />
+	          <result column="endDateP" property="endDate" />
+	           <result column="companyNameP" property="companyName" />
+	           <result column="agentLevelIdP" property="agentLevelId" />
+	           <result column="agentLevelP" property="agentLevel" />
+	            <result column="stateP" property="state" />
+	             <result column="packageDiscountP" property="packageDiscount" />
+            	<result column="publicDiscountP" property="publicDiscount" />
+           		 <result column="minaDiscountP" property="minaDiscount" />
+           </association >
+     </resultMap>
+
+	<sql id="userColumns">
+    	a.id AS userId,
+    	a.companyName AS companyName,
+    	a.startDate AS startDate,
+    	a.endDate  AS endDate,
+		a.agentLevelId  AS agentLevelId,
+		a.state AS state,
+		a.create_date AS createDate,
+		a.remarks AS remarks
+    </sql>
+
+	<sql id="parentColumns">
+    	c.id AS userIdP,
+    	c.companyName AS companyNameP,
+    	c.startDate AS startDateP,
+    	c.endDate  AS endDateP,
+		c.agentLevelId  AS agentLevelIdP,
+		c.state AS stateP
+    </sql>
+
+	<!-- 用户以及其上级用户信息的列表 -->
+	 <select id="findList" resultMap="userResultMap">
+		SELECT 
+			<include refid="userColumns"/>,b.name AS agentLevel,<include refid="parentColumns"/>,d.name AS agentLevelP
+		FROM sys_user a 
+		LEFT JOIN was_agent_level b  on a.agentLevelId=b.agentLevelId
+		LEFT JOIN  sys_user c on a.companyParentId=c.id
+		LEFT JOIN  was_agent_level d on c.agentLevelId=d.agentLevelId
+		<where>
+				AND find_in_set(#{id},a.companyParentIds)
+				AND a.del_flag = #{DEL_FLAG_NORMAL}  
+				AND c.del_flag = #{DEL_FLAG_NORMAL}  
+				AND b.state = 1
+				AND (d.state = 1 or d.state is null)
+				AND (a.state=2 or a.state=3)
+			<if test="companyName != null and companyName != ''">
+				AND a.companyName LIKE 
+					<if test="dbName == 'oracle'">'%'||#{companyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{companyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{companyName},'%')</if>
+			</if>
+			<if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
+				AND a.create_date BETWEEN #{startDate} AND #{endDate}
+			</if>
+			<if test="startDate!=null and startDate!='' and (endDate==null or endDate=='')">
+				AND a.create_date &gt;= #{startDate}
+			</if>
+			<if test="endDate!=null and endDate!='' and (startDate==null or startDate=='')">
+				AND a.create_date &lt;= #{endDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+		</choose>
+		ORDER BY a.state,a.create_date 
+	</select>
+	
+	<!-- 根据id获取用户以及上级用户的信息 -->
+	<select id="get" resultType="String" resultMap="userResultMap">
+		SELECT 
+			<include refid="userColumns"/>,a.packageDiscount AS packageDiscount,a.publicDiscount AS publicDiscount,a.minaDiscount AS minaDiscount,
+			a.publicAccount AS publicAccount,a.minaAccount AS minaAccount,a.hardwareAccount AS hardwareAccount,a.vipAccount AS vipAccount,
+			b.name AS agentLevel,
+			<include refid="parentColumns"/>,c.packageDiscount AS packageDiscountP,c.publicDiscount AS publicDiscountP,c.minaDiscount AS minaDiscountP,
+			d.name AS agentLevelP
+		FROM sys_user a 
+		LEFT JOIN was_agent_level b  on a.agentLevelId=b.agentLevelId
+		LEFT JOIN  sys_user c on a.companyParentId=c.id
+		LEFT JOIN  was_agent_level d on c.agentLevelId=d.agentLevelId
+		where a.id=#{0}
+	</select>
+	
+	<!-- 通过申请-->
+	<update id="pass">
+		UPDATE sys_user SET 
+			state=1
+			WHERE id = #{id}
+	</update>
+	
+	<!-- 拒绝申请-->
+	<update id="overRule">
+		UPDATE sys_user SET 
+			remarks=#{remarks},
+			state=3
+			WHERE id = #{id}
+	</update>
+	
+	<!-- 根据代理商等级id获取角色id -->
+	<select id="getAgentLevelById" resultType="WasAgentLevel">
+		SELECT roleId 
+		FROM was_agent_level
+		WHERE agentLevelId=#{0}
+	</select>
+	
+	<!-- 查询所有不是总代的代理商等级的名称-->
+	<select id="getAllNotSuperAgentLevel" resultType="WasAgentLevel">
+		SELECT a.name,a.agentLevelId,a.salesPolicyIds
+		FROM was_agent_level a
+		WHERE a.roleId not in (
+		SELECT b.id
+		FROM sys_role b
+		LEFT JOIN sys_role_menu c on b.id=c.role_id 
+		LEFT JOIN sys_menu d on c.menu_id=d.id
+		WHERE (d.permission=#{0} or d.permission=#{1}) 
+		AND b.del_flag='0' and b.role_type='代理商'
+		GROUP BY b.id) 
+		AND a.state=1
+	</select>
+	
+	<!-- 查询所有是总代的用户的名称 -->
+	<select id="selectAllSuperAgent" resultType="WasSysUser">
+		SELECT a.id,a.companyName 
+		FROM sys_user a
+		LEFT JOIN sys_user_role b on b.user_id=a.id 
+		LEFT JOIN sys_role e on e.id=b.role_id
+		LEFT JOIN sys_role_menu c on e.id=c.role_id 
+		LEFT JOIN sys_menu d on c.menu_id=d.id
+		WHERE (d.permission=#{0} or d.permission=#{1}) 
+		and a.state=1 and a.del_flag='0'  and e.del_flag='0' and e.role_type='代理商'
+		GROUP BY a.id
+	</select>
+	
+	<!--获取所有代理商等级 -->
+	<select id="getAllAgentLevel" resultType="WasAgentLevel">
+		SELECT a.name,a.agentLevelId,a.salesPolicyIds
+		FROM was_agent_level a where a.state=1 
+	</select>
+	
+	<!-- 根据公司名获取用户数量-->
+	<select id="getCountByCopanyName" resultType="java.lang.Integer">
+		SELECT count(1)
+		FROM sys_user a where binary a.companyName=#{0} 
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_user(
+			id, 
+			login_name, 
+			password, 
+			name, 
+			email, 
+			mobile, 
+			companyName,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+			login_flag,
+			del_flag,
+			state,
+			qq,
+			wechat,
+			packageDiscount,
+			publicDiscount,
+			minaDiscount,
+			companyParentId,
+			companyParentIds,
+			agentLevelId,
+			customerLevel,
+			startDate,
+			endDate,
+			certificate,
+			address,
+			province,
+			city,
+			county,
+			theater,
+			principal,
+			cashPledge
+		) VALUES (
+			#{id}, 
+			#{login_name}, 
+			#{password}, 
+			#{name}, 
+			#{email}, 
+			#{mobile}, 
+			#{companyName},
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{login_flag},
+			#{DEL_FLAG_NORMAL},
+			#{state},
+			#{qq},
+			#{wechat},
+			#{packageDiscount},
+			#{publicDiscount},
+			#{minaDiscount},
+			#{companyParentId},
+			#{companyParentIds},
+			#{agentLevelId},
+			#{customerLevel},
+			#{startDate},
+			#{endDate},
+			#{certificate},
+			#{address},
+			#{province},
+			#{city},
+			#{county},
+			#{theater},
+			#{principal},
+			#{cashPledge}
+		)
+	</insert>
+	
+	
+	<update id="update">
+		UPDATE sys_user SET 
+			login_name=#{login_name}, 
+			password=#{password}, 
+			name=#{name}, 
+			email=#{email}, 
+			mobile=#{mobile}, 
+			companyName=#{companyName},
+			update_by=#{updateBy.id}, 
+			update_date=#{updateDate}, 
+			login_flag=#{login_flag},
+			state=#{state},
+			qq=#{qq},
+			wechat=#{wechat},
+			packageDiscount=#{packageDiscount},
+			publicDiscount=#{publicDiscount},
+			minaDiscount=#{minaDiscount},
+			companyParentId=#{companyParentId},
+			companyParentIds=#{companyParentIds},
+			agentLevelId=#{agentLevelId},
+			customerLevel=#{customerLevel},
+			startDate=#{startDate},
+			endDate=#{endDate},
+			certificate=#{certificate},
+			address=#{address},
+			province=#{province},
+			city=#{city},
+			county=#{county},
+			theater=#{theater},
+			principal=#{principal},
+			cashPledge=#{cashPledge}
+			WHERE id=#{id}
+	</update>
+	
+	<!-- 根据用户id获取下放所需押金-->
+	<select id="getCashPledgeByUid" resultType="java.lang.String">
+		SELECT b.cashPledge
+		FROM sys_user a 
+		LEFT JOIN was_agent_level b on a.agentLevelId=b.agentLevelId 
+		WHERE a.state=1 and a.del_flag='0' and b.state=1 and b.delegateAgent=1 and a.id=#{0}
+	</select>
+</mapper>

@@ -1,0 +1,22 @@
+# file url
+fileUrl=http://www.wx-vicmob.cn
+
+# file save path
+savePath=/opt/tomcat/webapps/vicmob/agentSystem
+
+# terminal connector
+webConnector=http://www.wx-vicmob.cn/VicmobWeb/a/webAPI/userAuthorityContentAPI/saveForUserAuthority
+minaConnector=http://www.wx-vicmob.cn/VicmobMINA/a/agent/userInfo/register
+phpInseartConnector=http://api.vicmob.cn/api.php?1=1
+phpUpdateConnector=http://api.vicmob.cn/groupapi.php?1=1
+
+# terminal connector switch
+webSwitch=1
+minaSwitch=1
+phpSwitch=1
+
+
+#kdniao express
+kdniaoID=1305489
+kdniaoAppKey=13f7305b-9407-4bca-b198-acd629217ebc
+kdniaoReqURL=http://api.kdniao.cc/api/dist

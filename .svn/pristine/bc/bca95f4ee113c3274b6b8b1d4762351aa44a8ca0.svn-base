@@ -1,0 +1,20 @@
+﻿package com.jeeplus.modules.agentSystem.test;
+
+import com.jeeplus.modules.agentSystem.utils.KdniaoSubscribeAPI;
+
+import net.sf.json.JSONObject;
+
+public class ExpressAPI {
+
+	public static void main(String[] args) {
+		try {
+			String requestData = "{'ShipperCode': 'YTO'," + "'LogisticCode':'886464526203432801'}";
+			String result = KdniaoSubscribeAPI.orderTracesSubByJson(requestData);
+			JSONObject paramJson = JSONObject.fromObject(result);
+			System.out.print(paramJson.getString("Traces"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}

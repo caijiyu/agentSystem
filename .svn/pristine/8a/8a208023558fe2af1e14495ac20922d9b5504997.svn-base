@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentSystem.agency.dao.WasSysUserDao">
+    
+    <sql id="sysUsercolumns">
+		a.id AS "id",			        		<!--主键ID -->
+		a.login_name AS "login_name",			<!-- 登录名 -->	
+		a.password AS "password",		    	<!-- 密码 -->
+		a.companyName AS "companyName",		    <!-- 公司全称 -->
+		a.companyParentId AS "companyParentId",	<!-- 直属上级公司ID（默认0：微炫客） -->
+		a.companyParentIds AS "companyParentIds",<!-- 隶属上级公司ID（0,1,asdwasd,3） -->
+		a.name AS "name",			   			<!--  姓名 -->
+		a.phone AS "phone",			    		<!-- 电话 -->
+		a.province AS "province",		   		<!-- 省 -->
+		a.city AS "city",						<!-- 市 -->
+		a.county AS "county",					<!-- 县 -->
+		a.address AS "address",					<!-- 地址 -->
+		a.email AS "email",						<!-- 邮箱 -->
+		a.qq AS "qq",							<!-- QQ号 -->
+		a.wechat AS "wechat",					<!-- 微信号 -->
+		a.theater AS "theater",					<!-- 战区 -->
+		a.principal AS "principal",			<!-- 战区负责人 -->
+		a.packageDiscount AS "packageDiscount", <!-- 套餐折扣（最大1.0 -->
+		a.publicDiscount AS "publicDiscount",  	<!-- 公众号折扣（最大1.0） -->
+		a.minaDiscount AS "minaDiscount",		<!-- 小程序折扣（最大1.0） -->
+		a.agentLevelId AS "agentLevelId",		<!-- 代理商等级ID -->
+		a.customerLevel AS "customerLevel",		<!-- 客户等级（0：普通客户  1：VIP客户） -->
+		a.certificate AS "certificate",			<!-- 证书 -->
+		a.cashPledge AS "cashPledge",			<!-- 押金 -->
+		a.publicAccount AS "publicAccount",		<!-- 公众号账户 -->
+		a.minaAccount AS "minaAccount",			<!-- 小程序账户 -->
+		a.hardwareAccount AS "hardwareAccount",	<!-- 硬件账户 -->
+		a.vipAccount AS "vipAccount",			<!-- vip账户 -->
+		a.publicExpend AS "publicExpend",		<!-- 公众号账户消耗 -->
+		a.minaExpend AS "minaExpend",			<!-- 小程序消耗 -->
+		a.hardwareExpend AS "hardwareExpend",	<!-- 硬件消耗 -->
+		a.vipExpend AS "vipExpend",				<!-- VIP消耗 -->
+		a.mobile AS "mobile",					<!-- 手机 -->
+		a.user_type AS "user_type",				<!-- 用户类型 -->
+		a.photo AS "photo",						<!-- 用户头像 -->
+		a.login_ip AS "login_ip",				<!-- 最后登陆IP -->
+		a.login_date AS "login_date",			<!-- 最后登陆时间 -->
+		a.login_flag AS "login_flag",			<!-- 是否可登录 -->
+		a.create_by AS "create_by",				<!-- 创建者 -->
+		a.create_date AS "create_date",			<!-- 添加时间 -->
+		a.update_by AS "update_by",				<!-- 更新者 -->
+		a.update_date AS "update_date",			<!-- 更新时间 -->
+		a.startDate AS "startDate",				<!-- 开始时间 -->
+		a.endDate AS "endDate",					<!-- 结束时间 -->
+		a.state AS "state",						<!-- 状态（0：冻结，1：正常，2申请中，3：驳回） -->
+		a.remarks AS "remarks",				    <!-- 备注 -->
+		a.del_flag AS "del_flag",				<!-- 删除标记 -->
+		a.qrcode AS "qrcode"					<!-- 二维码 -->
+    </sql>
+    
+   <resultMap id="sysUserMap" type="com.jeeplus.modules.agentSystem.agency.entity.WasSysUser">
+	  <id property="id" column="id"/>
+	  <result property="login_name" column="login_name"/>
+	  <result property="password" column="password"/>
+	  <result property="companyName" column="companyName"/>
+	  <result property="companyParentId" column="companyParentId"/>
+	  <result property="companyParentIds" column="companyParentIds"/>
+	  <result property="name" column="name"/>
+	  <result property="phone" column="phone"/>
+	  <result property="province" column="province"/>
+	  <result property="city" column="city"/>
+	  <result property="county" column="county"/>
+	  <result property="address" column="address"/>
+	  <result property="email" column="email"/>
+	  <result property="qq" column="qq"/>
+	  <result property="wechat" column="wechat"/>
+	  <result property="theater" column="theater"/>
+	  <result property="principal" column="principal"/>
+	  <result property="create_date" column="create_date"/>
+	  <result property="packageDiscount" column="packageDiscount"/>
+	  <result property="publicDiscount" column="publicDiscount"/>
+	  <result property="minaDiscount" column="minaDiscount"/>
+	  <result property="agentLevelId" column="agentLevelId"/>
+	  <result property="customerLevel" column="customerLevel"/>
+	  <result property="certificate" column="certificate"/>
+	  <result property="cashPledge" column="cashPledge"/>
+	  <result property="publicAccount" column="publicAccount"/>
+	  <result property="minaAccount" column="minaAccount"/>
+	  <result property="hardwareAccount" column="hardwareAccount"/>
+	  <result property="vipAccount" column="vipAccount"/>
+	  <result property="publicExpend" column="publicExpend"/>
+	  <result property="minaExpend" column="minaExpend"/>
+	  <result property="hardwareExpend" column="hardwareExpend"/>
+	  <result property="vipExpend" column="vipExpend"/>
+	  <result property="mobile" column="mobile"/>
+	  <result property="user_type" column="user_type"/>
+	  <result property="photo" column="photo"/>
+	  <result property="startDate" column="startDate"/>
+	  <result property="endDate" column="endDate"/>
+	  <result property="state" column="state"/>
+	  <result property="remarks" column="remarks"/>
+	  <result property="agentLevel" column="agentLevel"/>
+	  <association property="companyParent" javaType="com.jeeplus.modules.agentSystem.agency.entity.WasSysUser">
+	  	 <id column="userIdP" property="id"/>
+         <result column="startDateP" property="startDate" />
+         <result column="endDateP" property="endDate" />
+         <result column="companyNameP" property="companyName" />
+         <result column="agentLevelIdP" property="agentLevelId" />
+         <result column="agentLevelP" property="agentLevel" />
+         <result column="stateP" property="state" />
+         <result column="packageDiscountP" property="packageDiscount" />
+       	 <result column="publicDiscountP" property="publicDiscount" />
+   		 <result column="minaDiscountP" property="minaDiscount" />
+	  </association>
+	  
+	</resultMap>
+	
+    <sql id="parentColumns">
+    	c.id AS userIdP,
+    	c.companyName AS companyNameP,
+    	c.startDate AS startDateP,
+    	c.endDate  AS endDateP,
+		c.agentLevelId  AS agentLevelIdP,
+		c.state AS stateP,
+		c.packageDiscount AS packageDiscountP,
+		c.publicDiscount AS publicDiscountP,
+		c.minaDiscount AS minaDiscountP
+    </sql>
+    
+    		
+	<select id="findList" parameterType="WasSysUser" resultMap="sysUserMap">
+		SELECT 
+			<include refid="sysUsercolumns"/>, b.name AS agentLevel,<include refid="parentColumns"/>,d.name AS agentLevelP 
+		FROM sys_user a
+		LEFT JOIN was_agent_level b  on a.agentLevelId=b.agentLevelId
+		LEFT JOIN  sys_user c on a.companyParentId=c.id
+		LEFT JOIN  was_agent_level d on c.agentLevelId=d.agentLevelId
+		<where>
+		AND find_in_set(#{id},a.companyParentIds)
+				AND a.del_flag = 0 
+				AND c.del_flag = 0  
+				AND b.state = 1 
+				AND (d.state = 1 or d.state is null)
+				AND (a.state=0 or a.state=1)
+			<if test="companyName != null and companyName != ''">
+				AND a.companyName LIKE 
+					<if test="dbName == 'oracle'">'%'||#{companyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{companyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{companyName},'%')</if>
+			</if>
+			<if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+				AND a.create_date BETWEEN #{startDate} AND #{endDate}
+			</if>
+			<if test="startDate != null  and startDate != '' and (endDate == null or endDate == '')">
+				AND a.create_date  &gt;=  #{startDate}
+			</if>
+			<if test="endDate != null and endDate != '' and (startDate == null  or startDate == '')">
+				AND a.create_date  &lt;= #{endDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			order by a.create_date DESC
+			</otherwise>
+		</choose>
+		
+	</select>
+	<!-- 查询是不是微炫客的代理商 -->
+	<select id="angentLookUp" resultType="String">
+	   select id FROM sys_user a
+	   <where>
+			<if test="companyName != null and companyName != ''">
+				AND binary  a.companyName = #{companyName}				
+			</if>
+		</where>
+	</select>
+	<!-- 查找所有的总代 -->
+	<select id="findAllSuperAgent" resultType="WasSysUser">
+		SELECT a.id,a.companyName 
+		FROM sys_user a
+		LEFT JOIN was_agent_level b on b.agentLevelId=a.agentLevelId
+		<where>
+		and b.state = 1 and b.delegateAgent = 1
+		and a.state=1 and a.del_flag='0'
+		</where>
+	</select>
+	<!-- 查找下级代理商 -->
+	<select id="findAllLowerAgent" resultType="WasSysUser">
+		SELECT *
+		FROM sys_user a
+		<where>
+		and a.companyParentId =#{id}
+		and a.state=1 and a.del_flag='0'
+		</where>
+	</select>
+	<!-- 查找当前代理商是否拥有下放权限 -->
+	<select id="findDelegateAgent" resultType="Integer">
+		SELECT delegateAgent FROM sys_user a 
+		LEFT JOIN was_agent_level b on a.agentLevelId=b.agentLevelId 
+		<where>
+		a.id = #{id}
+		</where>
+	</select>
+	
+	<!-- 查找代理商的详细信息 -->
+	<select id="get" parameterType="WasSysUser" resultMap="sysUserMap">
+	SELECT
+		<include refid="sysUsercolumns"/>, b.name AS agentLevel,<include refid="parentColumns"/>
+	FROM sys_user a
+	LEFT JOIN was_agent_level b  on a.agentLevelId=b.agentLevelId
+	LEFT JOIN  sys_user c on a.companyParentId=c.id
+	<where>
+		a.id = #{id}
+		AND a.del_flag = 0 
+		AND (a.state=0 or a.state=1)
+	</where>
+	</select>
+	<!-- 查找直属上级代理商 -->
+	<select id="getDirectAgent" parameterType="WasSysUser" resultMap="sysUserMap">
+	SELECT
+		<include refid="sysUsercolumns"/>
+	FROM sys_user a	
+	<where>
+		a.id = #{id}
+		AND a.del_flag = 0 
+		AND (a.state=0 or a.state=1)
+	</where>
+	</select>
+	<!-- 查找当前代理商等级，方针 -->
+	<select id="getAgentLevel" parameterType="WasSysUser" resultMap="sysUserMap">
+	SELECT
+		*
+	FROM was_agent_level a	
+	<where>
+		a.agentLevelId = #{id}
+		AND a.state= 1 
+	</where>
+	</select>
+		
+		<update id="thaw">
+			update was_terminal_user set reason=#{0},state=0 where terminalUserId=#{1}
+		</update>	
+		
+		<update id="updatePublicAccountAndExpend">
+				update sys_user set publicAccount=#{0},publicExpend=#{1} where id=#{2}
+		</update>
+		
+		<update id="updateMinaAccountAndExpend" >
+				update sys_user set minaAccount=#{0},minaExpend=#{1} where id=#{2}
+		</update>
+		
+		<update id="updateVipAccountAndExpend" >
+				update sys_user set vipAccount=#{0},vipExpend=#{1} where id=#{2}
+		</update>
+		
+		
+	<!-- 更改代理商的冻结解冻状态-->
+	<update id="update">
+		UPDATE sys_user a SET
+		a.remarks = #{remarks},
+		a.state = #{state},
+		a.update_by = #{update_by}, 
+		a.update_date = #{update_date}
+		WHERE a.id = #{id}
+	</update>
+	
+	<!-- 更改代理商的使用时间-->
+	<update id="updateTime">
+		UPDATE sys_user a SET
+		a.startDate = #{startDate},
+		a.endDate = #{endDate},
+		a.update_by = #{update_by}, 
+		a.update_date = #{update_date}
+		WHERE a.id = #{id}
+	</update>
+	
+	<!-- 更改代理商账户余额-->
+	<update id="updateAccount">
+		UPDATE sys_user a SET
+		a.cashPledge = #{cashPledge},
+		a.hardwareAccount = #{hardwareAccount},
+		a.publicAccount = #{publicAccount},
+		a.minaAccount = #{minaAccount},
+		a.vipAccount = #{vipAccount},
+		a.publicExpend = #{publicExpend},
+		a.hardwareExpend = #{hardwareExpend},
+		a.minaExpend = #{minaExpend},
+		a.vipExpend = #{vipExpend},
+		a.update_by = #{update_by}, 
+		a.update_date = #{update_date}
+		WHERE a.id = #{id}
+	</update>
+	<!-- 更改代理商删除状态-->
+	<update id="updateDelState">
+		UPDATE sys_user a SET
+		a.del_flag = #{del_flag},
+		a.update_by = #{update_by}, 
+		a.update_date = #{update_date}
+		WHERE a.id = #{id}
+	</update>
+	
+</mapper>

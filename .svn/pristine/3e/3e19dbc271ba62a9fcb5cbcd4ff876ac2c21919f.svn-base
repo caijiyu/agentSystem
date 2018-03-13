@@ -1,0 +1,226 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentSystem/include/head.jsp"%>
+<style type="text/css">
+#price-error{
+    margin-left:97px;
+    color:red;
+}
+</style>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Nav tabs -->
+			
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">
+						<shiro:hasPermission name="sysdata:wasSalesPolicy:add">
+						 <a href="${ctx}/agentsystem/wasSalesPolicy/form">
+						 <button  type="button" class="btn btn-info">
+							<i class="fa fa-plus-circle"></i> 添加
+						</button>
+						</a>  					
+						</shiro:hasPermission>
+						
+					</div>
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentsystem/wasSalesPolicy/list" method="post" style="width: 100%" id="searchForm">
+							<button type="button" class="btn waves-effect waves-light btn-info" onclick="search()" style="float: right; margin-left: 15px">搜索</button>
+							<input autocomplete="off" type="text" class="form-control height-control col-4"  placeholder="请输入关键字" id="keywords" value="${titlea}" style="float: right;"> 
+							<input type="hidden" id="keyword" value="${titlea}" name="title" /> 
+								<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}" /> 
+								<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}" />
+							<div class="form-group col-6" style="margin-bottom: 0px; float: right;">
+								
+							</div>
+						</form>
+					</div>
+					<table id="contentTable" class="display nowrap table table-hover table-striped table-bordered" cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th class="tableControl">套餐名</th>
+								<th class="tableControl">开通年限</th>
+								<th class="tableControl">续费折扣</th>
+								<th class="tableControl">价格/元</th>
+								<th class="tableControl">方针分类</th>
+								<th class="tableControl">开始时间</th>
+								<th class="tableControl">结束时间</th>
+								<th class="tableControl">备注</th>
+								<th class="tableControl">操作</th>
+							</tr>
+						</thead>
+						
+						<tbody>
+							<c:forEach items="${page.list}" var="salesPolicy">
+								<tr>
+									<td class="tableControl">${salesPolicy.title}</td>
+									<td class="tableControl">${salesPolicy.dredgeYear}</td>
+									<td class="tableControl"><fmt:formatNumber value="${salesPolicy.renewDiscount*10}" type="currency" pattern="#0.0"/></td>
+									<td class="tableControl">${salesPolicy.price}</td>
+									<td class="tableControl">
+									 <c:if test="${salesPolicy.classify == 0}">公众号</c:if> 
+									 <c:if test="${salesPolicy.classify == 1}">小程序</c:if> 
+									 <c:if test="${salesPolicy.classify == 2}">混合套餐</c:if> 
+									</td>
+									<td class="tableControl"><fmt:formatDate value="${salesPolicy.startDate}" type="both" /></td>
+									<td class="tableControl"><fmt:formatDate value="${salesPolicy.endDate}" type="both" /></td>
+									<td class="tableControl">${salesPolicy.remarks}</td>
+									
+									<td class="tableControl">
+										<shiro:hasPermission name="sysdata:wasSalesPolicy:look">
+											<button type="button" data-toggle="tooltip" onclick="lookPolicy(${salesPolicy.salesPolicyId})" data-original-title="查看" class="btn btn-info btn-circle btn-xs">
+												<i class="fa fa-search-plus"></i>
+											</button>
+										</shiro:hasPermission> 
+										<shiro:hasPermission name="sysdata:wasSalesPolicy:edit">
+											<button type="button" data-toggle="tooltip" onclick="editPolicy(${salesPolicy.salesPolicyId})" data-original-title="编辑" class="btn btn-info btn-circle btn-xs">
+												<i class="fa fa-edit"></i>
+											</button>
+										</shiro:hasPermission> 
+										<shiro:hasPermission name="sysdata:wasSalesPolicy:del">
+											<button type="button" data-toggle="tooltip" onclick="deletePolicy(${salesPolicy.salesPolicyId})" data-original-title="删除" class="btn btn-danger btn-circle btn-xs ">
+												<i class="fa fa-times"></i>
+											</button>
+										</shiro:hasPermission>
+										
+										 
+									</td>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${page.count gt 10}">
+						<table:page page="${page}"></table:page>
+					</c:if>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+<form action="${ctx}/agentsystem/wasSalesPolicy/form" id="editForm" method="post">
+<input id="salesPolicyId" value="" name="salesPolicyId" type="hidden">
+</form>
+<form action="${ctx}/agentsystem/wasSalesPolicy/lookover" id="lookForm" method="post">
+<input id="lookPolicyId" value="" name="salesPolicyId" type="hidden">
+</form>
+	<!-- 模态框 -->
+	<div class="modal fade" id="modal" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content" style="margin-top: 350px">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+						<h4 id="title" class="modal-title">添加</h4>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="inputForm">
+					<input type="hidden" id="softwareId" name="softwareId" />
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label"><span style="color:red">*</span>价格</label>
+							<div class="col-9 controls input-group">
+								<input style="border-radius:0.25rem 0 0 0.25rem ;"  id="price" autocomplete="off" type="text" name="price"
+									class="form-control" >
+								<span class="input-group-addon" style="border-radius:0 0.25rem 0.25rem 0;border-left:0px;" >元</span>
+							</div>
+						</div>
+						
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer" style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="saveSoftware()">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+	
+		
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n,s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		//查询方法
+		function search(){//查询，页码清零
+			$("#pageNo").val(0);
+		    $("#keyword").val($("#keywords").val()); 
+			$("#searchForm").submit();
+		}
+		
+		
+		
+		//删除
+		function deletePolicy(id){
+			layer.confirm("确认要彻底删除数据吗?",{skin : "layui-layer-red",btn : [ "确认","取消" ],icon:3},
+					function() {
+				$.ajax({
+					url :"${ctx}/agentsystem/wasSalesPolicy/delete",
+					dataType : "json",
+					Type : "post",
+					data : {"salesPolicyId":id},
+					success : function(result){
+						if(result>=0){
+							layer.msg("删除成功",{icon:1,time:1000},function(){
+								location.href="${ctx }/agentsystem/wasSalesPolicy/list";
+							});
+						}else if(result==-1){
+							layer.msg("当前销售方针已分配，请勿删除",{icon:7,time:2000},function(){
+							});
+						}
+					},
+					error : function(){
+						layer.msg("删除失败",{icon:2,time:1000},function(){
+							location.href="${ctx }/agentsystem/wasSalesPolicy/list";
+						});
+					}
+				});
+			});
+			
+		}
+		//编辑
+		function editPolicy(id){
+			$("#salesPolicyId").val(id);
+			$("#editForm").submit();
+		}
+		//查看
+		function lookPolicy(id){
+			$("#lookPolicyId").val(id);
+			$("#lookForm").submit();
+		}
+		
+		//checkbox监听
+		$('#ischange').on('ifChecked', function(event){ //ifCreated 事件应该在插件初始化之前绑定 
+			$('.check').iCheck('check');
+		});
+		$('#ischange').on('ifUnchecked', function(event){ //ifUnchecked 事件应该在插件初始化之前绑定 
+			$('.check').iCheck('uncheck');
+		});
+		
+		
+		
+		
+	</script>
+
+</body>
+</html>

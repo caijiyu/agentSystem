@@ -1,0 +1,113 @@
+package com.jeeplus.modules.agentsystem.agency.web;
+
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasFeedBack;
+import com.jeeplus.modules.agentsystem.agency.service.WasAgentAnsweredService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentSystemLog;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentSystemLogService;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+
+
+/**
+ * 
+ * @author WR
+ * @version 2017-9-29
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agentSystem/wasAgentAnsweredList")
+public class WasAgentAnsweredController extends BaseController{
+	
+	@Autowired
+	private WasAgentAnsweredService wasAgentAnsweredService;
+	@Autowired
+	private WasAgentSystemLogService wasAgentSystemLogService;
+	
+	@RequiresPermissions("agentsystem:wasAgentAnswered:listA")
+	@RequestMapping(value ="listA")	
+	public String list(WasFeedBack wasFeedBack,WasFeedBack wasFeedBackA, HttpServletRequest request, HttpServletResponse response, Model model) {					
+		//未回复表单的显示信息
+		wasFeedBack.setReplyState(0);
+		wasFeedBack.setFlag(0);
+		wasFeedBack.setState(1);
+		Page<WasFeedBack> page = wasAgentAnsweredService.findList(new Page<WasFeedBack>(request, response), wasFeedBack);
+		for(int i=0;i<page.getList().size();i++){
+			if(page.getList().get(i).getName() == null){
+				page.getList().get(i).setName("--");
+			}
+		}		
+		model.addAttribute("page", page);
+		model.addAttribute("wasFeedBack", wasFeedBack);
+		wasFeedBackA.setReplyState(1);
+		wasFeedBackA.setFlag(1);
+		wasFeedBackA.setState(1);
+		Page<WasFeedBack> pageA = wasAgentAnsweredService.findList(new Page<WasFeedBack>(request, response), wasFeedBackA);
+		pageA.setFuncName("pageA");
+		for(int i=0;i<pageA.getList().size();i++){
+			if(pageA.getList().get(i).getName() == null){
+				pageA.getList().get(i).setName("--");
+			}
+		}	
+		model.addAttribute("pageA", pageA);
+		model.addAttribute("wasFeedBackA", wasFeedBackA);
+		return "modules/agentsystem/agency/wasAgentAnsweredList";
+	}
+	//查看按钮的实现
+	@RequiresPermissions("agentsystem:wasAgentAnswered:look")
+	@RequestMapping(value ="look")	
+	@ResponseBody
+	public Page<WasFeedBack> look(WasFeedBack wasFeedBack, HttpServletRequest request, HttpServletResponse response, Model model) {					
+		wasFeedBack.setReplyState(1);
+		wasFeedBack.setFeedbackId(Integer.parseInt(request.getParameter("feedbackId")));		
+		//未回复表单的显示信息
+		Page<WasFeedBack> page = wasAgentAnsweredService.findList(new Page<WasFeedBack>(request, response), wasFeedBack);
+		return page;
+	}
+	@RequiresPermissions("agentsystem:wasAgentAnswered:lookReply")
+	@RequestMapping(value ="lookReply")	
+	@ResponseBody
+	public Page<WasFeedBack> lookReply(WasFeedBack wasFeedBack, HttpServletRequest request, HttpServletResponse response, Model model) {					
+		wasFeedBack.setReplyState(0);
+		wasFeedBack.setFeedbackId(Integer.parseInt(request.getParameter("feedbackId")));		
+		//未回复表单的显示信息
+		Page<WasFeedBack> page = wasAgentAnsweredService.findList(new Page<WasFeedBack>(request, response), wasFeedBack);
+		return page;
+	}
+	@RequiresPermissions("agentsystem:wasAgentAnswered:delete")
+	@RequestMapping(value ="delete")	
+	@ResponseBody
+	public Integer delete(String menuId,  WasFeedBack wasFeedBack, HttpServletRequest request, HttpServletResponse response, Model model){
+		Principal principal = UserUtils.getPrincipal();
+		wasFeedBack.setState(0);
+		wasFeedBack.setFeedbackId(Integer.parseInt(request.getParameter("feedbackId")));
+		Integer result = wasAgentAnsweredService.deleteAll(wasFeedBack);
+		wasAgentSystemLogService.insert(new WasAgentSystemLog(menuId,new Date(),principal.getId(),"用户"+principal.getLoginName()+"删除了反馈问题的ID:"+wasFeedBack.getFeedbackId()));
+		return result;
+	}
+	
+	@RequestMapping(value ="replySave")	
+	@ResponseBody
+	public Integer replySave(WasFeedBack wasFeedBack, HttpServletRequest request, HttpServletResponse response, Model model){				
+		wasFeedBack.setReply(request.getParameter("reply"));
+		wasFeedBack.setReplyDate(new Date());
+		wasFeedBack.setReplyState(1);
+		wasFeedBack.setFeedbackId(Integer.parseInt(request.getParameter("feedbackId")));
+		Integer result = wasAgentAnsweredService.deleteAll(wasFeedBack);
+		return result;
+	}
+	
+}

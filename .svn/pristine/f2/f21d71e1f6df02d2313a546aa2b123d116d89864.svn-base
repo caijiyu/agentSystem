@@ -1,0 +1,14 @@
+package com.jeeplus.modules.agentsystem.agency.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentsystem.agency.dao.WasHistoricalRecordDao;
+import com.jeeplus.modules.agentsystem.agency.entity.WasConsumeSynthesis;
+
+@Service
+@Transactional(readOnly = true)
+public class WasHistoricalRecordService extends CrudService<WasHistoricalRecordDao, WasConsumeSynthesis>{
+
+}

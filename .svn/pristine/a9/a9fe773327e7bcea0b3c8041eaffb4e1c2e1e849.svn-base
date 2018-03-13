@@ -1,0 +1,70 @@
+package com.jeeplus.modules.agentsystem.agency.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentsystem.agency.dao.WasPolicyPurchaseDao;
+import com.jeeplus.modules.agentsystem.agency.entity.WasPolicyPurchase;
+
+/**
+ * （软件）方针购买Service
+ * @author SZP
+ * @version 2017-10-09
+ */
+@Service
+@Transactional(readOnly = true,rollbackFor=Exception.class)
+public class WasPolicyPurchaseService extends CrudService<WasPolicyPurchaseDao, WasPolicyPurchase> {
+	
+	@Autowired
+	private WasPolicyPurchaseDao policyPurchaseDao;
+	
+	@Override
+	public WasPolicyPurchase get(String id) {
+		return super.get(id);
+	}
+	
+	@Override
+	public List<WasPolicyPurchase> findList(WasPolicyPurchase policyPurchase) {
+		return super.findList(policyPurchase);
+	}
+	
+	@Override
+	public Page<WasPolicyPurchase> findPage(Page<WasPolicyPurchase> page, WasPolicyPurchase policyPurchase) {
+		return super.findPage(page, policyPurchase);
+	}
+	
+	@Override
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	public void save(WasPolicyPurchase policyPurchase) {
+		super.save(policyPurchase);
+	}
+	
+	@Override
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	public void delete(WasPolicyPurchase policyPurchase) {
+		super.delete(policyPurchase);
+	}
+	
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	public Integer deleteByLogic(WasPolicyPurchase policyPurchase) {
+		return policyPurchaseDao.deleteByLogic(policyPurchase);
+	}
+
+	public List<WasPolicyPurchase> findPolicyOfTerminalUser(String terminalUserId){
+		return policyPurchaseDao.findPolicyOfTerminalUser(terminalUserId);
+	}
+	
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	public Integer deleteByPolicyPurchaseId(Integer policyPurchaseId){
+		return policyPurchaseDao.deleteByPolicyPurchaseId(policyPurchaseId);
+	}
+	public Page<WasPolicyPurchase> findRecord(Page<WasPolicyPurchase> page, WasPolicyPurchase wasPolicyPurchase) {
+		wasPolicyPurchase.setPage(page);
+		page.setList(policyPurchaseDao.findRecord(wasPolicyPurchase));
+		return page;
+	}
+}

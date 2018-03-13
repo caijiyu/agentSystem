@@ -1,0 +1,53 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentsystem.sysdata.entity;
+
+import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Length;
+
+import com.jeeplus.common.persistence.DataEntity;
+import com.jeeplus.common.utils.excel.annotation.ExcelField;
+
+/**
+ * 文件分类Entity
+ * @author WB
+ * @version 2017-09-27
+ */
+public class WasFileClassify extends DataEntity<WasFileClassify> {
+	
+	private static final long serialVersionUID = 1L;
+	/**主键ID*/
+	private Integer classifyId;		
+	/**分类名称*/
+	private String name;		
+	
+	public WasFileClassify() {
+		super();
+	}
+
+	public WasFileClassify(String id){
+		super(id);
+	}
+
+	@NotNull(message="主键ID不能为空")
+	@ExcelField(title="主键ID", align=2, sort=0)
+	public Integer getClassifyId() {
+		return classifyId;
+	}
+
+	public void setClassifyId(Integer classifyId) {
+		this.classifyId = classifyId;
+	}
+	
+	@Length(min=1, max=50, message="分类名称长度必须介于 1 和 50 之间")
+	@ExcelField(title="分类名称", align=2, sort=1)
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+}

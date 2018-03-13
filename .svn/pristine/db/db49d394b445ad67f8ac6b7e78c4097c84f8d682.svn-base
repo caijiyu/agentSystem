@@ -1,0 +1,186 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentSystem.sysdata.web;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentSystem.sysdata.entity.WasAgentLevel;
+import com.jeeplus.modules.agentSystem.sysdata.entity.WasSalesPolicy;
+import com.jeeplus.modules.agentSystem.sysdata.service.WasAgentLevelService;
+import com.jeeplus.modules.agentSystem.sysdata.service.WasSalesPolicyService;
+import com.jeeplus.modules.sys.entity.Role;
+import com.jeeplus.modules.sys.entity.User;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+/**
+ * 代理商等级Controller
+ * @author HJT
+ * @version 2017-10-09
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agentsystem/wasAgentLevel")
+public class WasAgentLevelController extends BaseController {
+
+	@Autowired
+	private WasAgentLevelService wasAgentLevelService;
+	@Autowired
+	private WasSalesPolicyService wasSalesPolicyService;
+	/**
+	 * 代理商等级列表页面
+	 */
+	@RequiresPermissions("sysdata:wasAgentLevel:list")
+	@RequestMapping(value = "list")
+	public String list(WasAgentLevel wasAgentLevel, HttpServletRequest request, HttpServletResponse response, Model model) {
+		Page<WasAgentLevel> page = wasAgentLevelService.findPage(new Page<WasAgentLevel>(request, response), wasAgentLevel); 
+		model.addAttribute("page", page);
+		return "modules/agentSystem/sysdata/wasAgentLevel";
+	}
+
+	
+	/**
+	 * 保存代理商等级
+	 */
+	@RequestMapping(value = "save")
+	@ResponseBody
+	public Integer save(WasAgentLevel wasAgentLevel, Model model,User user) {
+		wasAgentLevel.setState(1);
+		Principal principal = UserUtils.getPrincipal();
+		user.setId(principal.getId());
+		wasAgentLevel.setCreateDate(new Date());
+		wasAgentLevel.setUpdateDate(new Date());
+		wasAgentLevel.setCreateBy(user);
+		wasAgentLevel.setUpdateBy(user);
+		Integer result=wasAgentLevelService.saveAgentLevel(wasAgentLevel);
+		return result;
+	}
+	/**
+	 *获取代理商角色 
+	 */
+	@RequestMapping(value = "getRole")
+	@ResponseBody
+	public List<Role> getRole() {
+		String roleType="代理商";
+		List<Role> list=wasAgentLevelService.getroleType( roleType);
+		return list;
+	}
+	/**
+	 * 根据roleId查看是否有下放代理商的权限
+	 */
+	@RequestMapping(value = "judge")
+	@ResponseBody
+	public Integer count(String permissionA,String permissionB,String id) {
+		permissionA="agency:wasSysUser:list";
+		permissionB="agency:wasAgentApply:list";
+		Integer result=wasAgentLevelService.whetherPermission(permissionA, permissionB, id);
+		return result;
+	}
+	/**
+	 * 删除代理商等级
+	 */
+	@RequiresPermissions("sysdata:wasAgentLevel:del")
+	@RequestMapping(value = "delete")
+	@ResponseBody
+	public Integer delete(WasAgentLevel wasAgentLevel,Integer agentLevelId) {
+		wasAgentLevel.setState(0);
+		Integer result=wasAgentLevelService.deleteAgentLevel(wasAgentLevel);
+		return result;
+	}
+	/**
+	 * 删除判断
+	 */
+	@RequestMapping(value = "judgeDel")
+	@ResponseBody
+	public Integer judgeDel(Integer agentLevelId) {
+		Integer sum=wasAgentLevelService.wasAgentLevelSum(agentLevelId);
+		return sum;
+	}
+	/**
+	 * 查找所有销售方针
+	 */
+	//@RequiresPermissions("sysdata:wasAgentLevel:fap")
+	@RequestMapping(value = "findAllPolicy")
+	@ResponseBody
+	public List<Object> findAllPolicy(WasSalesPolicy wasSalesPolicy,Integer agentLevelId,WasAgentLevel wasAgentLevel){
+		List<Object> totalList=new ArrayList<Object>();
+		wasAgentLevel = wasAgentLevelService.getEnity(agentLevelId);
+		//添加当前时间
+		wasSalesPolicy.setStartDate(new Date());
+		List<WasSalesPolicy> list=wasSalesPolicyService.getUnexpiredPolicy(wasSalesPolicy);
+		totalList.add(wasAgentLevel);
+		totalList.add(list);
+		return totalList;
+	}
+	/**
+	 * 更新分配销售方针
+	 */
+	@RequestMapping(value = "update")
+	@ResponseBody
+	public Integer update(WasAgentLevel wasAgentLevel,User user) {
+		Principal principal = UserUtils.getPrincipal();
+		user.setId(principal.getId());
+		wasAgentLevel.setUpdateBy(user);
+		wasAgentLevel.setUpdateDate(new Date());
+		Integer result=wasAgentLevelService.updateAgentLevel(wasAgentLevel);
+		return result;
+	}
+	/**
+	 * 根据id查找实体
+	 */
+	@RequestMapping(value = "getAgentLevelEnity")
+	@ResponseBody
+	public WasAgentLevel getAgentLevelEnity(Integer agentLevelId,WasAgentLevel wasAgentLevel) {
+		wasAgentLevel=wasAgentLevelService.getEnity(agentLevelId);
+		return wasAgentLevel;
+	}
+	/**
+	 *验证等级名称不能重复 
+	 */
+	@ResponseBody
+	@RequestMapping(value = "validate")
+	public boolean validate(String name) {
+		Integer num=wasAgentLevelService.getNum(name);
+		if(num>0){
+		    	return false;
+		    }else{
+			    return true;
+		    }
+	}
+	
+/**
+ * 查看
+ */
+	@RequiresPermissions("sysdata:wasAgentLevel:look")
+	@ResponseBody
+	@RequestMapping(value = "lookover")
+	public List<Object> lookOver(Integer agentLevelId,WasAgentLevel wasAgentLevel,Role role) {
+		String title="";
+		List<Object> list=new ArrayList<Object>();
+		List<String> li=new ArrayList<String>();
+		wasAgentLevel=wasAgentLevelService.getEnity(agentLevelId);
+		role=wasAgentLevelService.findRoleEnity(wasAgentLevel.getRoleId());
+		if(wasAgentLevel.getSalesPolicyIds() !=null && !"".equals(wasAgentLevel.getSalesPolicyIds())) {
+		String[] idArry=wasAgentLevel.getSalesPolicyIds().split(",");
+		for(String id : idArry) {
+			 title=wasSalesPolicyService.findById(Integer.parseInt(id)).getTitle();
+			li.add(title);
+		    }
+		 }
+		list.add(wasAgentLevel);
+		list.add(role.getName());
+		list.add(li);
+		return list;
+	}
+}

@@ -1,0 +1,354 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<style>
+	#price-error{
+	    margin-left: 139px;
+	} 
+</style>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+		
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">
+						<shiro:hasPermission name="agency:wasAgentApply:add">
+							<button type="button" class="btn btn-info" onclick="show()">
+								<i class="fa fa-plus-circle"></i> 添加
+							</button>
+						</shiro:hasPermission>  
+					</div>
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agency/wasAgentApply/list" method="post" style="width: 100%" id="searchForm">
+							<button type="button" class="btn waves-effect waves-light btn-info" onclick="search()" style="float: right; margin-left: 15px">搜索</button>
+							<input autocomplete="off" type="text" class="form-control height-control col-4" placeholder="请输入公司名称关键字" name="companyName" value="${sysUser.companyName}" style="float: right;"> 
+								<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}" /> 
+								<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}" />
+								<input id="beginCreatedateB" name="startDateA" type="hidden"  value="<fmt:formatDate value="${sysUser.startDate}" pattern="yyyy-MM-dd"/>" />
+								<input id="endCreatedateB" name="endDateA" type="hidden"   value="<fmt:formatDate value="${sysUser.endDate}" pattern="yyyy-MM-dd"/>"/>
+							<div class="form-group col-6" style="margin-bottom: 0px; float: right;">
+								<div class=" input-group input-daterange" id="date-range">
+									<div style="display:inline-block;padding-top: 8px;">申请时间范围:&nbsp;&nbsp;</div>
+									<input 	id="beginCreatedateA"  type="text" value="<fmt:formatDate value="${sysUser.startDate}" pattern="yyyy-MM-dd"/>" class="form-control height-control" placeholder="选择开始时间"  style="text-align: left;" />
+									<span class="input-group-addon bg-info b-0 text-white height-control">至</span>
+									<input  id="endCreatedateA"  type="text" value="<fmt:formatDate value="${sysUser.endDate}" pattern="yyyy-MM-dd"/>" class="form-control height-control" placeholder="选择结束时间"   style="text-align: left;" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<table id="contentTable" class="display nowrap table table-hover table-striped table-bordered" cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th class="tableControl">公司名称</th>
+								<th class="tableControl">添加时间</th>
+								<th class="tableControl">到期时间</th>
+								<th class="tableControl">代理商等级</th>
+								<th class="tableControl">所属上级</th>
+								<th class="tableControl">上级代理等级</th>
+								<th class="tableControl">申请时间</th>
+								<th class="tableControl">申请状态</th>
+								<th class="tableControl">操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach items="${page.list}" var="log">
+								<tr>
+									<td class="tableControl">${log.companyName}</td>
+									<td class="tableControl"><fmt:formatDate value="${log.startDate}" type="both" /></td>
+									<td class="tableControl"><fmt:formatDate value="${log.endDate}" type="both" /></td>
+									<td class="tableControl">${log.agentLevel}</td>
+										<td class="tableControl">${log.companyParent.companyName}</td>
+									<td class="tableControl">${log.companyParent.agentLevel}</td>
+									<td class="tableControl"><fmt:formatDate value="${log.create_date}" type="both" /></td>
+									<td class="tableControl">${log.state==2?'申请中':'驳回'}</td>
+									<td class="tableControl">
+										<shiro:hasPermission name="agency:wasAgentApply:view">
+											<button type="button" data-toggle="tooltip" data-original-title="查看" class="btn btn-info btn-circle btn-xs" onclick="check('${log.id}')">
+												<i class="fa fa-search-plus"></i>
+											</button>
+										</shiro:hasPermission>  
+										<shiro:hasPermission name="agency:wasAgentApply:pass">
+											<button type="button" data-toggle="tooltip" data-original-title="通过" class="btn btn-info btn-circle btn-xs" ${log.state==2?'':'disabled'} onclick="showB('${log.id}')">
+												<i style="font-size:13px" class="iconfont icon-queren-"></i>
+											</button>
+										</shiro:hasPermission>  
+										<shiro:hasPermission name="agency:wasAgentApply:refuse">
+											<button type="button" data-toggle="tooltip" data-original-title="驳回" class="btn btn-info btn-circle btn-xs" ${log.state==2?'':'disabled'} onclick="showA('${log.id}')">
+												<i style="margin-left: -1.5px;" class="iconfont icon-zl_bohui"></i>
+											</button>
+										</shiro:hasPermission>  	
+									</td>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<table:page page="${page}"></table:page>
+				</div>
+			</div>
+		</div>
+	</div>
+	<form id="submitForm" action="#" method="post">
+		<input id="userId" name="id" type="hidden" value="" /> 
+	</form>
+	<!-- 模态框 -->
+	<div class="modal fade" id="modalA" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					驳回
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="modalFormA">
+						<input id="userIdA" name="id" type="hidden" value="" /> 
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><font color="red">*</font>驳回原因</label>
+							<div class="col-8 controls">
+								<textarea id="remarks" name="remarks" required class="form-control" rows="3" maxlength="100"></textarea>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer" style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="overRule()">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 模态框 -->
+	<div class="modal fade" id="modalB" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					平台押金充值
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="modalFormB">
+						<input id="userIdB" name="id" type="hidden" value="" /> 
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label">企业名称</label>
+							<div class="col-8 controls">
+								<input autocomplete="off" type="text" id="companyName"
+									class="form-control height-control" value="" readOnly required>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><font color="red">*</font>充值金额</label>
+							<div class="col-8 controls input-group">
+								<input style="border-radius:0.25rem 0 0 0.25rem ;"  id="price" autocomplete="off" type="text" name="cashPledge"
+								maxlength="9"	class="form-control" required>
+								<span class="input-group-addon" style="border-radius:0 0.25rem 0.25rem 0;border-left:0px;">元</span>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer" style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="pass()">保存</button>
+				</div>
+		</div>
+	  </div>
+	</div>
+	
+	<script type="text/javascript">
+		$.validator.addMethod("minNumber",function(value, element) {
+			var returnVal = true;
+	        inputZ=value;
+	        var ArrMen= inputZ.split(".");    //截取字符串
+	        if(ArrMen.length==2){
+	            if(ArrMen[1].length>2){    //判断小数点后面的字符串长度
+	                returnVal = false;
+	                return false;
+	            }
+	        }
+	        return returnVal;
+		},"最多支持两位小数");
+		
+		$("#modalFormB").validate({
+			 rules: {
+				 cashPledge:{
+						number : true,
+						min : 0,
+						max : 999999.99,
+						minNumber : true
+			      }
+			    },
+			    messages: {
+			    	cashPledge:{
+						required : "请填写充值金额",
+						number :"有效数字范围0~999999.99",
+						min : "有效数字范围0~999999.99",
+						max : "有效数字范围0~999999.99"
+				   	}
+				 },
+			errorPlacement : function(error, element) {
+						error.insertAfter(element.parent());
+					}
+		});
+		
+		$("#modalFormA").validate({
+				 rules: {
+				 
+			    },
+			    messages: {
+			    	remarks:{
+			    		required : "请填写驳回原因"	
+			    	}
+				 }
+		});
+		
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n,s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		//查询方法
+		function search(){//查询，页码清零
+			$("#pageNo").val(0);
+			$("#beginCreatedateB").val($("#beginCreatedateA").val());
+			$("#endCreatedateB").val($("#endCreatedateA").val());
+			$("#searchForm").submit();
+		}
+		
+		function check(id){
+			$('#userId').val(id);
+			$('#submitForm').attr("action","${ctx}/agency/wasAgentApply/checkDetail");
+			$('#submitForm').submit();
+		}
+		
+		function showB(id){
+			$("#modalB").modal("show");
+			var index = layer.load(1, {shade: [0.1,'#fff']});
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${ctx}/agency/wasAgentApply/get",
+				data : {'id': id}, 
+				success : function(result) {
+						layer.close(index);
+						$("#companyName").val(result.companyName);	
+						$("#userIdB").val(id);	
+				}
+			});	
+		}
+		
+		function pass(){
+			var locked = false;
+			var isValid = $("#modalFormB").valid();
+			if (isValid) {
+				layer.confirm('是否正式成为代理商？', { icon : 3 ,
+					 skin : 'layui-layer-molv',btn: ['确认','取消']},function(){
+						 if(!locked){
+							locked=true;
+							$("#modalB").modal("hide");
+							var index = layer.load(1, {shade: [0.1,'#fff']});
+								$.ajax({
+										type : "POST",
+										dataType : "json",
+										url : "${ctx}/agency/wasAgentApply/pass",
+										data : $('#modalFormB').serialize(),
+										success : function(result) {
+											layer.close(index);
+											if (parseInt(result) == 1) {
+												layer.msg("充值成功", {
+													time:1000,
+													icon:1,
+												},function(data){
+													$("#searchForm").submit();	
+												}
+												);
+											}else if(parseInt(result) == 0){
+												layer.msg("充值失败", {
+													time:1000,
+													icon:2,
+												},function(data){
+													$("#searchForm").submit();	
+												});
+											}
+										}
+									});
+						 }
+					 });
+			}
+		}
+		
+		function showA(id){
+			$("#modalA").modal("show");
+			$("#userIdA").val(id);	
+		}
+		
+		function overRule(){
+			var locked = false;
+			var isValid = $("#modalFormA").valid();
+			if (isValid) {
+				layer.confirm('是否确认保存？', { icon : 3 ,
+					 skin : 'layui-layer-molv',btn: ['确认','取消']},function(){
+						 if(!locked){
+							locked=true;
+							$("#modalB").modal("hide");
+							var index = layer.load(1, {shade: [0.1,'#fff']});
+								$.ajax({
+										type : "POST",
+										dataType : "json",
+										url : "${ctx}/agency/wasAgentApply/overRule",
+										data : $('#modalFormA').serialize(),
+										success : function(result) {
+											layer.close(index);
+											if (parseInt(result) == 1) {
+												layer.msg("保存成功", {
+													time:1000,
+													icon:1,
+												},function(data){
+													$("#searchForm").submit();	
+												}
+												);
+											}else if(parseInt(result) == 0){
+												layer.msg("保存失败", {
+													time:1000,
+													icon:2,
+												},function(data){
+													$("#searchForm").submit();	
+												});
+											}
+										}
+									});
+						 }
+					 });
+			}
+		}
+		
+		function show(){
+			$('#submitForm').attr("action","${ctx}/agency/wasAgentApply/addAgentApply");
+			$('#submitForm').submit();
+		}
+	</script>
+
+</body>
+</html>

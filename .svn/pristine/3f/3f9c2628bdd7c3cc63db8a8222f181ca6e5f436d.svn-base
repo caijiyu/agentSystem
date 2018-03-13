@@ -1,0 +1,709 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<style type="text/css">
+	/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+	::-webkit-scrollbar {
+	width: 4px !important;
+	height : 4px !important;
+	background-color: white;
+	}
+	
+	::-webkit-scrollbar-track {
+		/* -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
+		border-radius: 10px;
+		background-color: white;
+	}
+	/*定义滑块 内阴影+圆角*/
+	::-webkit-scrollbar-thumb {
+		border-radius: 10px;
+		-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+		background-color: #f4f5f9;
+	}  
+	.error {
+			color: red;
+		}
+		#harewareVal-error{
+			margin-left: 164px;
+		}
+		#publicVal-error{
+			margin-left: 164px;
+		}
+		#minaVal-error{
+			margin-left: 164px;
+		}
+		#vipVal-error{
+			margin-left: 164px;
+		}
+		#remarks-error{
+		margin-left: 164px;
+		}
+		#drawBackRemarks-error{
+		margin-left: 164px;
+		}
+
+</style>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">
+						<shiro:hasPermission name="agency:wasSysUser:Finance:add">
+						<button type="button" class="btn btn-info" onclick="addAgent()">
+							<i class="fa fa-plus-circle"></i> 添加
+						</button>
+						</shiro:hasPermission>
+						<shiro:hasPermission name="agency:wasSysUser:General:add">
+						<button type="button" class="btn btn-info" onclick="addLowerAgent()">
+							<i class="fa fa-plus-circle"></i> 添加
+						</button>
+						</shiro:hasPermission>
+					</div>
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentSystem/SysUser/list" method="post"
+							style="width: 100%" id="searchForm">
+							<button type="button"
+								class="btn waves-effect waves-light btn-info" onclick="search()"
+								style="float: right; margin-left: 15px">搜索</button>
+
+							<input autocomplete="off" type="text"
+								class="form-control height-control col-4"
+								placeholder="请输入企业名称关键字" name="companyName" value=""
+								style="float: right;"> <input id="pageNo" name="pageNo"
+								type="hidden" value="${page.pageNo}" /> <input id="pageSize"
+								name="pageSize" type="hidden" value="${page.pageSize}" />
+							<div class="form-group col-6"
+								style="margin-bottom: 0px; float: right;">
+								<div class=" input-group input-daterange" id="date-range">
+									<input
+										value="<fmt:formatDate value="${log.startDate}" pattern="yyyy-MM-dd"/>"
+										type="text" class="form-control height-control"
+										placeholder="选择开始时间" name="startDate"
+										style="text-align: left;" /> <span
+										class="input-group-addon bg-info b-0 text-white height-control addCentreControl">至</span>
+									<input
+										value="<fmt:formatDate value="${log.endDate}" pattern="yyyy-MM-dd"/>"
+										type="text" class="form-control height-control"
+										placeholder="选择结束时间" name="endDate" style="text-align: left;" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<table id="contentTable"
+						class="display nowrap table table-hover table-striped table-bordered"
+						cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th class="tableControl">企业名称</th>
+								<th class="tableControl">添加时间</th>
+								<th class="tableControl">到期时间</th>
+								<th class="tableControl">所属上级</th>
+								<th class="tableControl">硬件余额/元</th>
+								<th class="tableControl">公众号余额/元</th>
+								<th class="tableControl">小程序余额/元</th>
+								<th class="tableControl">VIP余额/元</th>
+								<th class="tableControl">平台押金/元</th>
+								<th class="tableControl">代理等级</th>
+								<th class="tableControl">状态</th>
+								<th class="tableControl">操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach items="${page.list}" var="log" varStatus="status">
+								<tr>
+									<td class="tableControl">${log.companyName}</td>
+									<td class="tableControl"><fmt:formatDate
+											value="${log.create_date}" type="both" /></td>
+									<td class="tableControl"><fmt:formatDate
+											value="${log.endDate}" type="both" /></td>
+									<td class="tableControl">${log.companyParent.companyName}</td>
+									<td class="tableControl">${log.hardwareAccount}</td>
+									<td class="tableControl">${log.publicAccount}</td>
+									<td class="tableControl">${log.minaAccount}</td>
+									<td class="tableControl">${log.vipAccount}</td>
+									<td class="tableControl">${log.cashPledge}</td>
+									<td class="tableControl">${log.agentLevel}</td>
+									<c:if test="${log.state == 1 }">
+										<td class="tableControl">正常</td>
+									</c:if>
+									<c:if test="${log.state == 0 }">
+										<td class="tableControl">冻结</td>
+									</c:if>
+									<td class="tableControl">
+										<div class="dropdown">
+											<button class="btn btn-default dropdown-toggle" type="button"
+												id="dropdownMenu" data-toggle="dropdown"
+												aria-haspopup="true" aria-expanded="true" style="font-size:13px">
+												操作 <span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu" aria-labelledby="dropdownMenu"
+												style="overflow-y:scroll; height: 150px;min-width: 98px;">
+												<shiro:hasPermission name="agency:wasSysUser:view">
+												<li><a href="javascript:void(0)" onclick="lookup('${log.id}')" ><i class="iconfont icon-chakandatu"></i><span style="margin-left: 10px; font-size: 13px;">查看</span></a></li>	
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:Finance:edit">
+												<li><a href="javascript:void(0)" onclick="editAgent('${log.id}')"><i class="iconfont icon-redact"></i><span style="margin-left: 10px; font-size: 13px;">编辑</span></a></li>
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:General:edit">
+												<li><a href="javascript:void(0)" onclick="editLowerAgent('${log.id}')"><i class="iconfont icon-redact"></i><span style="margin-left: 10px; font-size: 13px;">编辑</span></a></li>
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:finance:recharge">
+												<li><a href="javascript:void(0)" onclick="recharge('${log.id}')"><i class="iconfont icon-chongzhi"></i><span style="margin-left: 10px; font-size: 13px;">充值</span></a></li>
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:agent:recharge">
+												<li><a href="javascript:void(0)" onclick="agentRecharge('${log.id}')"><i class="iconfont icon-chongzhi"></i><span style="margin-left: 10px; font-size: 13px;">充值</span></a></li>
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:renew">
+												<li><a href="javascript:void(0)" onclick="renew('${log.id}')"><i class="iconfont icon-xuqian"></i><span style="margin-left: 10px; font-size: 13px;">续签</span></a></li>
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:order">
+												<li><a href="javascript:void(0)" onclick="order('${log.id}')"><i class="iconfont icon-gouwuchekong"></i><span style="margin-left: 10px; font-size: 13px;">下单</span></a></li>
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:transfer">
+												<li><a href="javascript:void(0)" onclick="transfer('${log.id}')"><i class="iconfont icon-zhuanyi"></i><span style="margin-left: 10px; font-size: 13px;">转移</span></a></li>
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:updateState">
+												<c:if test="${log.state == 1 }">
+												<li><a href="javascript:void(0)"  onclick="freeze('${log.id}')"><i class="${ log.state == 1 ? 'iconfont icon-dongjie':'iconfont icon-jiechudongjie'}"></i><span style="margin-left: 10px; font-size: 13px;">冻结</span></a></li>
+												</c:if>
+												<c:if test="${log.state == 0 }">
+												<li><a href="javascript:void(0)"  onclick="unfreeze('${log.id}')"><i class="${ log.state == 1 ? 'iconfont icon-dongjie':'iconfont icon-jiechudongjie'}"></i><span style="margin-left: 10px; font-size: 13px;">解冻</span></a></li>
+												</c:if>
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:drawback">
+												<li><a href="javascript:void(0)" onclick="showDrawBackModal('${log.id}','${log.companyName}')"><i class="iconfont icon-tuikuan"></i><span style="margin-left: 10px; font-size: 13px;">退款</span></a></li>
+												</shiro:hasPermission>
+												<shiro:hasPermission name="agency:wasSysUser:del">
+												<li><a href="javascript:void(0)" onclick="deleteBylogic('${log.id}')"><i class="iconfont icon-shanchu"></i><span style="margin-left: 10px; font-size: 13px;">删除</span></a></li>
+												</shiro:hasPermission>
+											</ul>
+										</div>
+									</td>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${page.count gt 10 }">
+					<table:page page="${page}"></table:page>
+					</c:if>
+				</div>
+				<div class="tab-pane p-20" id="profile2" role="tabpanel">2</div>
+				<div class="tab-pane p-20" id="messages2" role="tabpanel">3</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 模态框 -->
+	<div class="modal fade" id="modifyState" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content" style="margin-top:350px">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<label class="modal-title" id="exampleModalLabel" style="font-size: 14px">编辑代理商状态</label>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="stateForm" >
+					<input type="hidden" value="" id="agentId" name="id">
+					<input type="hidden" value="" id="agentState" name="state">
+					<input type="hidden" value="" id="menuState" name="menuId"> 
+						<div class="form-group row">
+							<label id="reason" for="example-text-input" class="col-3 col-form-label" style="text-align: center;padding-top: 8px;font-size: 13px"></label>
+							<div class="col-9 controls">
+								<textarea   name="remarks"
+									class="form-control height-control" spellcheck="false"></textarea>
+							</div>
+						</div>
+						
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer"
+					style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="updateState()">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="drawBackModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true" style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content"  style="margin-top:200px;width: 600px">
+            <div class="modal-header" style="background-color: #F4F5F9;">
+                <h4 class="modal-title" id="exampleModalLabel">退款页面</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="drawBackForm">
+                 <input type="hidden" value="" id="userId" name="id"> 
+                 <input type="hidden" value="" id="menu" name="menuId"> 
+                    <div class="form-group row">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">公司名称:</label>
+                        <div class="col-8">
+                            <input type="text" class="form-control" id="agentName"  value="" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="hardwarerow">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">硬件账户退款:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"   name="hardwareAccount" id="harewareVal" >
+                                <span class="input-group-addon">元</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="publicrow">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">公众号账户退款:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"   name="publicAccount" id="publicVal">
+                                <span class="input-group-addon">元</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="minarow">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">小程序账户退款:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"   name="minaAccount" id="minaVal" >
+                                <span class="input-group-addon">元</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="viprow">
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">VIP账户退款:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control"  name="vipAccount"  id="vipVal" >
+                                <span class="input-group-addon">元</span>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="form-group row" >
+                        <label for="recipient" class="col-3 control-label" style="text-align: center;padding-top: 8px">
+                        <span style="color: red">*&nbsp;&nbsp;&nbsp;</span>退款原因:</label>
+                        <div class="col-8">
+                            <div class="input-group">
+                                <textarea class="form-control"  name="remarks" id="drawBackRemarks" spellcheck="false"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+	                	<div class="col-11" >
+	                		<div style="float: right">总价格：<span id="totalDrawBackMoney"></span>元</div>
+	                	</div>
+	                </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer" style="background-color: #F4F5F9;">
+                <button type="button" class="btn waves-effect waves-light btn-info" onclick="drawBackAccount()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+	<form id="jump" name="myform" hidden="hidden" action="" method="post">
+		<input id="id" name="id" value=""/>
+		<input type="hidden" value="" id="menuId" name="menuId"> 
+	</form>
+	
+	<script src="${ctxStatic}/jquery-validation/1.14.0/jquery.validate.js"></script>
+	<script type="text/javascript">
+		$("tbody>tr").each(function(index,element){
+			if(index >= $('tbody>tr').length/2){
+				$(this).find('.dropdown').addClass("dropup");
+			}
+		}) 
+		
+		$("document").ready(function(){
+			//表单验证
+			$("#stateForm").validate({
+				rules: {
+					remarks : {
+						required : true,
+						maxlength : 50
+					},	
+				},
+				messages : {
+					remarks : {
+						required : "请填写更改代理商状态理由",
+						maxlength : "最多输入50个字符",
+					},		
+				},
+				errorPlacement : function(error, element) {
+					error.appendTo(element.parent());
+				}
+			});
+			
+			//表单验证
+			$("#drawBackForm").validate(
+				{
+					rules : {
+						hardwareAccount:{
+							required: true,
+							number: true,
+							minNumber: $("#harewareVal").val(),
+							range: [0,999999.99]
+						},			
+						publicAccount:{
+							required: true,
+							number: true,
+							minNumber: $("#publicVal").val(),
+							range: [0,999999.99]
+						},
+						minaAccount:{
+							required: true,
+							number: true,
+							minNumber: $("#minaVal").val(),
+							range: [0,999999.99]
+						},
+						vipAccount :{
+							required: true,
+							number: true,
+							minNumber: $("#vipVal").val(),
+							range: [0,999999.99]
+						},
+						remarks:{
+							required: true,
+							maxlength: 50
+						}
+					},
+					
+					//错误信息提示
+					messages:{
+						hardwareAccount:{
+							required: "请填写退款金额",
+							number: "请正确输入金额",
+							length: "输入数字最多小数点后两位",
+							range: "请输入正确的金额范围"
+						},
+						publicAccount:{
+							required: "请填写退款金额",
+							number: "请正确输入金额",
+							length: "输入数字最多小数点后两位",
+							range: "请输入正确的金额范围"
+						},
+						minaAccount:{
+							required: "请填写退款金额",
+							number: "请正确输入金额",
+							length: "输入数字最多小数点后两位",
+							range: "请输入正确的金额范围"
+						},
+						vipAccount:{
+							required: "请填写退款金额",
+							number: "请正确输入金额",
+							length: "输入数字最多小数点后两位",
+							range: "请输入正确的金额范围"
+						},
+						remarks:{
+							required: "请输入退款原因",
+							maxlength:"最多输入50个字符",
+						}
+					},
+					errorPlacement : function(error, element) {	
+		            	error.insertAfter( element.parent().parent()); 		            	         
+					}
+				});
+			 jQuery.validator.addMethod("minNumber",function(value, element){
+		            var returnVal = true;
+		            inputZ=value;
+		            var ArrMen= inputZ.split(".");    //截取字符串
+		            if(ArrMen.length==2){
+		                if(ArrMen[1].length>2){    //判断小数点后面的字符串长度
+		                    returnVal = false;
+		                    return false;
+		                }
+		            }
+		            return returnVal;
+		        },"小数点后最多为两位");
+		});
+		
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose : true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n, s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		//查询方法
+		function search() {//查询，页码清零
+			$("#pageNo").val(0);
+			$("#searchForm").submit();
+		}
+		
+		//针对tab切换会出现其他的问题
+		function switchover() {
+			$('#home2').removeClass("active");
+			$('#home2').attr("aria-expanded", false);
+			$('#profile2').removeClass("active");
+			$('#profile2').attr("aria-expanded", false);
+			$('#messages2').removeClass("active");
+			$('#messages2').attr("aria-expanded", false);
+		}
+		
+		function addAgent() {
+			window.location.href = "${ctx}/agency/wasAgentApply/addAgentA";
+		}
+		function addLowerAgent() {
+			window.location.href = "${ctx}/agency/wasAgentApply/addAgentB";
+		}
+		//查看代理商详情
+		function lookup(userId) {
+		$("#jump").attr("action", "${ctx}/agentSystem/SysUser/get");
+		$("#id").val(userId);
+		$("#jump").submit();	
+			
+		}
+		
+		//财务编辑代理商
+		function editAgent(userId) {
+			$("#jump").attr("action", "${ctx}/agentSystem/SysUser/edit");
+			$("#id").val(userId);
+			$("#jump").submit();
+		}
+		//总代编辑代理商
+		function editLowerAgent(userId) {
+			$("#jump").attr("action", "${ctx}/agentSystem/SysUser/editLowerAgent");
+			$("#id").val(userId);
+			$("#jump").submit();
+		}
+		//修改代理商状态
+		function freeze(userId) {
+			document.getElementById("stateForm").reset();
+			$("#stateForm").data("validator").resetForm();  
+			$("#reason").html("<span style='color: red'>*&nbsp;&nbsp;&nbsp;</span>冻结原因");
+			$("#agentId").val(userId);
+			$("#modifyState").modal("show");
+			
+			
+		}
+		function unfreeze(userId) {
+			document.getElementById("stateForm").reset(); 
+			$("#stateForm").data("validator").resetForm();
+			$("#reason").html("<span style='color: red'>*&nbsp;&nbsp;&nbsp;</span>解冻原因");
+			$("#agentId").val(userId);
+			$("#modifyState").modal("show");
+			
+			
+		}
+	
+		function updateState() {
+			var isValid = $("#stateForm").valid();
+			var menuId = $("#btnId",parent.document).val();
+			$("#menuState").val(menuId);
+			if (isValid) {
+				var locked = false;
+				layer.confirm('是否确认修改代理商状态?', {
+					skin : 'layui-layer-molv',
+					icon : 3,
+					btn : [ '确认', '取消' ]
+				//按钮
+				},function() {
+					if(!locked) {
+						locked = true;
+						var index = layer.load(1, {shade: [0.1,'#fff']});
+						$.ajax({
+							url : "${ctx}/agentSystem/SysUser/updateState",
+							type : "post",
+							dataType : "json",
+							data : $('#stateForm').serialize(),
+							success : function(result) {
+								if (result == 1) {
+									layer.close(index);
+									$("#modifyState").modal("hide");
+									$("#searchForm").submit();
+									layer.msg("修改状态成功！", {
+										icon : 1,
+										time : 1000
+									});
+								
+								} else {
+									$("#modifyState").modal("hide");
+									layer.msg("修改状态失败！", {
+										icon : 1,
+										time : 1000
+									});
+								}
+							}
+						});
+					}
+				
+				});
+			}
+		}
+		
+		function renew(agentId) {
+			$("#jump").attr("action", "${ctx}/agentSystem/SysUser/getAgent");
+			$("#id").val(agentId);
+			$("#jump").submit();
+		}
+		//财务给代理商充值
+		function recharge(agentId) {
+			$("#jump").attr("action", "${ctx}/agentSystem/SysUser/getAgentRecharge");
+			$("#id").val(agentId);
+			$("#jump").submit();
+		}
+		//总代给代理商充值
+		function agentRecharge(agentId){
+			$("#jump").attr("action", "${ctx}/agentSystem/SysUser/getLowerAgentRecharge");
+			$("#id").val(agentId);
+			$("#jump").submit();
+		}
+		//财务退款
+		function showDrawBackModal(agentId,companyName) {
+			$("#drawBackForm").data("validator").resetForm();
+			document.getElementById("drawBackForm").reset();  
+			$("#totalDrawBackMoney").html(0);
+			$("#userId").val(agentId);
+			$("#agentName").val(companyName);
+			$("#agentId").val(agentId);
+			$("#drawBackModal").modal("show");
+		}
+		var hardwareMoney=0;var publicMoney = 0;var minaMoney=0; var vipMoney= 0;
+		$('#harewareVal').bind('input propertychange', function() {
+			hardwareMoney = $('#harewareVal').val();
+			$('#totalDrawBackMoney').text(Number(hardwareMoney)+Number(publicMoney)+Number(minaMoney)+Number(vipMoney));
+		});
+		
+		$('#publicVal').bind('input propertychange', function() {
+			publicMoney = $('#publicVal').val();
+			$('#totalDrawBackMoney').html(Number(hardwareMoney)+Number(publicMoney)+Number(minaMoney)+Number(vipMoney));
+		});
+		$('#minaVal').bind('input propertychange', function() {
+			minaMoney = $('#minaVal').val();
+			$('#totalDrawBackMoney').html(Number(hardwareMoney)+Number(publicMoney)+Number(minaMoney)+Number(vipMoney));
+		});
+		$('#vipVal').bind('input propertychange', function() {
+			vipMoney = $('#vipVal').val();
+			$('#totalDrawBackMoney').html(Number(hardwareMoney)+Number(publicMoney)+Number(minaMoney)+Number(vipMoney));
+		});
+		function drawBackAccount() {
+			var isValid = $("#drawBackForm").valid();
+			var menuId = $("#btnId",parent.document).val();
+			$("#menu").val(menuId);
+			if(isValid) {
+				var flag;
+				if($("#harewareVal").val() == 0 && $("#publicVal").val() == 0 && $("#minaVal").val() == 0 && $("#vipVal").val() == 0) {
+					flag = false;
+					layer.msg("您还未输入一个非0的退款金额",{icon:7,time:1500});
+				}else {
+					flag = true;
+				}
+			}
+			if(isValid && flag) {
+				var locked = false;
+				layer.confirm('是否确认退款?', {
+					skin : 'layui-layer-molv',
+					icon : 3,
+					btn : [ '确认', '取消' ]
+				//按钮
+				},function() {
+					if(!locked) {
+						locked = true;
+						var index = layer.load(1, {shade: [0.1,'#fff']});
+						$.ajax({
+							url : "${ctx}/agentSystem/SysUser/updateDrawBackAccount",
+							type : "post",
+							dataType : "json",
+							data : $('#drawBackForm').serialize(),
+							success : function(result) {
+								if (result == 1) {
+									layer.close(index);
+									$("#drawBackModal").modal("hide");
+									$("#searchForm").submit();
+									layer.msg("退款成功！", {
+										icon : 1,
+										time : 1000
+									});
+								
+								} else {
+									$("#drawBackModal").modal("hide");
+									layer.msg("退款失败！", {
+										icon : 1,
+										time : 1000
+									});
+								}
+							}
+						});
+					}
+				
+				});
+			}
+		}
+		function deleteBylogic(agentId) {
+			$("#id").val(agentId);
+			var menuId = $("#btnId",parent.document).val();
+			$("#menuId").val(menuId);
+			layer.confirm('确认要删除该代理商吗?', {
+				skin : 'layui-layer-molv',
+				icon : 3,
+				btn : [ '确认', '取消' ]
+			//按钮
+			},function() {
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+					url : "${ctx}/agentSystem/SysUser/updateDelState",
+					type : "post",
+					dataType : "json",
+					data : $('#jump').serialize(),
+					success : function(result) {
+						if (result == 1) {
+							layer.close(index);
+							$("#searchForm").submit();
+							layer.msg("删除成功！", {
+								icon : 1,
+								time : 1000
+							});
+						
+						} else if(result == 0){
+							layer.close(index);
+							layer.msg("删除失败，该代理商仍有下级代理商存在！", {
+								icon : 1,
+								time : 1000
+							});
+						}else{
+							layer.close(index);
+							layer.msg("删除失败，该代理商仍有终端用户存在！", {
+								icon : 1,
+								time : 1000
+							});
+						}
+					}
+				});
+		
+			});
+		}
+		function order(agentId) {
+			$("#jump").attr("action", "${ctx}/agentSystem/SysUser/getOrderAgent");
+			$("#id").val(agentId);
+			$("#jump").submit();
+		}
+		
+		function transfer(agentId) {
+			$("#jump").attr("action", "${ctx}/agentSystem/SysUser/getTransferAgent");
+			$("#id").val(agentId);
+			$("#jump").submit();
+		}
+	</script>
+
+</body>
+</html>

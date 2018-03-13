@@ -1,0 +1,106 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentsystem.sysdata.web;
+
+import java.util.Date;
+import java.util.List;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasSoftwareModifyPrice;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasSoftwareModifyPriceService;
+import com.jeeplus.modules.sys.entity.User;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+/**
+ * 软件修改价Controller
+ * @author HJT
+ * @version 2017-09-29
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agentSystem/wasSoftwareModifyPrice")
+public class WasSoftwareModifyPriceController extends BaseController {
+
+	@Autowired
+	private WasSoftwareModifyPriceService wasSoftwareModifyPriceService;
+	
+	
+	/**
+	 * 列表页面
+	 */
+	@RequiresPermissions("sysdata:wasSoftwareModifyPrice:list")
+	@RequestMapping(value = "list")
+	public String list(WasSoftwareModifyPrice wasSoftwareModifyPrice,Model model) {
+		wasSoftwareModifyPrice.setState(true);
+		List<WasSoftwareModifyPrice> modifyPriceList=wasSoftwareModifyPriceService.findList(wasSoftwareModifyPrice);
+		model.addAttribute("modifyPriceList", modifyPriceList);
+		return "modules/agentSystem/sysdata/wasSoftwareModifyPrice";
+	}
+
+	
+	/**
+	 * 保存软件修改价
+	 */
+	//@RequiresPermissions("sysdata:wasSoftwareModifyPrice:save")
+	@RequestMapping(value = "save")
+	@ResponseBody
+	public Integer save(User user,WasSoftwareModifyPrice wasSoftwareModifyPrice, Model model,Integer modifypriceId) {
+		Integer result;
+		wasSoftwareModifyPrice.setState(true);
+		Principal principal = UserUtils.getPrincipal();
+		user.setId(principal.getId());
+		wasSoftwareModifyPrice.setUpdateBy(user);
+		wasSoftwareModifyPrice.setUpdateDate(new Date());
+		if(modifypriceId !=null){
+			result=wasSoftwareModifyPriceService.updateModifyPrice(wasSoftwareModifyPrice);
+		}else{
+			wasSoftwareModifyPrice.setCreateDate(new Date());
+			wasSoftwareModifyPrice.setCreateId(principal.getId());
+			 result=wasSoftwareModifyPriceService.saveModifyPrice(wasSoftwareModifyPrice);
+		}
+		return result;
+	}
+	
+	/**
+	 * 逻辑删除
+	 */
+	@RequiresPermissions("sysdata:wasSoftwareModifyPrice:del")
+	@RequestMapping(value = "delete")
+	@ResponseBody
+	public Integer delete(WasSoftwareModifyPrice wasSoftwareModifyPrice) {
+		wasSoftwareModifyPrice.setState(false);
+		Integer result=wasSoftwareModifyPriceService.deleteByLogicModifyPrice(wasSoftwareModifyPrice);
+		return result;
+	}
+	
+	/**
+	 * 根据Id找实体,编辑
+	 */
+	@RequiresPermissions("sysdata:wasSoftwareModifyPrice:edit")
+	@RequestMapping(value = "findEntiy")
+	@ResponseBody
+	public WasSoftwareModifyPrice findEntiy(WasSoftwareModifyPrice wasSoftwareModifyPrice) {
+		WasSoftwareModifyPrice modifyPrice=wasSoftwareModifyPriceService.findModifyPrice(wasSoftwareModifyPrice);
+		return modifyPrice;
+	}
+	@ResponseBody
+	@RequestMapping(value = "validate")
+	public boolean validateMobileExist(WasSoftwareModifyPrice wasSoftwareModifyPrice,Boolean classify) {
+		wasSoftwareModifyPrice.setState(true);
+		List<WasSoftwareModifyPrice> modifyPriceList=wasSoftwareModifyPriceService.findList(wasSoftwareModifyPrice);   
+		String a=classify+"";
+		String b=modifyPriceList.get(0).getClassify()+"";
+		if(a.equals(b)){
+		    	return false;
+		    }else{
+			    return true;
+		    }
+	}
+}

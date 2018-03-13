@@ -1,0 +1,37 @@
+package com.jeeplus.modules.agentSystem.sysdata.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentSystem.sysdata.dao.WasSoftwareDao;
+import com.jeeplus.modules.agentSystem.sysdata.entity.WasSoftware;
+@Service
+@Transactional(readOnly = true)
+public class WasSoftwareService extends CrudService<WasSoftwareDao, WasSoftware>{
+	@Autowired
+	WasSoftwareDao wasSoftwareDao;
+	public Page<WasSoftware> findList(Page<WasSoftware> page, WasSoftware wasSoftware) {
+		wasSoftware.setPage(page);
+		page.setList(dao.findList(wasSoftware));
+		return page;
+	}
+	@Transactional(readOnly = false)
+	public int updateSoftware(WasSoftware wasSoftware){
+		return dao.update(wasSoftware);
+	}
+	public List<WasSoftware> findSoftwareList(WasSoftware wasSoftware) {
+		return super.findList(wasSoftware);
+	}
+
+	public WasSoftware findSoftwareById(Integer softwareId){
+		return wasSoftwareDao.findById(softwareId);
+	}
+	public List<WasSoftware> findAllSofts( ){
+		return wasSoftwareDao.findAllSofts();
+	}
+}

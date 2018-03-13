@@ -1,0 +1,47 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentSystem.sysdata.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentSystem.sysdata.dao.WasInvoiceContentDao;
+import com.jeeplus.modules.agentSystem.sysdata.entity.WasInvoiceContent;
+
+/**
+ * 发票内容Service
+ * @author HJT
+ * @version 2017-10-08
+ */
+@Service
+@Transactional(readOnly = true)
+public class WasInvoiceContentService extends CrudService<WasInvoiceContentDao, WasInvoiceContent> {
+
+	public WasInvoiceContent get(String id) {
+		return super.get(id);
+	}
+	
+	public List<WasInvoiceContent> findList(WasInvoiceContent wasInvoiceContent) {
+		return super.findList(wasInvoiceContent);
+	}
+	//列表展示
+	public Page<WasInvoiceContent> findPage(Page<WasInvoiceContent> page, WasInvoiceContent wasInvoiceContent) {
+		return super.findPage(page, wasInvoiceContent);
+	}
+	//保存
+	@Transactional(readOnly = false)
+	public Integer saveContent(WasInvoiceContent wasInvoiceContent) {
+		return dao.insert(wasInvoiceContent);
+	}
+	//删除
+	@Transactional(readOnly = false)
+	public Integer deleteContent(WasInvoiceContent wasInvoiceContent) {
+		return dao.delete(wasInvoiceContent);
+	}
+	
+}

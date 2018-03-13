@@ -1,0 +1,17 @@
+package com.jeeplus.modules.agentsystem.terminal.dao;
+
+import java.util.List;
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalProduct;
+
+import scala.collection.generic.BitOperations.Int;
+
+@MyBatisDao
+public interface WasTerminalProductDao extends CrudDao<WasTerminalProduct> {
+	public List<WasTerminalProduct> findByTerminalUserId(Integer terminalUserId);
+	public WasTerminalProduct findCountById(Integer salesPolicyId);
+	public Integer insertProduct(WasTerminalProduct wasTerminalProduct);
+	public Integer updateProduct(WasTerminalProduct wasTerminalProduct);
+	public WasTerminalProduct findByTerminalUserIdAndSoftWareId(Integer terminalUserId,Integer softWareId);
+}

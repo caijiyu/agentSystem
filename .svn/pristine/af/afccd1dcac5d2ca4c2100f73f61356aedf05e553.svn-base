@@ -1,0 +1,114 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<!DOCTYPE html>
+<!-- saved from url=(0022)https://www.baidu.com/ -->
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+</head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">        
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta content="always" name="referrer">
+    <meta name="theme-color" content="#2932e1"> 
+    <link href="${ctxStatic}/agentSystem/css/iconfont.css" rel="stylesheet" type="text/css"/>
+    <link href="${ctxStatic}/agentSystem/css/lookUp.css" rel="stylesheet" type="text/css"/>
+    <title>代理商查询</title>
+<body link="#0000cc" style="">
+	<div data-for="result" id="swfEveryCookieWrap"
+		style="width: 0px; height: 0px; overflow: hidden;">
+		<div id="swfEveryCookie" style="visibility: visible;"></div>
+	</div>
+	<div id="wrapper" style="display: block;">
+		<div id="head">
+			<div class="head_wrapper">
+				<div class="s_form">
+					<div class="s_form_wrapper soutu-env-nomac soutu-env-index">
+						<!--logo的标志-->
+						<div id="lg">
+							<img src="${ctxStatic}/agentSystem/img/WXK.png" width="270"
+								height="129">
+						</div>
+						<form id="form" name="f" action="" class="fm">
+							<span class="bg s_ipt_wr quickdelete-wrap"> <span
+								class="soutu-btn"></span> <input id="kw" class="s_ipt" value=""
+								maxlength="255" placeholder="请输入代理商全称">
+							</span><span class="bg s_btn_wr"><input type="button" id="su" style="height:34.8px"
+								value="搜索" class="bg s_btn" onclick="lookSearch();"></span> <span
+								class="tools"><span id="mHolder"> </span> </span>
+						</form>
+						<div id="agentSh" style="padding-top: 50px; display: none">
+							<div id="agentIco"></div>
+							<div id="setAgName" style="padding-top: 30px; font-size: 15px;"></div>
+						</div>
+					</div>
+				</div>
+				<div id="u1">
+					<a href="${ctx}/agentSystem/SysUser/lookUpLogin" class="lb">用户登录</a>
+				</div>
+			</div>
+		</div>
+		<div class="qrcodeCon">
+			<div id="qrcode">
+				<div class="qrcode-item qrcode-item-1">
+					<div class="qrcode-img">
+						<img src="${ctxStatic}/agentSystem/img/qrcode.jpg">
+					</div>
+					<div class="qrcode-text">
+						<p>
+							<b>微炫客</b>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="ftCon">
+			<div class="ftCon-Wrapper">
+				<div id="ftConw">
+					<p id="cp">
+						©2017&nbsp;www.vicmob.com.&nbsp; <a href="">无锡微炫客信息技术有限公司版权所有</a>&nbsp;
+						<a href="" class="cp-feedback"></a>&nbsp;苏ICP备15062425号&nbsp;<i
+							class="c-icon-icrlogo"></i>&nbsp; <a id="jgwab" target="_blank"
+							href="">地址： 国家级科技企业孵化器江苏信息产业园清华创新大厦2001</a>&nbsp;<i class=""></i>
+					</p>
+				</div>
+			</div>
+		</div>
+		<div id="wrapper_wrapper"></div>
+	</div>
+	<div class="c-tips-container" id="c-tips-container"></div>
+</body>
+<script>
+function lookSearch(){	
+	var agentName = $("#kw").val().trim();	
+	var index = layer.load(1, {shade: [0.1,'#fff']});
+	if(agentName.length>0){
+		$.ajax({
+			url : "${ctx}/agentSystem/SysUser/lookUp",
+			type : "post",
+			dataType : "json",
+			data :{'agentName':agentName},
+			success : function(result) {
+				layer.close(index);
+				if(result){					
+					$("#agentIco").html('<i class="iconfont icon-chenggong"></i>');
+					$("#setAgName").html('<span>查询的代理商：'+agentName+'，是微炫客代理商！</span>');
+					$("#agentSh").css('display','block');
+				}else{
+					$("#agentIco").html('<i class="iconfont icon-shibai"></i>');
+					$("#setAgName").html('<span>查询的代理商：'+agentName+'，不是微炫客代理商！</span>');
+					$("#agentSh").css('display','block');
+				}							
+			},
+			error:function(xhr,textStatus){
+		    	layer.close(index);
+		    	layer.msg('操作失败！', { icon : 2 });
+		    },
+			});
+	}else{
+		layer.msg('请输入代理商', { icon : 2 });
+		layer.close(index);		
+	}
+}
+</script>
+
+</html>

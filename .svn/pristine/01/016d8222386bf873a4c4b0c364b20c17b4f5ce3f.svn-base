@@ -1,0 +1,100 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">
+					
+					</div>
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentSystem/RechargeHistory/myList" method="post" style="width: 100%" id="searchForm">
+							<button type="button" class="btn waves-effect waves-light btn-info" onclick="search()" style="float: right; margin-left: 15px">搜索</button>
+								<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}" /> 
+								<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}" />
+								<input id="startDateB" name="startDate" type="hidden" value="<fmt:formatDate value="${rechargeHistory.startDate}" pattern="yyyy-MM-dd"/>" />
+								<input id="endDateB" name="endDate" type="hidden" value="<fmt:formatDate value="${rechargeHistory.endDate}" pattern="yyyy-MM-dd"/>"/>
+							<div class="form-group col-6" style="margin-bottom: 0px; float: right;padding-right:0px">
+								<div class=" input-group input-daterange" id="date-range">
+									<div style="display:inline-block;padding-top: 8px;">充值日期范围:&nbsp;&nbsp;</div>
+									<input id="startDateA" value="<fmt:formatDate value="${rechargeHistory.startDate}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control" placeholder="选择开始时间" style="text-align: left;" />
+									<span class="input-group-addon bg-info b-0 text-white height-control addCentreControl">至</span>
+									<input id="endDateA" value="<fmt:formatDate value="${rechargeHistory.endDate}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control" placeholder="选择结束时间" style="text-align: left;" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<table id="contentTable" class="display nowrap table table-hover table-striped table-bordered" cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th class="tableControl">订单编号</th>
+								<th class="tableControl">公众号充值</th>
+								<th class="tableControl">小程序充值</th>
+								<th class="tableControl">硬件充值</th>
+								<th class="tableControl">VIP充值</th>
+								<th class="tableControl">押金充值</th>
+								<th class="tableControl">充值时间</th>
+								<th class="tableControl">操作人</th>
+								<th class="tableControl">备注</th>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach items="${page.list}" var="log">
+								<tr>
+									<td class="tableControl">${log.rechargeNo}</td>
+									<td class="tableControl">${log.publicRecharge}</td>
+									<td class="tableControl">${log.minaRecharge}</td>
+									<td class="tableControl">${log.hardwareRecharge}</td>
+									<td class="tableControl">${log.vipRecharge}</td>
+									<td class="tableControl">${log.cashRecharge}</td>
+									<td class="tableControl"><fmt:formatDate value="${log.createDate}" type="both" /></td>
+									<td class="tableControl">${fn:escapeXml(log.loginName)}</td>
+									<td class="tableControl">${fn:escapeXml(log.remarks)}</td>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${page.count>=10}">
+						<table:page page="${page}"></table:page>
+					</c:if>		
+				</div>
+			</div>
+		</div>
+	</div>
+
+	
+
+	<script type="text/javascript">
+	
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n,s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		//查询方法
+		function search(){//查询，页码清零
+			$("#pageNo").val(0);
+			$("#startDateB").val($("#startDateA").val());
+			$("#endDateB").val($("#endDateA").val());
+			$("#searchForm").submit();
+		}
+	</script>
+
+</body>
+</html>

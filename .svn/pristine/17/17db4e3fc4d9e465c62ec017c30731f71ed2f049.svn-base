@@ -1,0 +1,125 @@
+package com.jeeplus.modules.agentsystem.agency.web;
+
+
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasPolicyPurchase;
+import com.jeeplus.modules.agentsystem.agency.service.WasPolicyPurchaseService;
+import com.jeeplus.modules.agentsystem.agency.service.WasSysUserService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentSystemLog;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentSystemLogService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasSalesPolicyService;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+import com.jeeplus.modules.agentsystem.terminal.service.WasTerminalUserService;
+import com.jeeplus.modules.sys.entity.User;
+import com.jeeplus.modules.sys.service.SystemService;
+
+
+/**
+ * （软件）方针购买Controller
+ * @author SZP
+ * @version 2017-10-9
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agentSystem/PolicyPurchase")
+public class WasPolicyPurchaseController extends BaseController{
+	@Autowired
+	WasPolicyPurchaseService policyPurchaseService;
+	@Autowired
+	WasTerminalUserService wasTerminalUserService;
+	@Autowired
+	SystemService systemService;
+	@Autowired
+	WasSalesPolicyService wasSalesPolicyService;
+	@Autowired
+	private WasAgentSystemLogService agentSystemLogService;
+	@Autowired
+	private WasSysUserService sysUserService;
+	
+	
+	/**
+	 * 软件记录查看
+	 */
+	@RequiresPermissions("agentSystem:wasRecordExamine:consume:look")
+	@ResponseBody
+	@RequestMapping(value = "get")
+	public WasPolicyPurchase get(WasPolicyPurchase policyPurchase,Model model) {
+		policyPurchase = policyPurchaseService.get(policyPurchase);
+		return policyPurchase;
+	}
+	
+	/**
+	 * 删除软件记录
+	 */
+	@RequiresPermissions("agentSystem:wasRecordExamine:consume:delete")
+	@ResponseBody
+	@RequestMapping(value = "deleteByLogic")
+	public int deleteByLogic(WasPolicyPurchase policyPurchase,String userId,String menuId) {
+		Integer result;
+		
+		result = policyPurchaseService.deleteByLogic(policyPurchase);
+		//删除成功插入日志
+		agentSystemLogService.insert(new WasAgentSystemLog(menuId, new Date(), userId, "用户"+sysUserService.get(userId).getLogin_name()+"删除了消费记录单号："+policyPurchase.getNumber()));
+		return result;
+	}
+
+	//终端记录
+	//@RequiresPermissions("terminal:wasTerminalUser:list")
+	@RequestMapping(value = {"terminalUserRecord", ""})
+	public String terminalUserRecord(WasPolicyPurchase wasPolicyPurchase, HttpServletRequest request, HttpServletResponse response, Model model) {
+        System.err.println("++++++++++++++++++++++++");
+        System.err.println(wasPolicyPurchase.getOverDate());
+		wasPolicyPurchase.setId("1");
+		Page<WasPolicyPurchase> page = policyPurchaseService.findRecord(new Page<WasPolicyPurchase>(request, response), wasPolicyPurchase);
+        model.addAttribute("page", page);
+        List<WasPolicyPurchase> list = page.getList();
+        
+        for(WasPolicyPurchase a : list){
+
+        	Integer days = (int) Math.abs((a.getEndDate().getTime() - a.getEndDate().getTime())/ (24 * 60 * 60 * 1000)) + 1;
+        	Float years = (float) (days/365.0);
+        	
+        	Integer terminalUserId = a.getTerminalUserId();
+        	WasTerminalUser wasTerminalUser = wasTerminalUserService.findByTerminalUserId(terminalUserId);
+        	String salesName =  wasSalesPolicyService.findById(a.getSalesPolicyId()).getTitle();
+        	
+        	String companyName = wasTerminalUser.getCompanyName();
+        	String loginName = wasTerminalUser.getLoginName();
+        	String id = wasTerminalUser.getParentId();
+        	User user =  systemService.getUser(id);
+        	String agentName = user.getName();
+        	System.err.println(agentName);
+        	System.err.println(a.getTerminalUserId());
+        	String[] info = new String[5];
+        	info[0] = companyName;
+        	info[1] = loginName;
+        	info[2] = salesName;
+        	info[3] = agentName;
+        	info[4] = Float.toString(years);
+        	a.setInfo(info);
+        }
+		return "modules/agentSystem/terminal/wasTerminalRecord";
+	}
+	@RequestMapping(value="deleteById")
+	@ResponseBody
+	public String deleteById(Integer policyPurchaseId) {
+		System.err.println("=========================");
+		System.err.println(policyPurchaseId);
+		Integer num=-1;
+		num = policyPurchaseService.deleteByPolicyPurchaseId(policyPurchaseId);
+		return num>0?"success":"failure";
+	}
+}

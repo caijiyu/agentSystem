@@ -1,0 +1,23 @@
+package com.jeeplus.modules.agentsystem.agency.dao;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentsystem.agency.entity.WasInvoiceApplication;
+
+/**
+ * @author WR
+ * 
+ */
+@MyBatisDao
+public interface WasInvoiceApplicationDao extends CrudDao<WasInvoiceApplication> {
+	/** 
+	 * @param 列表的显示
+	 * @param wasInvoiceApplication 
+	 * @return WasInvoiceApplication 
+	 */
+	public WasInvoiceApplication findPageOrder(WasInvoiceApplication wasInvoiceApplication);
+	
+	 
+	public Integer insertInvoice(WasInvoiceApplication wasInvoiceApplication);
+	
+}

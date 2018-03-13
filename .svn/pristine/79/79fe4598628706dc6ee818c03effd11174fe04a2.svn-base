@@ -1,0 +1,49 @@
+package com.jeeplus.modules.agentsystem.sysdata.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.sysdata.dao.WasUserDao;
+@Service
+@Transactional(readOnly = true)
+public class WasUserService extends CrudService<WasUserDao, WasSysUser>{
+	@Autowired
+	private WasUserDao wasUserDao;
+	
+	public Page<WasSysUser> findPage(Page<WasSysUser> page, WasSysUser sysUser) {
+		return super.findPage(page, sysUser);
+	}
+	
+	@Transactional(readOnly = false)
+	public Integer	insertUserRole(String user_id,String role_id){
+		return wasUserDao.insertUserRole(user_id, role_id);
+	}
+	
+	@Transactional(readOnly = false)
+	public Integer   deleteUserRole(String user_id){
+		return wasUserDao.deleteUserRole(user_id);
+	}
+	
+	@Transactional(readOnly = false)
+	public Integer	updateAccountMoney(WasSysUser wasSysUser){
+		return wasUserDao.updateAccountMoney(wasSysUser);
+	}
+	
+	public 	WasSysUser getUserAccountMoney(String id){
+		return wasUserDao.getUserAccountMoney(id);
+	}
+	
+	/**
+	 * 更新用户头像
+	 * @param wasSysUser
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public Integer	updateUserPhoto(WasSysUser wasSysUser){
+		return wasUserDao.updateUserPhoto(wasSysUser);
+	}
+}

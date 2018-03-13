@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.sysdata.dao.WasFileDao">
+    <resultMap id="WasFile" type="com.jeeplus.modules.agentsystem.sysdata.entity.WasFile">
+	  <id property="id" column="ID"/>
+	  <result property="fileId" column="fileId"/>
+	  <result property="name" column="name"/>
+	  <result property="classifyId" column="classifyId"/>
+	  <result property="number" column="number"/>
+	  <result property="urlink" column="urlink"/>
+	  <result property="fetchCode" column="fetchCode"/>
+	  <result property="createDate" column="createDate"/>
+	  <result property="classifyName" column="classifyName"/>
+	</resultMap>
+    
+	<sql id="wasFileColumns">
+		a.fileid AS "fileId",
+		a.name AS "name",
+		a.classifyid AS "classifyId",
+		a.number AS "number",
+		a.urlink AS "urlink",
+		a.fetchcode AS "fetchCode",
+		a.createdate AS "createDate"
+	</sql>
+	
+	<sql id="wasFileJoins">
+	</sql>
+    
+    <!--根据id获取文件信息-->
+	<select id="get" resultType="WasFile">
+		SELECT 
+			<include refid="wasFileColumns"/>
+		FROM was_file a
+		WHERE a.fileid = #{fileId}
+	</select>
+	
+	<!--根据文件分类外键id获取文件信息个数-->
+	<select id="getFileByClassifyId" resultType="java.lang.Integer">
+		SELECT 
+			count(1)
+		FROM was_file a
+		WHERE a.classifyId = #{classifyId}
+	</select>
+	
+	<!--文件信息列表-->
+	<select id="findList" resultMap="WasFile">
+		SELECT 
+			<include refid="wasFileColumns"/>,b.name AS "classifyName"
+		FROM was_file a
+		LEFT JOIN was_file_classify b on a.classifyId=b.classifyId
+		<where>
+			
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="beginCreatedate != null and endCreatedate != null and beginCreatedate != '' and endCreatedate != ''">
+				AND a.createdate BETWEEN #{beginCreatedate} AND #{endCreatedate}
+			</if>
+			<if test="beginCreatedate != null  and beginCreatedate != '' and (endCreatedate==null or endCreatedate=='')">
+				AND a.createdate  &gt;=  #{beginCreatedate}
+			</if>
+			<if test="endCreatedate != null and endCreatedate != '' and (beginCreatedate == null  or beginCreatedate == '')">
+				AND a.createdate  &lt;= #{endCreatedate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		ORDER BY a.createDate DESC
+	</select>
+	
+	<!--添加文件信息-->
+	<insert id="insert">
+		INSERT INTO was_file(
+			fileId,
+			name,
+			classifyId,
+			number,
+			urlink,
+			fetchCode,
+			createDate
+		) VALUES (
+			#{fileId},
+			#{name},
+			#{classifyId},
+			#{number},
+			#{urlink},
+			#{fetchCode},
+			#{createDate}
+		)
+	</insert>
+	
+	<!--根据id更新文件信息-->
+	<update id="update">
+		UPDATE was_file SET 	
+			name = #{name},
+			classifyId = #{classifyId},
+			number = #{number},
+			urlink = #{urlink},
+			fetchCode = #{fetchCode}
+		WHERE fileId = #{fileId}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM was_file
+		WHERE fileId= #{fileId}
+	</update>
+	
+</mapper>

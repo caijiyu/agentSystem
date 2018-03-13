@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentSystem.sysdata.dao.WasAgentLevelDao">
+    
+	<sql id="wasAgentLevelColumns">
+		a.agentLevelId AS "agentLevelId",
+		a.roleId AS "roleId",
+		a.salesPolicyIds AS "salesPolicyIds",
+		a.name AS "name",
+		a.cashPledge AS "cashPledge",
+		a.createDate AS "createDate",
+		a.createBy AS "createBy",
+		a.updateDate AS "updateDate",
+		a.updateBy AS "updateBy",
+		a.state AS "state",
+		a.delegateAgent AS "delegateAgent"
+	</sql>
+	
+	<sql id="wasAgentLevelJoins">
+	</sql>
+    
+	  <!-- <select id="get" resultType="WasAgentLevel">
+		SELECT 
+			<include refid="wasAgentLevelColumns"/>
+		FROM was_agent_level a
+		<include refid="wasAgentLevelJoins"/>
+		WHERE a.id = #{id}
+	</select> 
+	 -->
+	<select id="findList" resultType="WasAgentLevel">
+		SELECT 
+			<include refid="wasAgentLevelColumns"/>
+		FROM was_agent_level a
+		<include refid="wasAgentLevelJoins"/>
+		<where>
+			AND state=1
+			
+		</where>
+		ORDER BY createDate DESC
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WasAgentLevel">
+		SELECT 
+			<include refid="wasAgentLevelColumns"/>
+		FROM was_agent_level a
+		<include refid="wasAgentLevelJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 判断是否有下方权利 -->
+	<select id="getRoleNum" resultType="Integer">
+	SELECT count(*)
+		FROM sys_role b
+		LEFT JOIN sys_role_menu c on b.id=c.role_id 
+		LEFT JOIN sys_menu d on c.menu_id=d.id
+		WHERE (d.permission=#{0} or d.permission=#{1}) and b.id=#{2}
+		 and b.del_flag='0' and b.role_type='代理商' 
+	</select>
+	<!-- 查找角色 -->
+	<select id="findByRoletype" resultType="Role">
+	select a.id,a.name from sys_role a  where role_type=#{0}
+	</select>
+	<!--  -->
+	<select id="findByAgentLevelId" resultType="Integer">
+	SELECT COUNT(*) FROM sys_user a WHERE a.agentLevelId=#{0}  
+	</select>
+	<!--  -->
+	<select id="findEnity" resultType="WasAgentLevel">
+	SELECT * FROM was_agent_level WHERE agentLevelId=#{0}
+	</select>
+	<!-- 根据name查找个数 -->
+	<select id="getNameNum" resultType="Integer">
+	SELECT COUNT(*) FROM was_agent_level WHERE name=#{0}
+	</select>
+	<select id="findRoleById" resultType="Role">
+	SELECT * FROM sys_role WHERE id=#{0}
+	</select>
+	<insert id="insert">
+		INSERT INTO was_agent_level(
+			roleId,
+			salesPolicyIds,
+			name,
+			cashPledge,
+			createDate,
+			createBy,
+			updateDate,
+			updateBy,
+			delegateAgent,
+			state
+		) VALUES (
+			#{roleId},
+			#{salesPolicyIds},
+			#{name},
+			#{cashPledge},
+			#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id},
+			#{delegateAgent},
+			#{state}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE was_agent_level SET 	
+			salesPolicyIds = #{salesPolicyIds},
+			updateDate = #{updateDate},
+			updateBy = #{updateBy.id}
+		WHERE agentLevelId = #{agentLevelId}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM was_agent_level
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_agent_level SET 
+			state = #{state}
+		WHERE agentLevelId = #{agentLevelId}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WasAgentLevel" statementType="STATEMENT">
+		select * FROM was_agent_level  where ${propertyName} = '${value}'
+	</select>
+</mapper>

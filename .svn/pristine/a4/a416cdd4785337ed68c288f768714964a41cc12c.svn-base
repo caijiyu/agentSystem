@@ -1,0 +1,10 @@
+# file url
+fileUrl=http://www.wx-vicmob.cn
+
+# file save path
+savePath=/opt/tomcat/webapps/vicmob/agentSystem
+
+#kdniao express
+kdniaoID=1305489
+kdniaoAppKey=13f7305b-9407-4bca-b198-acd629217ebc
+kdniaoReqURL=http://api.kdniao.cc/api/dist

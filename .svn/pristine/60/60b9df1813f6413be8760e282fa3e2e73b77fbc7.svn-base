@@ -1,0 +1,205 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<!-- 开票信息查看 -->
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+
+<style>
+/*给订单信息价滚动条*/
+	  table tbody {
+		display: block;
+		/* height: 165px; */
+		overflow-y: scroll;
+	}
+	
+	table thead, tbody tr {
+		display: table;
+		width: 100%;
+		table-layout: fixed;
+		
+	}
+	table thead {
+		width: calc(100% - 1em)
+	}  
+	
+	 ::-webkit-scrollbar {
+	width: 6px !important;
+	height : 4px !important;
+	background-color: white;
+} 
+::-webkit-scrollbar-track {
+	/* -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); */
+	  border-radius: 10px;
+	background-color: white;
+}  
+/*定义滑块 内阴影+圆角*/
+::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+	background-color: #f4f5f9;
+} 
+</style>
+
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<h5 style="margin-top: 10px;margin-left: 12px;">发票信息</h5>
+				<hr>
+				<div class="row p-t-20">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">开票金额：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].money}</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group has-danger row">
+							<label class="control-label col-3" style="text-align: right;">发票内容：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].body }</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<!--/row-->
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">发票类型：</label>
+							<label class="control-label col-7" id="invoiceType" style="text-align: left;">${page.list[0].invoiceType}</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">公司名称：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].companyName}</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<!--/row-->
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">发票收货地址：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].address}</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">纳税人识别号：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].dutyParagraph}</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<div class="row" id="dedicatedA">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">注册地址：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].registerAddress}</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">注册电话：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].registerPhone}</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<div class="row" id="dedicatedB">
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">开户行：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].registerBank}</label>
+						</div>
+					</div>
+					<!--/span-->
+					<div class="col-md-6">
+						<div class="form-group row">
+							<label class="control-label col-3" style="text-align: right;">银行账户：</label>
+							<label class="control-label col-7" style="text-align: left;">${page.list[0].account}</label>
+						</div>
+					</div>
+					<!--/span-->
+				</div>
+				<!--/row-->
+				<hr>
+				<h5 class="box-title m-t-15" style="margin-bottom: 15px;margin-left: 12px;">订单信息</h5>
+				<div>
+					<table class="display nowrap table table-hover table-striped table-bordered">
+					<thead>
+						<tr>
+							<th class="tableControl">订单编号</th>
+							<th class="tableControl">金额</th>
+							<th class="tableControl">支付日期</th>
+							<th class="tableControl">消费账户</th>
+						</tr>
+					</thead>
+					<tbody style="max-height:165px;">
+						<c:forEach items="${pageB}" var="log">
+							<tr>
+								<td class="tableControl">${log.orderNo}</td>
+								<td class="tableControl">${log.payMoney}</td>
+								<td class="tableControl"><fmt:formatDate
+										value="${log.createDate}" type="both" /></td>
+								<td class="tableControl">${fn:escapeXml(log.behavior)}</td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+				</div>
+				<div class="dataTables_wrapper">
+					<div class="dataTables_paginate"style="margin-bottom: 15px; margin-top: -15px;margin-right: 15px;">
+						<button type="button" onclick="examineBack('${page.list[0].applyBy}')" class="btn btn-default" style="background-color: #DDDDDD;">返回</button>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+	<form id="backForm" method="post"
+		action="${ctx}/agentSystem/RecordExamine/list">
+		<input id="receivedUserId" name="receivedUserId" type="hidden" value="" />
+		<input id="companyName" name="companyName" type="hidden" value="${page.list[0].companyName}" />
+	</form>
+	<script type="text/javascript">
+		$("document").ready(function(){
+			var invoiceType = $("#invoiceType").html();
+			if(invoiceType == "普通发票"){
+				$("#dedicatedA").hide();
+				$("#dedicatedB").hide();
+			}
+		})
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		
+		//查询方法
+		function search(){//查询，页码清零
+			$("#pageNo").val(0);
+			$("#searchForm").submit();
+		}
+		
+		//返回方法
+		function examineBack(userId){
+			$("#receivedUserId").val(userId);
+			$("#backForm").submit();
+		}
+		
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentsystem.sysdata.web;
+
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasSysUser;
+import com.jeeplus.modules.agentsystem.agency.service.WasSysUserService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentSystemLog;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasHardware;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentSystemLogService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasHardwareService;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+
+/**
+ * 硬件管理Controller
+ * @author Ricky
+ * @version 2017-09-27
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/sysdata/wasHardware")
+public class WasHardwareController extends BaseController {
+
+	@Autowired
+	private WasHardwareService wasHardwareService;
+	@Autowired
+	private WasAgentSystemLogService wasAgentSystemLogService;
+	@Autowired
+	private WasSysUserService wasSysUserService;
+	/**
+	 * 获取单条硬件数据
+	 */
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	@ResponseBody
+	@RequestMapping(value = {"get"})
+	public WasHardware getter(WasHardware wasHardware){
+		String id = Integer.toString(wasHardware.getHardwareId());
+		wasHardware = wasHardwareService.get(id);
+		Principal principal = UserUtils.getPrincipal();
+		WasSysUser wasSysUser = wasSysUserService.get(principal.getId());
+		wasHardware.setHardwareAccount(wasSysUser.getHardwareAccount());
+		wasHardware.setVipAccount(wasSysUser.getVipAccount());
+		return wasHardware;
+	}
+	
+	/**
+	 * 硬件管理列表页面
+	 */
+	@RequiresPermissions("sysdata:wasHardware:list")
+	@RequestMapping(value = {"list", ""})
+	public String list(WasHardware wasHardware, HttpServletRequest request, HttpServletResponse response, Model model) {
+		Page<WasHardware> pagePar = new Page<WasHardware>(request, response);
+		pagePar.setPageSize(8);
+		Page<WasHardware> page = wasHardwareService.findPage(pagePar, wasHardware); 
+		model.addAttribute("page", page);
+		return "modules/agentsystem/sysdata/wasHardware";
+	}
+
+	/**
+	 * 保存硬件管理
+	 */
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	@RequiresPermissions(value={"sysdata:wasHardware:add","sysdata:wasHardware:edit"},logical=Logical.OR)
+	@ResponseBody
+	@RequestMapping(value = "save")
+	public Integer save(WasHardware wasHardware, Model model,String menuIdaaa) {
+		if(wasHardware.getHardwareId()!=null){
+			wasHardware.setId(Integer.toString(wasHardware.getHardwareId()));
+			wasHardware.setIsNewRecord(false);
+			Principal principal = UserUtils.getPrincipal();
+			wasHardware.setUpdateId(principal.toString());
+			Date date = new Date();
+			wasHardware.setUpdateDay(date);
+			wasAgentSystemLogService.insert(new WasAgentSystemLog(menuIdaaa,new Date(),principal.getId(),"用户"+principal.getLoginName()+"编辑了硬件"+wasHardware.getName()));
+		}else{
+			wasHardware.setIsNewRecord(true);
+			Principal principal = UserUtils.getPrincipal();
+			wasHardware.setCreateId(principal.toString());
+			wasHardware.setUpdateId(principal.toString());
+			Date date = new Date();
+			wasHardware.setCreateDay(date);
+			wasHardware.setUpdateDay(date);
+			wasAgentSystemLogService.insert(new WasAgentSystemLog(menuIdaaa,new Date(),principal.getId(),"用户"+principal.getLoginName()+"添加了硬件"+wasHardware.getName()));
+		}
+		int result=-1;
+		wasHardwareService.save(wasHardware);
+		result = 1;
+		return result;
+	}
+	
+	/**
+	 * 删除硬件管理(逻辑删除)
+	 */
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	@RequiresPermissions("sysdata:wasHardware:del")
+	@ResponseBody
+	@RequestMapping(value = "deleteByLogic")
+	public Integer delete(WasHardware wasHardware,String menuIdaaa) {
+		wasHardware.setState(0);
+		int result=-1;
+		wasHardwareService.deleteByLogic(wasHardware);
+		Principal principal = UserUtils.getPrincipal();
+		wasAgentSystemLogService.insert(new WasAgentSystemLog(menuIdaaa,new Date(),principal.getId(),"用户"+principal.getLoginName()+"删除了硬件"+wasHardware.getHardwareId()));
+		result = 1;
+		return result;
+	}
+	
+
+}

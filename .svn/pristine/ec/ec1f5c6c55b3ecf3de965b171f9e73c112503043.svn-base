@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentSystem.agency.dao.WasPolicyPurchaseDao">
+    
+    
+    <sql id="PolicyPurchaseColumns">
+		a.policyPurchaseId AS "policyPurchaseId",                
+		a.number AS "number",                
+		a.terminalUserId AS "terminalUserId",        
+		a.salesPolicyId AS "salesPolicyId", 
+		s.title AS "comboName",       
+		a.policyNumber AS "policyNumber",            
+		a.behavior AS "behavior",   
+		a.totalMoney AS "totalMoney",
+		a.payMoney AS "payMoney",                
+		a.createDate AS "createDate",                
+		a.endDate AS "endDate",        
+		a.userId AS "userId",
+		u.login_name AS "loginName",  
+		a.publicExpend AS "publicExpend",            
+		a.minaExpend AS "minaExpend",   
+		a.hardwareExpend AS "hardwareExpend",
+		a.vipExpend AS "vipExpend",                
+		a.type AS "type",                
+		a.remarks AS "remarks",        
+		a.invoiceNo AS "invoiceNo",        
+		a.invoice AS "invoice",            
+		a.state AS "state"   
+							 
+	</sql>
+    <sql id="PolicyPurchaseJoins">
+    	LEFT JOIN sys_user u ON u.id = a.userId
+    	LEFT JOIN was_sales_policy s ON s.salesPolicyId = a.salesPolicyId
+    </sql>
+    		
+	<select id="get" resultType="WasPolicyPurchase">
+		SELECT 
+			<include refid="PolicyPurchaseColumns"/>
+		FROM was_policy_purchase a
+		<include refid="PolicyPurchaseJoins"/>
+		<where>
+			<if test="number != null and number != ''">
+				AND a.number = #{number} 
+			</if>
+		</where>
+		
+	</select>
+	
+	<select id="findList" resultType="WasPolicyPurchase">
+		SELECT 
+			<include refid="PolicyPurchaseColumns"/>
+		FROM was_policy_purchase a
+		<include refid="PolicyPurchaseJoins"/>
+		<where>
+			<if test="userId != null and userId != ''">
+				AND a.userId = #{userId} 
+			</if>
+			<if test="createDate != null and createDate != ''">
+				AND <![CDATA[ a.createDate >= #{createDate} ]]>
+			</if>
+			<!-- 时间范围搜索 -->
+			<if test="beginDate != null and beginDate != ''">
+				<![CDATA[   AND DATE_FORMAT(a.createDate, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')   ]]>
+			</if>
+			<if test="overDate != null and overDate != ''">
+				<![CDATA[  AND DATE_FORMAT(a.createDate, '%Y-%m-%d') <= DATE_FORMAT(#{overDate}, '%Y-%m-%d')    ]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="findRecord" resultType="WasPolicyPurchase">
+		SELECT 
+			a.*
+		FROM was_policy_purchase a
+			left join was_terminal_user b 
+				on a.terminalUserId = b.terminalUserId
+			left join sys_user c
+				on b.parentId=c.id
+		<where>
+			<if test="id != null and id != ''">
+				AND c.id = #{id} 
+			</if>
+			<if test="companyName != null and companyName != ''">
+				AND b.companyName LIKE CONCAT('%', #{companyName}, '%') 
+			</if>
+			<!-- 时间范围搜索 -->
+			<if test="beginDate != null and overDate != null and beginDate != '' and overDate != ''">
+	            AND a.createdate BETWEEN #{beginDate} AND #{overDate}
+	        </if>
+	        	AND a.state=1
+		</where>
+	</select>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_policy_purchase SET 
+			state = 0
+		WHERE number = #{number}
+	</update>
+	
+	    		
+	<select id="findPolicyOfTerminalUser" resultType="WasPolicyPurchase">
+		SELECT 
+			*
+			FROM was_policy_purchase 
+		WHERE
+			 terminalUserId = #{0} 
+		Group By salesPolicyId
+		
+	</select>
+	
+	<insert id="insert">
+			INSERT INTO was_policy_purchase(
+			number, 
+			terminalUserId, 
+			salesPolicyId, 
+			policyNumber, 
+			behavior,
+			totalMoney, 
+			payMoney, 
+			createDate, 
+			endDate, 
+			userId, 
+			publicExpend, 
+			minaExpend,
+			hardwareExpend, 
+			vipExpend, 
+			type, 
+			remarks, 
+			state
+		) VALUES (
+		    #{number},
+		    #{terminalUserId},
+		    #{salesPolicyId},
+		    #{policyNumber},
+		    #{behavior},
+		    #{totalMoney},
+		    #{payMoney},
+		    #{createDate},
+		    #{endDate},
+		    #{userId},
+		    #{publicExpend},
+		    #{minaExpend},
+		    #{hardwareExpend},
+		    #{vipExpend},
+		    #{type},
+		    #{remarks},
+		    #{state}
+		)
+	</insert>
+	<update id="deleteByPolicyPurchaseId">
+		update was_policy_purchase set
+		state = 0
+		where policyPurchaseId = #{policyPurchaseId}
+	</update>
+	
+</mapper>

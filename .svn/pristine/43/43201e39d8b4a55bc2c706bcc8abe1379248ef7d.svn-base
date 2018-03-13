@@ -1,0 +1,384 @@
+package com.jeeplus.modules.agentsystem.agency.entity;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jeeplus.common.persistence.DataEntity;
+
+/**
+ * 硬件购买记录Entity
+ * @author: YeJR
+ * @date: 2017年9月28日 下午2:51:21
+ * @version 1.0
+ */
+public class WasHardwarePurchase extends DataEntity<WasHardwarePurchase> {
+
+	private static final long serialVersionUID = 1L;
+	/** 硬件购买记录主键ID */ 
+	private Integer hardwarePurchaseId;
+	/** 硬件购买单号 */ 
+	private String orderNo;
+	/** 购买的代理商ID */ 
+	private String userId;
+	/** 购买硬件的公司名称 */ 
+	private String purchasedCompanyName;
+	/** 收货方式（0：自提，1：快递） */ 
+	private Boolean deliveryMethod;
+	/** 收货人 */ 
+	private String name;
+	/** 联系电话 */ 
+	private String phone;
+	/** 收货地址 */
+	private String address;
+	/** 硬件ID */ 
+	private Integer hardwareId;
+	/** 硬件名称 */
+	private String hardwareName;
+	/** 购买数量 */
+	private Integer number;
+	/** 支付的价格 */
+	private BigDecimal payMoney;
+	/** 快递公司 */
+	private String expressCompany;
+	/** 快递公司编码 */
+	private String expressCoding;
+	/** 快递单号 */
+	private String expressNumber;
+	/** 下单时间 */
+	private Date createDate;
+	/** 发货时间 */
+	private Date deliverDate;
+	/** 收货时间 */
+	private Date receiveDate;
+	/** 操作账号ID */
+	private String createId;
+	/** 操作账号 */
+	private String createLoginName;
+	/** 消费行为 */
+	private String behavior;
+	/** 公众号账户消费 */
+	private BigDecimal publicExpend;
+	/** 小程序消费 */
+	private BigDecimal minaExpend;
+	/** 硬件消费 */
+	private BigDecimal hardwareExpend;
+	/** VIP消费 */
+	private BigDecimal vipExpend;
+	/** 2:硬件购买 */
+	private Integer type;
+	/** 备注 */
+	private String remarks;
+	/** 开票单号 */
+	private String invoiceNo;
+	/** 是否开过票（0：没有开过票， 1：已经开过票） */
+	private Boolean invoice;
+	/** 发货状态（0：未发货，1：发货，2：已完成） */
+	private Integer sendState;
+	/** 状态（0：删除，1:正常）*/
+	private Boolean state;
+	/** 查询开始时间 */
+	private Date beginDate;
+	/** 查询结束时间 */
+	private Date endDate;
+	/** 排序方式，0：下单时间排序，1：发货时间排序，2：收货时间排序 */
+	private Integer orderingRule;
+	/** 硬件账户 */
+	private BigDecimal hardwareAccount;
+	/** VIP账户 */
+	private BigDecimal vipAccount;
+	/** 公众号账户 */
+	private BigDecimal publicAccount;
+	/** 小程序账户 */
+	private BigDecimal minaAccount;
+	/** 硬件消耗 */
+	private BigDecimal userHardwareExpend;
+	/** VIP消耗 */
+	private BigDecimal userVipExpend;
+	/** 公众号消耗 */
+	private BigDecimal userPublicExpend;
+	/** 小程序消耗 */
+	private BigDecimal userMinaExpend;
+	
+	public Integer getHardwarePurchaseId() {
+		return hardwarePurchaseId;
+	}
+	public void setHardwarePurchaseId(Integer hardwarePurchaseId) {
+		this.hardwarePurchaseId = hardwarePurchaseId;
+	}
+	public String getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getPurchasedCompanyName() {
+		return purchasedCompanyName;
+	}
+	public void setPurchasedCompanyName(String purchasedCompanyName) {
+		this.purchasedCompanyName = purchasedCompanyName;
+	}
+	public Boolean getDeliveryMethod() {
+		return deliveryMethod;
+	}
+	public void setDeliveryMethod(Boolean deliveryMethod) {
+		this.deliveryMethod = deliveryMethod;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getPhone() {
+		return phone;
+	}
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public Integer getHardwareId() {
+		return hardwareId;
+	}
+	public void setHardwareId(Integer hardwareId) {
+		this.hardwareId = hardwareId;
+	}
+	public String getHardwareName() {
+		return hardwareName;
+	}
+	public void setHardwareName(String hardwareName) {
+		this.hardwareName = hardwareName;
+	}
+	public Integer getNumber() {
+		return number;
+	}
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
+	public BigDecimal getPayMoney() {
+		return payMoney;
+	}
+	public void setPayMoney(BigDecimal payMoney) {
+		this.payMoney = payMoney;
+	}
+	public String getExpressCompany() {
+		return expressCompany;
+	}
+	public void setExpressCompany(String expressCompany) {
+		this.expressCompany = expressCompany;
+	}
+	public String getExpressCoding() {
+		return expressCoding;
+	}
+	public void setExpressCoding(String expressCoding) {
+		this.expressCoding = expressCoding;
+	}
+	public String getExpressNumber() {
+		return expressNumber;
+	}
+	public void setExpressNumber(String expressNumber) {
+		this.expressNumber = expressNumber;
+	}
+	
+	@Override
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	public Date getCreateDate() {
+		return createDate;
+	}
+	@Override
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+	
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	public Date getDeliverDate() {
+		return deliverDate;
+	}
+	public void setDeliverDate(Date deliverDate) {
+		this.deliverDate = deliverDate;
+	}
+	
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	public Date getReceiveDate() {
+		return receiveDate;
+	}
+	public void setReceiveDate(Date receiveDate) {
+		this.receiveDate = receiveDate;
+	}
+	public String getCreateId() {
+		return createId;
+	}
+	public void setCreateId(String createId) {
+		this.createId = createId;
+	}
+	public String getCreateLoginName() {
+		return createLoginName;
+	}
+	public void setCreateLoginName(String createLoginName) {
+		this.createLoginName = createLoginName;
+	}
+	public String getBehavior() {
+		return behavior;
+	}
+	public void setBehavior(String behavior) {
+		this.behavior = behavior;
+	}
+	public BigDecimal getPublicExpend() {
+		return publicExpend;
+	}
+	public void setPublicExpend(BigDecimal publicExpend) {
+		this.publicExpend = publicExpend;
+	}
+	public BigDecimal getMinaExpend() {
+		return minaExpend;
+	}
+	public void setMinaExpend(BigDecimal minaExpend) {
+		this.minaExpend = minaExpend;
+	}
+	public BigDecimal getHardwareExpend() {
+		return hardwareExpend;
+	}
+	public void setHardwareExpend(BigDecimal hardwareExpend) {
+		this.hardwareExpend = hardwareExpend;
+	}
+	public BigDecimal getVipExpend() {
+		return vipExpend;
+	}
+	public void setVipExpend(BigDecimal vipExpend) {
+		this.vipExpend = vipExpend;
+	}
+	public Integer getType() {
+		return type;
+	}
+	public void setType(Integer type) {
+		this.type = type;
+	}
+	
+	@Override
+	public String getRemarks() {
+		return remarks;
+	}
+	
+	@Override
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+	public String getInvoiceNo() {
+		return invoiceNo;
+	}
+	public void setInvoiceNo(String invoiceNo) {
+		this.invoiceNo = invoiceNo;
+	}
+	public Boolean getInvoice() {
+		return invoice;
+	}
+	public void setInvoice(Boolean invoice) {
+		this.invoice = invoice;
+	}
+	public Integer getSendState() {
+		return sendState;
+	}
+	public void setSendState(Integer sendState) {
+		this.sendState = sendState;
+	}
+	public Boolean getState() {
+		return state;
+	}
+	public void setState(Boolean state) {
+		this.state = state;
+	}
+	public Date getBeginDate() {
+		return beginDate;
+	}
+	public void setBeginDate(Date beginDate) {
+		this.beginDate = beginDate;
+	}
+	public Date getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+	public Integer getOrderingRule() {
+		return orderingRule;
+	}
+	public void setOrderingRule(Integer orderingRule) {
+		this.orderingRule = orderingRule;
+	}
+	public BigDecimal getHardwareAccount() {
+		return hardwareAccount;
+	}
+	public void setHardwareAccount(BigDecimal hardwareAccount) {
+		this.hardwareAccount = hardwareAccount;
+	}
+	public BigDecimal getVipAccount() {
+		return vipAccount;
+	}
+	public void setVipAccount(BigDecimal vipAccount) {
+		this.vipAccount = vipAccount;
+	}
+	public BigDecimal getPublicAccount() {
+		return publicAccount;
+	}
+	public void setPublicAccount(BigDecimal publicAccount) {
+		this.publicAccount = publicAccount;
+	}
+	public BigDecimal getMinaAccount() {
+		return minaAccount;
+	}
+	public void setMinaAccount(BigDecimal minaAccount) {
+		this.minaAccount = minaAccount;
+	}
+	public BigDecimal getUserHardwareExpend() {
+		return userHardwareExpend;
+	}
+	public void setUserHardwareExpend(BigDecimal userHardwareExpend) {
+		this.userHardwareExpend = userHardwareExpend;
+	}
+	public BigDecimal getUserVipExpend() {
+		return userVipExpend;
+	}
+	public void setUserVipExpend(BigDecimal userVipExpend) {
+		this.userVipExpend = userVipExpend;
+	}
+	public BigDecimal getUserPublicExpend() {
+		return userPublicExpend;
+	}
+	public void setUserPublicExpend(BigDecimal userPublicExpend) {
+		this.userPublicExpend = userPublicExpend;
+	}
+	public BigDecimal getUserMinaExpend() {
+		return userMinaExpend;
+	}
+	public void setUserMinaExpend(BigDecimal userMinaExpend) {
+		this.userMinaExpend = userMinaExpend;
+	}
+	@Override
+	public String toString() {
+		return "WasHardwarePurchase [hardwarePurchaseId=" + hardwarePurchaseId + ", orderNo=" + orderNo + ", userId="
+				+ userId + ", purchasedCompanyName=" + purchasedCompanyName + ", deliveryMethod=" + deliveryMethod
+				+ ", name=" + name + ", phone=" + phone + ", address=" + address + ", hardwareId=" + hardwareId
+				+ ", hardwareName=" + hardwareName + ", number=" + number + ", payMoney=" + payMoney
+				+ ", expressCompany=" + expressCompany + ", expressCoding=" + expressCoding + ", expressNumber="
+				+ expressNumber + ", createDate=" + createDate + ", deliverDate=" + deliverDate + ", receiveDate="
+				+ receiveDate + ", createId=" + createId + ", createLoginName=" + createLoginName + ", behavior="
+				+ behavior + ", publicExpend=" + publicExpend + ", minaExpend=" + minaExpend + ", hardwareExpend="
+				+ hardwareExpend + ", vipExpend=" + vipExpend + ", type=" + type + ", remarks=" + remarks
+				+ ", invoiceNo=" + invoiceNo + ", invoice=" + invoice + ", sendState=" + sendState + ", state=" + state
+				+ ", beginDate=" + beginDate + ", endDate=" + endDate + ", orderingRule=" + orderingRule + "]";
+	}
+	
+	
+	
+}

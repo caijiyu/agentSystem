@@ -1,0 +1,51 @@
+package com.jeeplus.modules.agentsystem.agency.web;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasExpendPay;
+import com.jeeplus.modules.agentsystem.agency.service.WasExpendPayService;
+
+/**
+ * 充消Controller
+ * @author SZP
+ * @version 2017-10-9
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agentSystem/ExpendPay")
+public class WasExpendPayController extends BaseController {
+
+	
+	@Autowired
+	WasExpendPayService expendPayService;
+	
+	/**
+	 * 充消记录查看
+	 */
+	@RequiresPermissions("agentSystem:wasRecordExamine:consume:look")
+	@ResponseBody
+	@RequestMapping(value = "get")
+	public WasExpendPay get(WasExpendPay expendPay,Model model) {
+		expendPay = expendPayService.get(expendPay);
+		return expendPay;
+	}
+	
+	/**
+	 * 删除充消记录
+	 */
+	@RequiresPermissions("agentSystem:wasRecordExamine:consume:delete")
+	@ResponseBody
+	@RequestMapping(value = "deleteByLogic")
+	public int deleteByLogic(WasExpendPay expendPay) {
+		Integer result;
+		System.err.println(expendPay);
+		result = expendPayService.deleteByLogic(expendPay);
+		System.err.println(result);
+		return result;
+	}
+	
+}

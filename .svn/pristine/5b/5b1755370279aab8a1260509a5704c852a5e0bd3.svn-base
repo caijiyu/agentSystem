@@ -1,0 +1,62 @@
+package com.jeeplus.modules.agentSystem.agency.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentSystem.agency.dao.WasFeedBackDao;
+import com.jeeplus.modules.agentSystem.agency.entity.WasFeedBack;
+
+/**
+ * 反馈Service
+ * @author SZP
+ * @version 2017-10-20
+ */
+@Service
+@Transactional(readOnly = true)
+public class WasFeedBackService extends CrudService<WasFeedBackDao, WasFeedBack> {
+
+	@Autowired
+	private WasFeedBackDao wasFeedBackDao;
+	
+	public WasFeedBack get(String id) {
+		return super.get(id);
+	}
+	
+	public List<WasFeedBack> findList(WasFeedBack wasFeedBack) {
+		return super.findList(wasFeedBack);
+	}
+	
+	public Page<WasFeedBack> findPage(Page<WasFeedBack> page, WasFeedBack wasFeedBack) {
+		return super.findPage(page, wasFeedBack);
+	}
+	
+	@Transactional(readOnly = false)
+	public void save(WasFeedBack wasFeedBack) {
+		super.save(wasFeedBack);
+	}
+	
+	@Transactional(readOnly = false)
+	public void delete(WasFeedBack wasFeedBack) {
+		super.delete(wasFeedBack);
+	}
+	
+	@Transactional(readOnly = false)
+	public Integer deleteByLogic(WasFeedBack wasFeedBack) {
+		return wasFeedBackDao.deleteByLogic(wasFeedBack);
+	}
+	
+	@Transactional(readOnly = false)
+	public void insert(WasFeedBack wasFeedBack) {
+		super.save(wasFeedBack);
+	}
+	
+	//反馈问题提交保存
+	@Transactional(readOnly = false)
+	public Integer insertFeedBack(WasFeedBack wasFeedBack) {
+		return wasFeedBackDao.insertFeedBack(wasFeedBack);
+	}
+}

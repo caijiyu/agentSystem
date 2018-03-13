@@ -1,0 +1,574 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentSystem/include/head.jsp"%>
+	<style type="text/css">
+		.error {
+			color: red;
+		}
+		select.error{
+			color:#67757c;
+		}
+		#agentin_name-error {
+			margin-left: 252px;
+		}
+		#password-error {
+			margin-left: 252px;
+		}
+		#companyName-error {
+			margin-left: 252px;
+		}
+		#name-error {
+			margin-left: 252px;
+		}
+		#phone-error {
+			margin-left: 252px;
+		}
+		#address-error {
+			margin-left: 252px;
+		}
+		#theater-error {
+			margin-left: 252px;
+		}
+		#principal-error {
+			margin-left: 252px;
+		}
+		#email-error {
+			margin-left: 252px;
+		}
+		#wechat-error {
+			margin-left: 252px;
+		}
+		#qq-error {
+			margin-left: 252px;
+		}
+		#endDate-error {
+		margin-left: 170px;
+		}
+		#startDate-error{
+		margin-right:200px
+		}
+	</style>
+</head>
+<body>
+	<div class="row divControl">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-body">
+					<h3 class="box-title">代理商基本信息设置</h3>
+					<hr class="m-t-0 m-b-40">
+					<form action="#" method="post"
+						style="width: 100%" id="addForm">
+						<div class="form-body">
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group row">
+
+										<label class="col-3 col-form-label"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>账号</label>
+
+										<div class="col-md-9">
+											<input type="text" class="form-control height-control"
+												name="agentin_name" value="">
+										</div>
+									</div>
+
+
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>公司全称</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" placeholder="公司全称"
+												name="companyName">
+										</div>
+									</div>
+
+
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>联系方式</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control"
+												placeholder="公司负责人或企业法人联系方式" name="phone">
+										</div>
+									</div>
+
+
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>公司地址</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" placeholder="公司地址"
+												name="address">
+
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">QQ</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" placeholder="负责人QQ"
+												name="qq">
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>所属战区</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" name="theater">
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>套餐折扣</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control"
+													name="packageDiscount"> <span
+													class="input-group-addon">折</span>
+											</div>
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>公众号折扣</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control"
+													name="publicDiscount"> <span
+													class="input-group-addon">折</span>
+											</div>
+										</div>
+									</div>
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>小程序折扣</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control" name="minaDiscount">
+												<span class="input-group-addon">折</span>
+											</div>
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>客户等级</label>
+										<div class="col-md-9">
+											<input type="radio" class="check" id="square-radio-A" name="square-radio" data-radio="iradio_square-blue">
+	                                        <label for="square-radio-A">普通客户</label>
+	                                         <input type="radio" class="check" id="square-radio-B" name="square-radio" data-radio="iradio_square-blue">
+	                                        <label for="square-radio-B">VIP客户</label>
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>时间范围</label>
+										<div class="col-md-9">
+											<div class="input-daterange input-group" id="date-range">
+												<input type="text" class="form-control" name="startDate" id="startDate">
+												<span class="input-group-addon bg-info b-0 text-white">至</span>
+												<input type="text" class="form-control" name="endDate" id="endDate">
+											</div>
+										</div>
+
+									</div>
+
+
+
+								</div>
+
+
+								<!--/span-->
+								<div class="col-md-6">
+									<div class="form-group has-danger row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>密码</label>
+										<div class="col-md-9">
+											<input type="text"
+												class="form-control form-control-danger" name="password">
+										</div>
+									</div>
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>负责人</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control"
+												placeholder="公司负责人或企业法人" name="name">
+										</div>
+									</div>
+    									<div class="form-group row">
+                                                <label class="control-label text-right col-md-3"><span style="color: red">*&nbsp;&nbsp;&nbsp;</span>地区:</label>
+                                                <div class="col-md-9  area" >
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <select id="s_province" class="form-control custom-select" tabindex="1" name ="province" >
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select id="s_city" class="form-control custom-select" tabindex="1"  name="city" style="padding: 0px" name="city">
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select id="s_county" class="form-control custom-select" tabindex="1" name="county" style="padding: 0px" name="county">
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">邮箱</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" placeholder="负责人邮箱"
+												name="email">
+										</div>
+									</div>
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">微信号</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" placeholder="负责人微信"
+												name="wechat">
+										</div>
+									</div>
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>战区负责人</label>
+										<div class="col-md-9">
+											<input type="text" class="form-control" name="principal">
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>所属上级</label>
+										<div class="col-md-9">
+
+											<div class="editable-input" style="position: relative;">
+												<select class="form-control input-sm"
+													 name="select">
+													<option value="0">请选择</option>
+													<c:forEach items="${page.list}" var="agent">
+														<option value="${agent.id}">${agent.name}</option>
+													</c:forEach>
+												</select>
+											</div>
+
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3"><span
+											style="color: red">*&nbsp;&nbsp;&nbsp;</span>代理商等级</label>
+										<div class="col-md-9">
+
+											<div class="editable-input" style="position: relative;">
+												<select class="form-control input-sm"
+													 name="select">
+													<option value="0">请选择</option>
+													<c:forEach items="${page.list}" var="agent">
+														<option value="${agent.id}">${agent.name}</option>
+													</c:forEach>
+												</select>
+											</div>
+											<div class="editable-input" style="position: relative;">五年高考三年模拟</div>
+											<div class="editable-input" style="position: relative;">五年高考三年模拟</div>
+											<div class="editable-input" style="position: relative;">五年高考三年模拟</div>
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label class="control-label text-right col-md-3">证书</label>
+										<div class="col-md-9">
+											<div class="input-group">
+												<input type="text" class="form-control" name="certificate">
+												<button type="button"
+													class="btn waves-effect waves-light btn-info">上传</button>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label class="col-2 col-form-label"></label>
+							<div class="col-9">
+								<div class="text-xs-right" style="text-align: right;">
+									<button type="button" class="btn btn-default">返回</button>
+									<button type="button"
+										class="btn waves-effect waves-light btn-info" onclick="save()">保存</button>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<script src="${ctxStatic}/jquery-validation/1.14.0/jquery.validate.js"></script>
+	<script src="${ctxStatic}/agentSystem/js/area.js"></script>
+	<script type="text/javascript">
+	var opt0 = ["省份","地级市","市、县级市"];
+	_init_area();
+		$("document").ready(function() {
+		
+			//表单验证
+			$("#addForm").validate(
+				{
+					rules : {
+						agentin_name : {
+							required : true,
+							maxlength : 15,
+							isRightagentinNameForm : true,
+							remote : ""
+						},
+						password : {
+							required : true,
+							minlength : 6,
+							maxlength : 20,
+							isRightPasswordForm : true
+						},
+						companyName : {
+							required : true,
+							maxlength : 30,
+							remote : "${ctx}/agentSystem/terminal/validateCompanyName"
+						},
+						name : {
+							required : true,
+							minlength : 2,
+							maxlength : 10
+						},
+						phone:{
+		    				required:true,
+		    				isphone:true,
+		    			},
+		    			county:{
+		    				validateArea:true,
+		    			},
+						address : {
+							required : true,
+							maxlength : 50
+						},
+						email : {
+							maxlength : 30,
+							email : true
+						},
+						qq :{
+							maxlength : 20
+						},
+						wechat :{
+							maxlength : 20
+						},
+						theater :{
+							required : true,
+							maxlength : 10
+						},
+						principal :{
+							required : true,
+							minlength : 2,
+							maxlength : 10
+						},
+						packageDiscount :{
+							required : true,
+							isRightDecimalForm : true
+						},
+						agentLevelId :{
+							required : true
+						},
+						publicDiscount :{
+							required : true,
+							isRightDecimalForm : true
+						},
+						minaDiscount :{
+							required : true,
+							isRightDecimalForm : true
+						},
+						customerLevel :{
+							required : true
+						},
+						startDate :{
+							required : true
+						},
+						endDate : {
+							required : true
+						}
+					},
+					
+					//错误信息提示
+					messages:{
+						agentin_name : {
+							required : "请输入账户名称",
+							maxlength : "账户名称最多为15个字符",
+							remote : "此账户名已经注册过"
+						},
+						password : {
+							required : "请输入密码",
+							minlength : "密码最少为6位字符",
+							maxlength : "密码最少为20位字符",
+						},
+						companyName : {
+							required : "请输入公司名称",
+							maxlength : "账户名称最多为30个字符",
+							remote : "此公司名已经注册过"
+						},
+						name : {
+							required : "请输入负责人名称",
+							minlength : "负责人名称最少为2个字符",
+							maxlength : "负责人名称最多为10个字符"
+						},
+						phone:{
+		    				required:"请输入联系方式",
+		    			},
+		    			select : {
+							min : "请选省，市，区"
+						},
+						address : {
+							required : "请输入公司地址",
+							maxlength : "公司地址最多为50个字符"
+						},
+						email : {
+							maxlength : "邮箱最多为30个字符",					
+						},
+						qq :{
+							maxlength : "QQ最多为20个字符"
+						},
+						wechat :{
+							maxlength : "微信最多为20个字符"
+						},
+						theater :{
+							required : "请输入战区",
+							maxlength : "战区最多为10个字符"
+						},
+						principal :{
+							required : "请输入战区负责人",
+							minlength : "战区负责人名称最少为2个字符",
+							maxlength : "战区负责人名称最少为10个字符"
+						},
+						packageDiscount :{
+							required : "请输入套餐折扣",
+							
+						},
+						agentLevelId :{
+							required : "请选择所属上级"
+						},
+						publicDiscount :{
+							required : "请输入公众号折扣"	,
+							
+						},
+						minaDiscount :{
+							required : "请输入小程序折扣",
+							
+						},
+						customerLevel :{
+							required : "请选择客户等级"
+						},
+						startDate :{
+							required : "请选择开始时间"
+						},
+						endDate :{
+							required : "请选择结束时间"
+						}
+					},
+					errorPlacement : function(error, element) {	
+						if(element.attr("id")=="s_county"){
+		            		$(".area").append(error)
+		            	}else{
+		            		error.insertAfter( element.parent());
+		            	}  		            	         
+					}
+				});
+			jQuery.validator.addMethod("isphone", function (value, element) {  
+			    var isphone =  /^((0\d{2,3}-\d{7,8})|(1[3567984]\d{9})|(^400-?[0-9]{3}-?[0-9]{4})|(^800-?[0-9]{3}-?[0-9]{4}))$/;   
+			    return this.optional(element) || (isphone.test(value));  
+			}, $.validator.format("请输入正确的电话号码"));
+	        jQuery.validator.addMethod("isRightagentinNameForm", function(value, element) {
+	            var rightagentinNameForm = /^[a-zA-z][a-zA-Z0-9]{5,14}$/;
+	            return (rightagentinNameForm.test(value));
+	        }, "账号只能由字母数字组成，且只能以字母开头");
+	        jQuery.validator.addMethod("isRightPasswordForm", function(value, element) {
+	            var rightPasswordForm = /^[a-zA-Z0-9]{5,19}$/;
+	            return (rightPasswordForm.test(value));
+	        }, "密码只能由字母数字组成");
+	        jQuery.validator.addMethod("isRightDecimalForm", function(value, element) {
+	            var rightDecimalForm = /^(?=0\.[1-9]|[1-9]\.\d).{3}$|^([1-9])$/;
+	            return (rightDecimalForm.test(value));
+	        }, "折扣只能是大于0小于10的一位小数");
+	        jQuery.validator.addMethod("validateArea", function(value, element) {
+	            var str = "市、县级市";
+	            return (str != value);
+	        }, "请选择地区");
+	        
+		});
+		//小时选择
+		$('.clockpicker').clockpicker({
+			donetext : 'Done',
+		}).find('input').change(function() {
+			console.agent(this.value);
+		});
+		//日期选择
+		jQuery('#datepicker-autoclose').datepicker({
+			autoclose : true,
+			todayHighlight : true,
+			format : "yyyy-mm-dd"
+		});
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose : true, 
+			startDate:new Date(),
+			format : "yyyy-mm-dd",
+			
+		});
+		$('#startDate').datepicker({
+			onSelect:function(date){ 
+				 this.focus();  
+		          this.blur();   
+		      }  
+		});
+		$('#endDate').datepicker({
+			onSelect:function(date){ 
+				 this.focus();  
+		          this.blur();   
+		      }  
+		});
+		//日期和时间
+		$('#date-format').bootstrapMaterialDatePicker({
+			format : 'YYYY-MM-DD HH:mm'
+		});
+		//checkbox选中
+		$('#square-checkbox-2').iCheck('check');
+		//单选选中
+		$('#square-radio-A').iCheck('check');
+		//下拉多选
+		$(".select2").select2();
+
+		function test() {
+			//获取下拉多选的值
+			var options = $(".select2 option:selected");//获取当前选择项.
+			for (var i = 0; i < options.length; i++) {
+				alert(options[i].value);
+			}
+		}
+		
+		function save() {			
+			var isValid = $("#addForm").valid();
+			if (isValid) {
+			
+			}
+		}
+	</script>
+</body>
+</html>

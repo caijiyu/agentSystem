@@ -1,0 +1,394 @@
+package com.jeeplus.modules.agentsystem.agency.entity;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+import org.springframework.web.util.HtmlUtils;
+
+import com.jeeplus.common.persistence.DataEntity;
+
+/**
+ * 
+ * @author WR
+ * @version 2017-9-29
+ */
+public class WasInvoiceApplication extends DataEntity<WasInvoiceApplication> {
+	private static final long serialVersionUID = 1L;
+	/**
+	 * 主键ID
+	 */
+	private Integer  invoiceId; 
+	/**
+	 * 开票单号
+	 */
+	private String  invoiceNo; 
+	/**
+	 * 发票类型
+	 */
+	private String  invoiceType; 
+	/**
+	 * 开票内容
+	 */
+	private String  body;  
+	/**
+	 * 开票金额
+	 */
+	private BigDecimal  money;  
+	/**
+	 * 公司名称
+	 */
+	private String  companyName; 
+	/**
+	 * 收货人
+	 */
+	private String  name; 
+	/**
+	 * 联系电话
+	 */
+	private String  phone;  
+	/**
+	 * 收货地址
+	 */
+	private String  address;  
+	/**
+	 * 纳税人识别号
+	 */
+	private String  dutyParagraph;  
+	/**
+	 * 注册地址
+	 */
+	private String  registerAddress; 
+	/**
+	 * 注册电话
+	 */
+	private String  registerPhone;  
+	/**
+	 * 开户行
+	 */
+	private String  registerBank;  
+	/**
+	 * 银行账户
+	 */
+	private String  account;  
+	/**
+	 * 申请时间
+	 */
+	private Date  applyDate;  
+	/**
+	 * 申请时间开始时间
+	 */
+	private Date  beginDate;   
+	/**
+	 * 申请时间结束时间
+	 */
+	private Date  endDate;   
+	/**
+	 * 列表显示
+	 */
+	private Integer sendFlag; 
+	public Integer getSendFlagOne() {
+		return sendFlagOne;
+	}
+
+	public void setSendFlagOne(Integer sendFlagOne) {
+		this.sendFlagOne = sendFlagOne;
+	}
+	/**
+	 * 列表显示One
+	 */
+	private Integer sendFlagOne;
+	/**
+	 * 订单编号集合
+	 */
+	private String orderNumber;
+	
+	public String getOrderNumber() {
+		return orderNumber;
+	}
+
+	public void setOrderNumber(String orderNumber) {
+		this.orderNumber = orderNumber;
+	}
+
+	public Integer getSendFlag() {
+		return sendFlag;
+	}
+
+	public void setSendFlag(Integer sendFlag) {
+		this.sendFlag = sendFlag;
+	}
+
+	public Date getBeginDate() {
+		return beginDate;
+	}
+
+	public void setBeginDate(Date beginDate) {
+		this.beginDate = beginDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+	/**
+	 * 发货时间
+	 */
+	private Date  deliverDate;  
+	/**
+	 * 收货时间
+	 */
+	private Date  receiveDate;  
+	/**
+	 * 申请账号
+	 */
+	private String  applyBy;  
+	/**
+	 * 登录账户
+	 */
+	private String loginName;
+	/**
+	 * 拒绝理由
+	 */
+	private String  reason;  
+	/**
+	 * 发货状态（0：已申请，1：已发货，2：已完成，3：拒绝）
+	 */
+	private Integer  sendState;  
+	/**
+	 * 状态（0：删除，1：正常）
+	 */
+	private Integer  state;  
+	/**
+	 * 快递公司
+	 */
+	private String  expressCompany;  
+	/**
+	 * 快递公司编码
+	 */
+	private String  expressCoding;
+	/**
+	 * 快递单号
+	 */
+	private String  expressNumber;
+	/**
+	 * 开始时间
+	 */
+	private Date startDate;			
+
+	public WasInvoiceApplication() {
+		super();
+	}
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+	
+	public String getLoginName() {
+		return loginName;
+	}
+
+	public void setLoginName(String loginName) {
+		this.loginName = HtmlUtils.htmlUnescape(loginName);
+	}
+
+	public Integer getInvoiceId() {
+		return invoiceId;
+	}
+
+	public void setInvoiceId(Integer invoiceId) {
+		this.invoiceId = invoiceId;
+	}
+
+	public String getInvoiceNo() {
+		return invoiceNo;
+	}
+
+	public void setInvoiceNo(String invoiceNo) {
+		this.invoiceNo = HtmlUtils.htmlUnescape(invoiceNo);
+	}
+
+	public String getInvoiceType() {
+		return invoiceType;
+	}
+
+	public void setInvoiceType(String invoiceType) {
+		this.invoiceType = invoiceType;
+	}
+
+	public String getBody() {
+		return body;
+	}
+
+	public void setBody(String body) {
+		this.body = HtmlUtils.htmlUnescape(body);
+	}
+
+	public BigDecimal getMoney() {
+		return money;
+	}
+
+	public void setMoney(BigDecimal money) {
+		this.money = money;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = HtmlUtils.htmlUnescape(companyName);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = HtmlUtils.htmlUnescape(name);
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = HtmlUtils.htmlUnescape(address);
+	}
+
+	public String getDutyParagraph() {
+		return dutyParagraph;
+	}
+
+	public void setDutyParagraph(String dutyParagraph) {
+		this.dutyParagraph = HtmlUtils.htmlUnescape(dutyParagraph);
+	}
+
+	public String getRegisterAddress() {
+		return registerAddress;
+	}
+
+	public void setRegisterAddress(String registerAddress) {
+		this.registerAddress = HtmlUtils.htmlUnescape(registerAddress);
+	}
+
+	public String getRegisterPhone() {
+		return registerPhone;
+	}
+
+	public void setRegisterPhone(String registerPhone) {
+		this.registerPhone = registerPhone;
+	}
+
+	public String getRegisterBank() {
+		return registerBank;
+	}
+
+	public void setRegisterBank(String registerBank) {
+		this.registerBank = HtmlUtils.htmlUnescape(registerBank);
+	}
+
+	public String getAccount() {
+		return account;
+	}
+
+	public void setAccount(String account) {
+		this.account = HtmlUtils.htmlUnescape(account);
+	}
+
+	public Date getApplyDate() {
+		return applyDate;
+	}
+
+	public void setApplyDate(Date applyDate) {
+		this.applyDate = applyDate;
+	}
+
+	public Date getDeliverDate() {
+		return deliverDate;
+	}
+
+	public void setDeliverDate(Date deliverDate) {
+		this.deliverDate = deliverDate;
+	}
+
+	public Date getReceiveDate() {
+		return receiveDate;
+	}
+
+	public void setReceiveDate(Date receiveDate) {
+		this.receiveDate = receiveDate;
+	}
+
+	public String getApplyBy() {
+		return applyBy;
+	}
+
+	public void setApplyBy(String applyBy) {
+		this.applyBy = applyBy;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = HtmlUtils.htmlUnescape(reason);
+	}
+
+	public Integer getSendState() {
+		return sendState;
+	}
+
+	public void setSendState(Integer sendState) {
+		this.sendState = sendState;
+	}
+
+	public Integer getState() {
+		return state;
+	}
+
+	public void setState(Integer state) {
+		this.state = state;
+	}
+
+	public String getExpressCompany() {
+		return expressCompany;
+	}
+
+	public void setExpressCompany(String expressCompany) {
+		this.expressCompany = HtmlUtils.htmlUnescape(expressCompany);
+	}
+
+	public String getExpressCoding() {
+		return expressCoding;
+	}
+
+	public void setExpressCoding(String expressCoding) {
+		this.expressCoding = HtmlUtils.htmlUnescape(expressCoding);
+	}
+
+	public String getExpressNumber() {
+		return expressNumber;
+	}
+
+	public void setExpressNumber(String expressNumber) {
+		this.expressNumber = HtmlUtils.htmlUnescape(expressNumber);
+	}	
+	
+	
+}

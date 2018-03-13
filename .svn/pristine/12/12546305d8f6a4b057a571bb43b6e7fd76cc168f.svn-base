@@ -1,0 +1,385 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<!--文件管理列表-->
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<style>
+	.error{
+	color:red;
+	} 
+</style>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">
+						<shiro:hasPermission name="sysdata:wasFile:add">
+							<button type="button" class="btn btn-info" onclick="show(0,this)">
+								<i class="fa fa-plus-circle"></i> 添加
+							</button>
+						</shiro:hasPermission>  
+					</div>
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentsystem/wasFile/list" method="post" style="width: 100%" id="searchForm">
+							<button type="button" class="btn waves-effect waves-light btn-info" onclick="search()" style="float: right; margin-left: 15px">搜索</button>
+
+							<input id="fileNameA" autocomplete="off" type="text" class="form-control height-control col-3" value="${fn:escapeXml(log.name)}" placeholder="请输入文件名称关键字" style="float: right;">
+								<input id="fileNameB" name="name" type="hidden" value="${fn:escapeXml(log.name)}" />  
+								<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}" /> 
+								<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}" />
+								<input id="beginCreatedateB" name="beginCreatedate" type="hidden" value="<fmt:formatDate value="${log.beginCreatedate}" pattern="yyyy-MM-dd HH:mm:ss"/>" />
+								<input id="endCreatedateB" name="endCreatedate" type="hidden" value="<fmt:formatDate value="${log.endCreatedate}" pattern="yyyy-MM-dd HH:mm:ss"/>" />
+							<div class="form-group col-6" style="margin-bottom: 0px; float: right;">
+								<div class=" input-group input-daterange" id="date-range">
+									<div style="display:inline-block;padding-top: 8px;">创建时间范围:&nbsp;&nbsp;</div>
+									<input id="beginCreatedateA" autocomplete="off" type="text" value="<fmt:formatDate value="${log.beginCreatedate}" pattern="yyyy-MM-dd"/>" class="form-control height-control rightAngle" placeholder="开始时间"  style="text-align: left;" />
+									<span class="input-group-addon bg-info b-0 text-white height-control  leftAngle rightAngle">至</span>
+									<input id="endCreatedateA" autocomplete="off" type="text" value="<fmt:formatDate value="${log.endCreatedate}" pattern="yyyy-MM-dd"/>" class="form-control height-control leftAngle" placeholder="结束时间"  style="text-align: left;" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<table id="contentTable" class="display nowrap table table-hover table-striped table-bordered" cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th class="tableControl">文件名称</th>
+								<th class="tableControl">文件分类</th>
+								<th class="tableControl">数量</th>
+								<th class="tableControl">地址</th>
+								<th class="tableControl">提取密码</th>
+								<th class="tableControl">创建时间</th>
+								<th class="tableControl">操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach items="${page.list}" var="log">
+								<tr>
+									<td class="tableControl">${fn:escapeXml(log.name)}</td>
+									<td class="tableControl">${fn:escapeXml(log.classifyName)}</td>
+									<td class="tableControl">${log.number}</td>
+									<td class="tableControl">${fn:escapeXml(log.urlink)}</td>
+									<td class="tableControl">${fn:escapeXml(log.fetchCode)}</td>
+									<td class="tableControl"><fmt:formatDate value="${log.createDate}" type="both" /></td>
+									<td class="tableControl">
+									<shiro:hasPermission name="sysdata:wasFile:load">
+											<button type="button" data-toggle="tooltip" data-original-title="下载" class="btn btn-info btn-circle btn-xs" onclick="window.open('${log.urlink}');">
+												<i style="font-size: 10px;" class="iconfont icon-xiazai"></i>
+											</button>
+									</shiro:hasPermission>  	
+									<shiro:hasPermission name="sysdata:wasFile:edit">
+											<button type="button" data-toggle="tooltip" data-original-title="编辑" class="btn btn-info btn-circle btn-xs" onclick="show('${log.fileId}',this)">
+												<i class="fa fa-edit"></i>
+											</button>
+									</shiro:hasPermission> 
+									<shiro:hasPermission name="sysdata:wasFile:del">
+											<button type="button" data-toggle="tooltip" data-original-title="删除" class="btn btn-danger btn-circle btn-xs" onclick="deleteFile(${log.fileId})">
+												<i class="fa fa-times"></i>
+											</button>
+									</shiro:hasPermission> 
+									</td>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${page.count>10}">
+						<table:page page="${page}"></table:page>
+					</c:if>	
+				</div>
+				<div class="tab-pane p-20" id="profile2" role="tabpanel">2</div>
+				<div class="tab-pane p-20" id="messages2" role="tabpanel">3</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 模态框 -->
+	<div class="modal fade" id="modal" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content" style="margin-top:30%;">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+				<span id="modal-header-title">添加文件</span>	
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="inputFormD">
+						<input id="fileId" name="fileId" type="hidden" value="" />
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><font color="red">*&nbsp;</font>文件名称：</label>
+							<div class="col-8 controls">
+								<input autocomplete="off" type="text" name="name"  id="fileName"
+									class="form-control height-control" required maxlength="10">
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><font color="red">*&nbsp;</font>文件数量：</label>
+							<div class="col-8 controls">
+								<input autocomplete="off" type="text" name="number" id="fileNumber" maxlength="3"
+									class="form-control height-control" required>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><font color="red">*&nbsp;</font>提取密码：</label>
+							<div class="col-8 controls">
+								<input autocomplete="off" type="text" name="fetchCode" id="fetchCode" maxlength="10"
+									class="form-control height-control" required>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><font color="red">*&nbsp;</font>文件地址：</label>
+							<div class="col-8 controls">
+								<input autocomplete="off" type="text" name="urlink" id="urlink" maxlength="100"
+									class="form-control height-control" required>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><font color="red">*&nbsp;</font>文件分类：</label>
+							<div class="col-8 controls">
+								<select id="fileClassify" name="classifyId" class="form-control custom-select">
+                                </select>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer" style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="saveFile()">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			addSelection();
+			
+			jQuery.validator.addMethod("positiveinteger", function(value, element) {
+				   var aint=parseInt(value);	
+				    return aint>0&& (aint+"")==value;   
+				  }, "请输入正整数"); 
+			
+			jQuery.validator.addMethod("isUrl", function(value, element) {
+				 var strRegex = "^((https|http|ftp|rtsp|mms)?://)"
+					 + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //ftp的user@ 
+					  + "(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP形式的URL- 199.194.52.184 
+					  + "|" // 允许IP和DOMAIN（域名）
+					  + "([0-9a-z_!~*'()-]+\.)*" // 域名- www. 
+					  + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\." // 二级域名 
+					  + "[a-z]{2,6})" // first level domain- .com or .museum 
+					  + "(:[0-9]{1,4})?" // 端口- :80 
+					  + "((/?)|" // a slash isn't required if there is no file name 
+					  + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$"; 
+					 var re=new RegExp(strRegex); 
+				    return (re.test(value)) 
+				  }, "请输入正确的网址"); 
+			
+			$("#inputFormD").validate({
+				 rules: {
+					 FileClassify:{
+						 required: true
+				      },
+					number:{
+						positiveinteger:true
+					},
+				    fetchCode:{
+				    	minlength:4
+				    },
+				    classifyId:{
+				    	required: true
+				    },
+					urlink:{
+						isUrl:true
+					    }
+				    },
+					messages: {
+						name:{	
+							 required: "文件名称不能为空"
+					   		},
+					   	number:{
+					   		required: "文件数量不能为空"
+					   		},
+					   	fetchCode:{
+					   		required:"提取码不能为空",
+					   		minlength:"提取码不能少于4个字符"
+					   	},
+					   	urlink:{
+					   		required:"文件地址不能为空",
+						    },
+						    classifyId:{
+							required: "文件分类不能为空"	
+						    }
+					   }
+				  });
+		});
+	
+		//弹框显示
+		function show(fileId,obj) {
+			$("#inputFormD").data("validator").resetForm();
+			$("#fileClassify").removeClass("error");
+			$("#fileName").removeClass("error");
+			$("#fileNumber").removeClass("error");
+			$("#fetchCode").removeClass("error");
+			$("#urlink").removeClass("error");
+			$("#fileClassify").removeClass("error");
+			if(fileId!=0){
+				$(".modal-header").html($(".modal-header").html().replace("添加","编辑"));
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+					type : "POST",
+					dataType : "json",
+					url : "${ctx}/agentsystem/wasFile/get",
+					data :  {'fileId': fileId},
+					success : function(result) {
+						layer.close(index);
+						$("#fileId").val(result.fileId);
+						$("#fileName").val(result.name);
+						$("#fileNumber").val(result.number);
+						$("#fetchCode").val(result.fetchCode);
+						$("#urlink").val(result.urlink);
+						$("#fileClassify").val(result.classifyId); 
+					}
+				});
+			}else{
+				$(".modal-header").html($(".modal-header").html().replace("编辑","添加"));
+				$("#fileId").val('');
+				$("#fileName").val('');
+				$("#fileNumber").val('1');
+				$("#fetchCode").val('');
+				$("#urlink").val('');
+				$("#fileClassify").val(''); 
+			}
+			
+			$("#modal").modal("show");
+			$(obj).blur();
+		}
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n,s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		//查询方法
+		function search(){//查询，页码清零
+			$("#pageNo").val(0);
+			$("#fileNameB").val($("#fileNameA").val());
+			$("#beginCreatedateB").val($("#beginCreatedateA").val());
+			$("#endCreatedateB").val($("#endCreatedateA").val()+" 23:59:59");
+			$("#searchForm").submit();
+		}
+		
+		function saveFile(){
+			var locked = false;
+			var isValid = $("#inputFormD").valid();
+			if (isValid) {
+				layer.confirm('是否确认保存？', { icon : 3 ,closeBtn: 0,
+					 skin : 'layui-layer-molv',btn: ['确认','取消']},function(){
+						 if(!locked){
+							locked=true;
+							$("#modal").modal("hide");
+							var index = layer.load(1, {shade: [0.1,'#fff']});
+								$.ajax({
+										type : "POST",
+										dataType : "json",
+										url : "${ctx}/agentsystem/wasFile/save",
+										data : $('#inputFormD').serialize(),
+										success : function(result) {
+											layer.close(index);
+											if (parseInt(result) == 1) {
+												layer.msg("保存成功", {
+													time:1000,
+													icon:1,
+												},function(data){
+													$("#searchForm").submit();	
+												}
+												);
+											}else if(parseInt(result) == 0){
+												layer.msg("删除失败", {
+													time:1000,
+													icon:2,
+												},function(data){
+													$("#searchForm").submit();	
+												});
+											}
+										}
+									});
+						 }
+					 });
+			}
+		}
+		
+		function deleteFile(fileId){
+			layer.alert('确认要彻底删除数据吗?', {
+				skin : 'layui-layer-molv',
+				closeBtn: 0,
+				icon : 3,
+				btn : [ '确认', '取消' ]
+			//按钮
+			}, function() {
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+					type : "POST",
+					dataType : "json",
+					url : "${ctx}/agentsystem/wasFile/delete",
+					data :  {'fileId': fileId},
+					success : function(result) {
+						layer.close(index);
+						if (parseInt(result) == 0) {
+							layer.msg("删除成功", {
+								time:1000,
+								icon:1,
+							},function(data){
+								$("#searchForm").submit();	
+							});
+						}else if(parseInt(result) == 1){
+							layer.msg("删除失败", {
+								time:1000,
+								icon:1,
+							},function(data){
+								$("#searchForm").submit();	
+							});
+						}
+					}
+				});
+			});
+		}
+		
+		//添加数据到select
+		function addSelection(){
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${ctx}/sysdata/wasFileClassify/getAll",
+				success : function(result) {
+					$('#fileClassify').append('<option value="" selected="selected">'+'--请选择--'+'</option>');
+					for(var i=0;i<result.length;i++){
+						$('#fileClassify').append('<option value="'+result[i].classifyId+'">'+result[i].name+'</option>');
+					}
+				}
+			});
+		}
+		
+		$('#fileNameA').bind('keypress', function(event) {
+			if (event.keyCode == "13") {
+				search();
+			}
+		});
+	</script>
+
+</body>
+</html>

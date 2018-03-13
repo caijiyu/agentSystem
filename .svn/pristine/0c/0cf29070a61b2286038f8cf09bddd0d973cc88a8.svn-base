@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.sysdata.dao.WasFileClassifyDao">
+    
+	<sql id="wasFileClassifyColumns">
+		a.classifyid AS "classifyId",
+		a.name AS "name",
+		a.createdate AS "createDate"
+	</sql>
+	
+	<sql id="wasFileClassifyJoins">
+	</sql>
+    
+	<select id="get" resultType="WasFileClassify">
+		SELECT 
+			<include refid="wasFileClassifyColumns"/>
+		FROM was_file_classify a
+		<include refid="wasFileClassifyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getFileClassifyByName" resultType="java.lang.Integer">
+		SELECT 
+			count(1)
+		FROM was_file_classify a
+		WHERE binary a.name = #{0}
+	</select>
+	
+	<select id="findList" resultType="WasFileClassify">
+		SELECT 
+			<include refid="wasFileClassifyColumns"/>
+		FROM was_file_classify a
+		<include refid="wasFileClassifyJoins"/>
+		<where>
+			
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		ORDER BY a.createDate DESC
+	</select>
+	
+	<select id="findAllList" resultType="WasFileClassify">
+		SELECT 
+			<include refid="wasFileClassifyColumns"/>
+		FROM was_file_classify a
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO was_file_classify(
+			classifyId,
+			name,
+			createDate
+		) VALUES (
+			#{classifyId},
+			#{name},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE was_file_classify SET 	
+			classifyId = #{classifyId},
+			name = #{name},
+			createDate = #{createDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM was_file_classify
+		WHERE classifyId = #{classifyId}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_file_classify SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WasFileClassify" statementType="STATEMENT">
+		select * FROM was_file_classify  where ${propertyName} = '${value}'
+	</select>
+</mapper>

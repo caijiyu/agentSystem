@@ -1,0 +1,741 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+<style type="text/css">
+label {
+	text-align: right;
+}
+
+.pagination-detail {
+	display: none
+}
+
+.noboder td {
+	border: none;
+}
+input.error{
+		color:#67757c;
+	}
+.layui-layer{
+   		top: 200px!important;
+	}
+</style>
+</head>
+<body>
+	<div class="divControl">
+		<div class="row">
+			<div class="button-group col-6">
+			<shiro:hasPermission name="sysdata:wasHardware:add">
+				<button type="button" class="btn btn-info" onclick="show()">
+					<i class="fa fa-plus-circle"></i> 添加
+				</button>
+			</shiro:hasPermission>
+			</div>
+			<div class="col-6" style="text-align: right;">
+				<form action="${ctx}/sysdata/wasHardware/list" method="post"
+					style="width: 100%" id="searchForm">
+					<button type="button" class="btn waves-effect waves-light btn-info"
+						onclick="search()" style="float: right; margin-left: 15px">搜索</button>
+					<input autocomplete="off" type="text"
+						class="form-control height-control col-4" placeholder="请输入产品名称"
+						id="hardWareNamea" name="name" style="float: right;"> <input
+						id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}" />
+					<input id="pageSize" name="pageSize" type="hidden"
+						value="${page.pageSize}" />
+				</form>
+			</div>
+		</div>
+		<div class="row" style="margin-top: 15px;">
+			<!-- column -->
+			<c:forEach items="${page.list}" var="log">
+				<div class="col-lg-3 col-md-6">
+					<!-- Card -->
+					<div class="card ">
+						<div  class="imgdiv boxgrid captionfull">
+							<input type='hidden' name="fileUrl" value="${vicmobAgentSystemFileUrl}" id="fileUrl" />
+							<img class="card-img-top img-responsive" src='"${vicmobAgentSystemFileUrl}"+"${log.picture}"' alt="Card image cap" >
+						</div>
+						<div class="card-body" style="height: 170px;">
+							<h4 class="card-title">产品名称：${log.name}</h4>
+							<p class="card-text" style="margin-top: 20px;">
+								产品分类：${log.classify}<br /> 价格：${log.price}元
+							</p>
+							<div id="bott" class="button-group">
+								<shiro:hasPermission name="sysdata:wasHardware:edit">
+									<button type="button" data-toggle="tooltip"
+										data-original-title="编辑" class="btn btn-info btn-circle btn-xs"
+										onclick="edit(${log.hardwareId})">
+										<i class="fa fa-edit"></i>
+									</button>
+								</shiro:hasPermission>
+								<shiro:hasPermission name="agent:hardwarePurchase:buy">
+									<button type="button" data-toggle="tooltip"
+										data-original-title="购买" class="btn btn-info btn-circle btn-xs"
+										data-toggle="modal" data-target="#exampleModal" onclick="buy(${log.hardwareId})">
+										<i class="mdi mdi-cart-outline"></i>
+									</button>
+								</shiro:hasPermission>
+								<shiro:hasPermission name="sysdata:wasHardware:del">
+									<button type="button" data-toggle="tooltip"
+										data-original-title="删除"
+										class="btn btn-danger btn-circle btn-xs " onclick="deleteHardware(${log.hardwareId})">
+										<i class="fa fa-times"></i>
+									</button>
+								</shiro:hasPermission>
+							</div>
+						</div>
+					</div>
+					<!-- Card -->
+				</div>
+			</c:forEach>
+		</div>
+		<table:page page="${page}"></table:page>
+	</div>
+
+	<!-- 模态框 -->
+	<div class="modal fade" id="modal" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content">
+				<!--对话框头-->
+				<div class="modal-header" 
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<span id="addHardware">添加硬件</span>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="inputForm" action="" method="post">
+						<input id="menuIdaaa" name="menuIdaaa" value="" type="hidden">
+						<input id="hardwareIda" type="hidden" name="hardwareId">
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								style="color: red">*</span>&nbsp;产品图片：</label>
+							<div class="col-8">
+								<div class="controls input-group">
+									<!-- data-rule-required="true" -->
+									<input type="text" id="picturea" name="picture"
+										class="form-control singleGraph height-control rightAngle"
+										value=""  readonly/> <span class="input-group-btn ">
+										<button class="btn btn-default leftAngle height-control" onclick="lopen('upImg','picturea','1')" type="button" style="height: 36px; font-size: 12px;" >上传</button>
+									</span>
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								style="color: red">*</span>&nbsp;产品名称：</label>
+							<div class="col-8 ">
+								<div class=" controls input-group">
+									<input autocomplete="off" type="text" name="name" id="namea"
+										class="form-control height-control"
+										data-validation-required-message="这是必填项" maxlength="10" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label">产品分类：</label>
+							<div class="col-8 ">
+								<div class=" controls input-group">
+									<input autocomplete="off" type="text" name="classify"
+										id="classifya" class="form-control height-control"
+										data-validation-required-message="这是必填项" maxlength="10" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label"><span
+								style="color: red">*</span>&nbsp;产品价格：</label>
+							<div class="col-8 ">
+								<div class="controls input-group">
+									<input autocomplete="off" type="text" 
+										name="price" id="pricea" class="form-control height-control rightAngle" maxlength="9"> 
+									<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!--对话框尾-->
+				<div class="modal-footer"
+					style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="save(${log.hardwareId})">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="exampleModal" data-backdrop="static">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content"
+				style="width: 800px; margin-left: -150px; margin-top: 100px">
+				<div class="modal-header" style="background-color: #F4F5F9;">
+					<p class="modal-title" id="exampleModalLabela"
+						style="font-size: 14px;">购买硬件</p>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+				<form id="buyHardware" action="" method="post" role="form">
+					<table class="table noboder" style="font-size: 13px;">
+						<tbody >
+							<tr class="form-group">
+								<td style="text-align: right; vertical-align: middle; width: 100px">商品名称：</td>
+								<td><input id="hardwareIdb" type="hidden" name="hardwareId">
+									<input id="type" type="hidden" name="type">
+									<input id="hardwarePurchaseId" type="hidden" name="hardwarePurchaseId">
+									<input id="hardwareExpend" type="hidden" name="hardwareExpend">
+									<input id="vipExpend" type="hidden" name="vipExpend">
+									<input id="userHardwareExpend" type="hidden" name="userHardwareExpend">
+									<input id="userVipExpend" type="hidden" name="userVipExpend"> 
+									<input autocomplete="off" type="text" name="namea"
+									id="buyName" class="form-control height-control"
+									readonly />
+								<td style="text-align: right; vertical-align: middle; width: 100px">商品单价：</td>
+								<td>
+									<div class="input-group">
+										<input autocomplete="off" type="text" 
+											name="price" id="SinglePrice" class="form-control height-control rightAngle" maxlength="9" readonly> 
+										<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+									</div>
+								</td>
+							</tr>
+							<tr class="form-group">
+									<td style="text-align: right; vertical-align: middle; width: 100px"><span
+										style="color: red;">*</span>&nbsp;数量：</td>
+									<td><div><input autocomplete="off" type="text" name="number"
+										id="buyNumber" class="form-control height-control" value="1" 
+										data-validation-required-message="这是必填项" maxlength="6" onkeyup="count()"/></div>
+									<td style="text-align: right; vertical-align: middle; width: 100px">商品总价：</td>
+									<td>
+										<div class="input-group">
+											<input autocomplete="off" type="text" 
+												name="payMoney" id="buyPrice" class="form-control height-control rightAngle"  readonly> 
+											<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+										</div>
+									</td>
+								</tr>
+							<tr class="form-group">
+								<td style="text-align: right; vertical-align: middle; width: 100px">硬件余额：</td>
+								<td>
+									<div class="input-group">
+										<input autocomplete="off" type="text" 
+											name="hardwareAccount" id="hardwareAccount" class="form-control height-control rightAngle"  readonly> 
+										<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+									</div>
+								</td>
+								<td style="text-align: right; vertical-align: middle; width: 100px">VIP余额：</td>
+								<td>
+									<div class="input-group">
+										<input autocomplete="off" type="text" 
+											name="vipAccount" id="vipAccount" class="form-control height-control rightAngle"  readonly> 
+										<span class="input-group-addon height-control leftAngle" id="basic-addon1">元</span>
+									</div>
+								</td>
+							</tr>
+							<tr class="form-group">
+								<td style="text-align: right; vertical-align: middle; width: 100px">收货方式：</td>
+								<td style="vertical-align: middle;">
+									<input type="hidden" id="deliveryMethod" name="deliveryMethod">
+									<input type="radio" class="check" id="square-radio-one" name="square-radio" data-radio="iradio_square-blue"  value="0" onclick="divClick(this)">
+                                    <label for="square-radio-1">自提</label>
+                                    <input type="radio" class="check" id="square-radio-two" name="square-radio" data-radio="iradio_square-blue" value="1" checked="checked" onclick="divClick(this)">
+                                    <label for="square-radio-2">快递</label>
+                                </td>
+							</tr>
+							<tr class="form-group">
+								<td style="text-align: right; vertical-align: middle; width: 100px">
+									<span style="color: red;">*</span>&nbsp;收货人：</td>
+								<td><div><input autocomplete="off" type="text" name="name"
+									id="goodsName" class="form-control height-control"
+									data-validation-required-message="这是必填项" maxlength="10"/></div></td>
+								<td style="text-align: right; vertical-align: middle; width: 100px">
+									<span style="color: red;">*</span>&nbsp;联系电话：</td>
+								<td><div><input autocomplete="off" type="text" name="phone"
+									id="goodsPhone" class="form-control height-control"
+									data-validation-required-message="这是必填项" /></div></td>
+
+							</tr>
+							<tr class="form-group">
+								<td style="text-align: right; vertical-align: middle; width: 100px" id="selecta">
+								<span style="color: red;" >*</span>&nbsp;收货地址：</td>
+								<td id="selectb"><div><textarea autocomplete="off" type="text" name="address"
+										id="goodsAddress" class="form-control height-control"
+										data-validation-required-message="这是必填项" maxlength="50"></textarea></div></td>
+								<td style="text-align: right; vertical-align: middle; width: 100px">备注：</td>
+								<td><div><textarea autocomplete="off" type="text" name="remarks"
+										id="goodsRemarks" class="form-control height-control"
+										 data-validation-required-message="这是必填项" maxlength="100"></textarea></div></td>
+							</tr>
+						</tbody>
+					</table> 
+					</form>
+					<p style="font-size: 13px; margin-top: 10px; margin-left:15px">注：默认从硬件余额中扣款，硬件余额不足则从VIP余额中扣款！</p>
+				</div>
+				<div class="modal-footer" style="background-color: #F4F5F9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn  btn-info" id="sure"  onclick="confirm()">确认</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="ModalSure" tabindex="-1" role="dialog"
+		aria-labelledby="ModalLabela" aria-hidden="true"
+		style="display: none; margin-top: 200px; margin-left: 100PX;">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="background-color: #F4F5F9;">
+					<p class="modal-title" id="exampleModalLabela"
+						style="font-size: 14px;">信息确认</p>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close" onclick="editcss()">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="orderForm" action="" style="font-size: 13px;">
+						<div class="form-group row">
+							<div class="col-6">
+								<label>商品名称：</label> <label for="example-text-input"
+									id="goodsHardware" name="name"></label>
+							</div>
+							<div class="col-6">
+								<label>商品单价：</label> <label for="example-text-input"
+									id="goodsPrice" name="price"></label>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-6">
+								<label>商品数量：</label> 
+								<label for="example-text-input" id="goodsNumber" ></label>
+							</div>
+							<div class="col-6">
+								<label>商品总价：</label> 
+								<label for="example-text-input" id="goodsTotal" ></label>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-6">
+								<label>硬件扣款：</label> 
+								<label for="example-text-input" id="hardwareSpend" ></label>
+							</div>
+							<div class="col-6">
+								<label>VIP扣款：</label> 
+								<label for="example-text-input" id="vipSpend" ></label>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer" style="background-color: #F4F5F9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+						<button type="button" class="btn  btn-info" id="sure"  onclick="saveOrder()">确认</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+
+<script type="text/javascript">
+		//添加弹框显示
+		function show() {
+			$("#inputForm").data("validator").resetForm();
+			$("#addHardware").html("添加硬件");
+			$("#hardwareIda").val("");
+			$("#pictureafile").hide();
+			$("#picturea").val("");
+			$("#namea").val("");
+			$("#classifya").val("");
+			$("#pricea").val("");
+			$("#modal").modal("show");
+		}
+		
+		//编辑
+		function edit(hardwareId){
+			//alert(typeof hardwareId);
+			$("#inputForm").data("validator").resetForm();
+			$("#addHardware").html("编辑硬件");
+			var index = layer.load(1, {shade: [0.1,'#fff']});
+			$.ajax({
+				url : "${ctx}/sysdata/wasHardware/get",
+				dataType : "json",
+				type : "post",
+				data : {'hardwareId':hardwareId},//通过ajax传过去
+				success : function(result) {//control成功了在传回来用的
+					layer.close(index);
+					$("#hardwareIda").val(result.hardwareId);
+					$("#picturea").val(result.picture);
+					$("#namea").val(result.name);
+					$("#classifya").val(result.classify);
+					$("#pricea").val(result.price);
+ 					$("#modal").modal("show");
+				}
+			});
+			if($("#pictureafile").length<=0){
+		 		var attr='<div id="pictureafile">'
+			 		+'&nbsp;&nbsp;&nbsp;'
+			 		+'<img src="" id="picturefile" style="width:100px;margin-top:10px;">'
+			 		+'&nbsp;&nbsp;'
+			 		+'<a href=" " onclick="singleFileDel(picturea)">×</a>'
+			 		+'</div>';
+			   document.getElementById('picturea').parentNode.insertAdjacentHTML('afterend', attr);
+	 		}
+			$("#pictureafile").attr("src",'$("#picturea").val()');
+		}
+		
+		//购买弹框
+		function buy(hardwareId) {
+			$("#exampleModal").css("z-index","10400");//设置图层
+			$("#buyHardware").data("validator").resetForm();
+			$('#square-radio-two').iCheck('check');
+			$("#goodsName").val("");
+			$("#goodsPhone").val("");
+			$("#goodsAddress").val("");
+			$("#goodsRemarks").val("");
+			var index = layer.load(1, {shade: [0.1,'#fff']});
+			$.ajax({
+				url : "${ctx}/sysdata/wasHardware/get",
+				dataType : "json",
+				type : "post",
+				data : {'hardwareId':hardwareId},//通过ajax传过去
+				success : function(result) {//control成功了在传回来用的
+					layer.close(index);
+					$("#hardwareIdb").val(result.hardwareId);
+					$("#buyName").val(result.name);
+					$("#SinglePrice").val(result.price);
+					$("#hardwareAccount").val(result.hardwareAccount);
+					$("#vipAccount").val(result.vipAccount);
+					$("#userHardwareExpend").val(result.userHardwareExpend);
+					$("#userVipExpend").val(result.userVipExpend);
+					$("#exampleModal").modal("show");
+					$("#buyPrice").val($("#SinglePrice").val()*($("#buyNumber").val()));
+				}
+			});
+		}
+		
+		//计算总价onkeyup事件
+		function count(){
+            var a= $("#buyNumber").val();
+            if(a == ""){
+            	$("#buyPrice").val(0);
+            }else{
+            	$("#buyPrice").val(parseInt(a)*($("#SinglePrice").val()));
+            }
+        }
+		
+		//form表单验证
+		$("#inputForm").validate({
+			rules : {
+				picture : {
+					required : true,
+				},
+				name : {
+					required : true,
+					maxlength : 10
+				},
+				classify : {
+					maxlength : 10
+				},
+				price : {
+					required : true,
+					number : true,
+					max : 999999.99,
+					maxlength : 9,
+					minNumber : true,
+				},
+			},
+			messages : {
+				picture : {
+					required : "请上传图片",
+				},
+				name : {
+					required : "请输入产品名称",
+					maxlength : $.validator.format("最多输入10个字符")
+				},
+				classify : {
+					maxlength : $.validator.format("最多输入10个字符")
+				},
+				price : {
+					required : "请输入产品价格",
+					number : $.validator.format("请输入有效的数字"),
+					max : $.validator.format("有效值范围0~999999.99"),
+					maxlength : $.validator.format("最多输入9个字符")
+				},
+			},
+			errorPlacement : function(error, element) {
+				error.insertAfter(element.parent());
+			}
+		});
+		
+		$(document).ready(function() {
+			//验证手机和座机
+			jQuery.validator.addMethod("isPhone", function(value,element) {
+			    var length = value.length;
+			    var mobile =  /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1})|(14[0-9]{1})|(17[0-9]{1}))+\d{8})$/;
+			    var tel = /^\d{3,4}-?\d{7,9}$/;
+			
+			    if(/-/.test(value)){
+			        return this.optional(element) || tel.test(value);
+			    }else{
+			        return this.optional(element) || (length == 11 && mobile.test(value));
+			    }
+			
+			}, "请正确填写您的联系电话");
+		    
+			//自定义validate验证输入的数字小数点位数不能大于两位
+			jQuery.validator.addMethod("minNumber",function(value, element){
+	            var returnVal = true;
+	            inputZ=value;
+	            var ArrMen= inputZ.split(".");    //截取字符串
+	            if(ArrMen.length==2){
+	                if(ArrMen[1].length>2){    //判断小数点后面的字符串长度
+	                    returnVal = false;
+	                    return false;
+	                }
+	            }
+	            return returnVal;
+	        },"小数点后最多为两位");
+			
+			//获取菜单ID
+			$("#menuIdaaa").val($("#btnId",parent.document).val());
+		});
+		
+		$("#buyHardware").validate({
+			rules : {
+				number : {
+					required : true,
+					number : true,
+					min:1,
+				},
+				name : {
+					required : true,
+					maxlength : 10
+				},
+				phone : {
+					required : true,
+					isPhone : true,
+				},
+				address : {
+					required : true,
+				}
+			},
+			messages : {
+				number : {
+					required : "请输入购买数量",
+					number : $.validator.format("请输入有效的数字"),
+					min:"请输入大于零的正整数"
+				},
+				name : {
+					required : "请输入收货人",
+					maxlength : $.validator.format("最多输入10个字符")
+				},
+				phone : {
+					required : "请输入联系电话",
+					maxlength : $.validator.format("最多输入10个字符")
+				},
+				address : {
+					required : "请输入收货地址",
+				}
+			},
+			errorPlacement : function(error, element) {
+				error.insertAfter(element.parent());
+			}
+		});
+		
+		//checkbox监听
+		$('#square-radio-one').on('ifChecked', function(event) { //ifCreated 事件应该在插件初始化之前绑定 (ifUnchecked)
+			document.getElementById("selecta").style.display="none";    
+            document.getElementById("selectb").style.display="none";
+		});
+		$('#square-radio-two').on('ifChecked', function(event) { //ifCreated 事件应该在插件初始化之前绑定 (ifUnchecked)
+			document.getElementById("selecta").style.display="";    
+            document.getElementById("selectb").style.display="";
+		});
+		
+		
+		//购买确认
+		function confirm(){
+			$("#deliveryMethod").val($(":radio:checked").val());
+			var isValid = $("#buyHardware").valid();
+			var hardwareAccount = $("#hardwareAccount").val();
+			var vipAccount = $("#vipAccount").val();
+			var userHardwareExpend = $("#userHardwareExpend").val();
+			var userVipExpend = $("#userVipExpend").val();
+			var totalMoney = parseInt(hardwareAccount)+parseInt(vipAccount);
+			var butPrice = $("#buyPrice").val()
+			if (isValid) {
+				if(totalMoney>butPrice){
+					$("#goodsHardware").text($("#buyName").val());
+					$("#goodsPrice").text($("#SinglePrice").val()+"元");
+					$("#goodsNumber").text($("#buyNumber").val());
+					$("#goodsTotal").text($("#buyPrice").val()+"元");
+					var a = hardwareAccount - butPrice;
+					if(a>0){
+						$("#hardwareSpend").text(butPrice+"元");
+						$("#vipSpend").text(0+"元");
+						$("#hardwareExpend").val(butPrice);
+						$("#vipExpend").val(0);
+					}else{
+						var vipSpend = parseInt($("#buyPrice").val())-parseInt($("#hardwareAccount").val());
+						$("#hardwareSpend").text(hardwareAccount+"元");
+						$("#vipSpend").text(vipSpend+"元");
+						$("#hardwareExpend").val(hardwareAccount);
+						$("#vipExpend").val(vipSpend);
+					}
+					$("#exampleModal").css("z-index","1000");
+					$("#ModalSure").css("z-index","10500");
+					$("#ModalSure").modal("show");
+				}else{
+					layer.msg("硬件账户余额不足及VIP账户余额不足！",{icon:7,time:1500});
+				}
+			}
+		}
+		function editcss(){
+			$("#exampleModal").css("z-index","10400");
+		}
+		
+		//保存订单
+		function saveOrder(){
+			var index = layer.load(1, {shade: [0.1,'#fff']});
+			var url = "${ctx}/hardware/hardwarePurchase/insertState";
+			$.ajax({
+				url : url,
+				dataType : "json",
+				type : "post",
+				data : $('#buyHardware').serialize(), //通过ajax传过去
+				success : function(result) {//control成功了在传回来用的
+					layer.close(index);
+					if (result > 0) {
+						$("#exampleModal").modal("hide");
+						$("#ModalSure").modal("hide");
+						layer.msg("购买成功", {
+							time : 1000,
+							icon : 1,
+						}, function(data) {
+							$("#searchForm").submit();
+						});
+					}
+				},
+				error:function(){
+			    	layer.close(index);
+			    	layer.msg('购买失败！', { icon : 1,time : 1000, });
+			    	$("#searchForm").submit();
+			    },
+			});
+		}
+		
+		//保存
+		function save() {
+			var isValid = $("#inputForm").valid();
+			if (isValid) {
+				var locked = false;
+				layer.confirm('是否确认保存？', {
+					icon : 3,
+					skin : 'layui-layer-molv',
+					btn : [ '确认', '取消' ]
+				}, function() {
+					if(!locked){
+						locked=true;
+						var url = "${ctx}/sysdata/wasHardware/save";
+						var index = layer.load(1, {shade: [0.1,'#fff']});
+						$.ajax({
+							url : url,
+							dataType : "json",
+							type : "post",
+							data : $('#inputForm').serialize(),//通过ajax传过去
+							success : function(result) {//control成功了在传回来用的
+								layer.close(index);
+								if (result > 0) {
+									$("#modal").modal("hide");
+									layer.msg("保存成功", {
+										time : 1000,
+										icon : 1,
+									}, function(data) {
+										$("#searchForm").submit();
+									});
+								}
+							},
+							error:function(){
+						    	layer.close(index);
+						    	layer.msg('保存失败！', { icon : 1,time : 1000, });
+						    	$("#searchForm").submit();
+						    },
+						});
+					}
+				});
+			}
+		}
+		
+		//删除硬件(逻辑删除)
+		function deleteHardware(hardwareId){
+			var menuIdaaa = $("#menuIdaaa").val();
+			layer.confirm('确认要彻底删除数据吗?', {
+				skin : 'layui-layer-molv',
+				icon : 3,
+				btn : [ '确认', '取消' ]
+			//按钮
+			}, function() {
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+					type : "POST",
+					dataType : "json",
+					url : "${ctx}/sysdata/wasHardware/deleteByLogic",
+					data :  {'hardwareId': hardwareId,'menuIdaaa' : menuIdaaa},
+					success : function(result) {
+						layer.close(index);
+						if (result > 0) {
+							layer.msg("删除成功", {
+								time:1000,
+								icon:1,
+							},function(data){
+								$("#searchForm").submit();	
+							});
+						}
+					},
+					error:function(){
+				    	layer.close(index);
+				    	layer.msg('删除失败！', { icon : 1,time : 1000, });
+				    	$("#searchForm").submit();
+				    },
+				});
+			});
+		}
+		
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose : true,
+			format : "yyyy-mm-dd"
+		});
+		
+		//分页方法
+		function page(n, s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		
+		//查询方法
+		function search() {//查询，页码清零
+			//alert($("#searchForm").serialize());
+			$("#pageNo").val(0);
+			$("#searchForm").submit();
+		}
+		
+		//针对tab切换会出现其他的问题
+		function switchover() {
+			$('#home2').removeClass("active");
+			$('#home2').attr("aria-expanded", false);
+			$('#profile2').removeClass("active");
+			$('#profile2').attr("aria-expanded", false);
+			$('#messages2').removeClass("active");
+			$('#messages2').attr("aria-expanded", false);
+		}
+</script>
+
+</body>
+</html>

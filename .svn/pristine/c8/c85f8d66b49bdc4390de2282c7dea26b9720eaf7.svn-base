@@ -1,0 +1,93 @@
+package com.jeeplus.modules.agentsystem.terminal.dao;
+
+import java.util.Date;
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+/**
+ * 终端Dao接口 
+ * @author Hua
+ *
+ */
+@MyBatisDao
+public interface WasTerminalUserDao extends CrudDao<WasTerminalUser>{
+	/**
+	 * 插入数据
+	 * @param wasTerminalUser
+	 * @return
+	 */
+	public Integer insertWasTerminalUser(WasTerminalUser wasTerminalUser);
+	/**
+	 * 更新数据
+	 * @param wasTerminalUser
+	 * @return
+	 */
+	public Integer updateWasTerminalUser(WasTerminalUser wasTerminalUser);  
+	/**
+	 * 根据终端用户id查找终端用户
+	 * @param terminalUserId
+	 * @return
+	 */
+	public WasTerminalUser findByTerminalUserId(Integer  terminalUserId);
+	/**
+	 * 逻辑删除
+	 * @param terminalUserId
+	 * @return
+	 */
+	public Integer deleteLogic(Integer terminalUserId);
+	/**
+	 * 解冻
+	 * @param reason
+	 * @param terminalUserId
+	 * @return
+	 */
+	public Integer thaw(String reason,Integer terminalUserId);
+	/**
+	 * 冻结
+	 * @param reason
+	 * @param terminalUserId
+	 * @return
+	 */
+	public Integer freeze(String reason,Integer terminalUserId);
+	/**
+	 * 公司名唯一性验证
+	 * @param companyName
+	 * @return
+	 */
+	public Integer validateCompanyName(String companyName);
+	/**
+	 * 登录名唯一性验证
+	 * @param loginName
+	 * @return
+	 */
+	public Integer validateLoginName(String loginName);
+	/**
+	 * 只插入更新时间与更新者
+	 * @param updateName
+	 * @param updateDate
+	 * @param terminalUserId
+	 * @return
+	 */
+	public Integer insertUpdateInfo(String updateName,Date updateDate,Integer terminalUserId);
+	
+	/**
+	 *  查询终端的产品详细信息
+	 * @param wasTerminalUser
+	 * @return
+	 */
+	public WasTerminalUser getTerminalInfo(WasTerminalUser wasTerminalUser);
+	/**
+	 * 根据公司名查找个数
+	 * @param companyName
+	 * @return
+	 */
+	public Integer findIdBycompanyName(String companyName);
+	/**
+	 * 查找其能看到的下级所有用户
+	 * @param id
+	 * @return
+	 */
+	public List<String> findSubUsers(String id);
+}

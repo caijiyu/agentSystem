@@ -1,0 +1,12 @@
+package com.jeeplus.modules.agentSystem.sysdata.dao;
+
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentSystem.sysdata.entity.WasSoftware;
+@MyBatisDao
+public interface WasSoftwareDao extends CrudDao<WasSoftware>{
+	public WasSoftware findById(Integer softwareId);
+	public List<WasSoftware> findAllSofts( );
+}

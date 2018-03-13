@@ -1,0 +1,119 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+</head>
+<body>
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">
+					<div class="row button-group col-3" style="float: left;">						
+					</div>
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentSystem/wasInvoiceApplyForIn/listFinish" method="post" style="width: 100%" id="searchForm">
+							<button type="button" class="btn waves-effect waves-light btn-info" onclick="search()" style="float: right; margin-left: 15px">搜索</button>
+
+							<input autocomplete="off" type="text" class="form-control height-control col-3" id="keywordOne" placeholder="请输入发票内容"  value="${fn:escapeXml(body)}" style="float: right;"/> 
+								<input type="hidden" id="keyword" value="${fn:escapeXml(body)}"  name="body" />
+								<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}" /> 
+								<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}" />
+							<div class="form-group col-6" style="margin-bottom: 0px; float: right;">
+								<div class=" input-group input-daterange" id="date-range">
+									<div style="display:inline-block;padding-top: 8px;">申请时间范围:&nbsp;&nbsp;</div>
+									<input value="<fmt:formatDate value="${wasInvoiceApplication.beginDate}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control rightAngle" placeholder="选择申请开始时间" name="beginDate" style="text-align: left;" />
+									<span class="input-group-addon bg-info b-0 text-white height-control addCentreControl">至</span>
+									<input value="<fmt:formatDate value="${wasInvoiceApplication.endDate}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control leftAngle" placeholder="选择申请结束时间" name="endDate" style="text-align: left;" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<table id="contentTable"
+						class="display nowrap table table-hover table-striped table-bordered">
+						<thead>
+							<tr>
+
+								<th class="tableControl">发票申请号</th>
+								<th class="tableControl">发票内容</th>
+								<th class="tableControl">开票金额</th>
+								<th class="tableControl">申请时间</th>								
+								<th class="tableControl">操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach items="${page.list}" var="log">
+								<tr>
+									
+										<td class="tableControl">${log.invoiceNo}</td>
+										<td class="tableControl">${fn:escapeXml(log.body)}</td>
+										<td class="tableControl">${log.money}</td>
+										<td class="tableControl"><fmt:formatDate
+												value="${log.applyDate}" type="both" /></td>																				
+										<td class="tableControl">
+										<shiro:hasPermission name="agentsystem:wasInvoiceApplication:lookInform">
+											<button type="button" data-toggle="tooltip"
+												data-original-title="查看"
+												class="btn btn-info btn-circle btn-xs"
+												onclick="lookInform('${log.invoiceNo}');">
+												<i class="fa fa-search-plus"></i>
+											</button>
+										</shiro:hasPermission>																																				
+										</td>
+										
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${page.count gt 10}">
+						<table:page page="${page}"></table:page>
+					</c:if>
+				</div>
+			</div>
+		</div>
+	</div>
+	<form  id="lookJump" hidden="hidden" action="${ctx}/agentSystem/wasInvoiceApplication/lookInform" method="post">
+		<input name="sendFlag" value="4" />
+		<input id="invoiceNoL" name="invoiceNo" value="" />
+	</form>
+	<script type="text/javascript">	
+     //查看的页面跳转	
+		function lookInform(invoiceNo){		
+			$("#invoiceNoL").val(invoiceNo)
+			$("#lookJump").submit();
+		}		
+		
+		
+		//日期范围选择
+		jQuery('#date-range').datepicker({
+			toggleActive : true,
+			autoclose: true,
+			format : "yyyy-mm-dd"
+		});
+		//分页方法
+		function page(n,s) {
+			$("#pageNo").val(n);
+			$("#pageSize").val(s);
+			$("#searchForm").submit();
+			$("span.page-size").text(s);
+		}
+		//查询方法
+		function search(){//查询，页码清零
+			$("#keyword").val($("#keywordOne").val());
+			$("#pageNo").val(0);
+			$("#searchForm").submit();
+		}
+		//checkbox监听
+		$('#ischange').on('ifChecked', function(event){ //ifCreated 事件应该在插件初始化之前绑定 
+			$('.check').iCheck('check');
+		});
+		$('#ischange').on('ifUnchecked', function(event){ //ifUnchecked 事件应该在插件初始化之前绑定 
+			$('.check').iCheck('uncheck');
+		});		
+	</script>
+
+</body>
+</html>

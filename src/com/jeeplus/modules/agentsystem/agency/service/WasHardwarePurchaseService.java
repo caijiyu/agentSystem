@@ -1,0 +1,67 @@
+package com.jeeplus.modules.agentsystem.agency.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentsystem.agency.dao.WasHardwarePurchaseDao;
+import com.jeeplus.modules.agentsystem.agency.entity.WasHardwarePurchase;
+
+/**
+ * 硬件购买记录Service
+ * @author: YeJR
+ * @date: 2017年9月28日 下午2:51:05
+ * @version 1.0
+ */
+@Service
+@Transactional(readOnly = true,rollbackFor=Exception.class)
+public class WasHardwarePurchaseService extends CrudService<WasHardwarePurchaseDao, WasHardwarePurchase> {
+	@Autowired
+	WasHardwarePurchaseDao wasHardwarePurchaseDao;
+
+	
+	
+	@Override
+	public WasHardwarePurchase get(WasHardwarePurchase entity) {
+		// TODO Auto-generated method stub
+		return super.get(entity);
+	}
+	
+	@Override
+	public Page<WasHardwarePurchase> findPage(Page<WasHardwarePurchase> page, WasHardwarePurchase entity) {
+		// TODO Auto-generated method stub
+		return super.findPage(page, entity);
+	}
+	
+	/**
+	 * 插入或者更新方法
+	 * @param wasHardwarePurchase
+	 * @return
+	 */
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	public int saveData(WasHardwarePurchase wasHardwarePurchase) {
+		if(wasHardwarePurchase.getHardwarePurchaseId() == null){
+			super.save(wasHardwarePurchase);
+			return wasHardwarePurchase.getHardwarePurchaseId();
+		} else {
+			int result = super.update(wasHardwarePurchase);
+			if(result > 0){
+				return wasHardwarePurchase.getHardwarePurchaseId();
+			}
+			return -1;
+		}
+	}
+
+	/**
+	 * 删除硬件购买记录
+	 * @param hardwarePurchase
+	 * @return
+	 */
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	public Integer deleteByLogic(WasHardwarePurchase hardwarePurchase) {
+		return wasHardwarePurchaseDao.deleteByLogic(hardwarePurchase);
+	}
+
+}

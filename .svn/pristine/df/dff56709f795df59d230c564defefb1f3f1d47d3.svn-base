@@ -1,0 +1,404 @@
+ 
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<!DOCTYPE html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+</head>
+<body>
+	<div class="divControl" >
+        <div class="container-fluid">
+            <div class="row" >
+                <!-- 列表区 -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div id="baseInfo" class="col-6">
+                                        <h4 class="card-title" style="font-size:14px">基本信息</h4>
+                                        <div class="table-responsive">
+                                            <table class="table noneBorder" style="font-size:13px">
+                                                <tr>
+                                                    <td>企业名称</td>
+                                                    <td>${wasTerminalUser.companyName}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td >所属代理商</td>
+                                                    <td>${wasSysUser.companyName}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>公众号余额</td>
+                                                    <td><span>${wasSysUser.publicAccount}</span>元</td>
+                                                </tr>
+                                                <tr>
+                                                    <td >vip余额</td>
+                                                    <td><span>${wasSysUser.vipAccount}</span>元</td>
+                                                </tr>
+                                                <tr>
+                                                    <td >小程序</td>
+                                                    <td><span>${wasSysUser.minaAccount}</span>元</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h4 class="card-title" style="font-size:14px">已有版本</h4>
+                                        <div class="table-responsive" >
+                                            <table class="table" style="font-size:13px">
+		                                            <thead>
+			                                                <tr>
+			                                                    <th>版本名称</th>
+			                                                    <th>到期时间</th>
+			                                                </tr>
+		                                            </thead>
+		                                            <tbody>	
+				                                            <c:forEach items="${productList}" var="product">
+																<tr>
+																	<td class="tableControl">${product.id}</td>
+																	<td class="tableControl"><fmt:formatDate value="${product.endDate}" pattern="yyyy-MM-dd"/></td>
+																</tr>
+															</c:forEach>
+		                                            </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h4 class="card-title" style="font-size:14px">添加产品</h4>
+                                        <div class="table-responsive">
+                                            <table id="addProduct" class="display nowrap table table-hover table-striped table-bordered"  style="font-size:13px">
+                                                <thead>
+                                                    <tr>
+														<th class="tableControl"><input type="checkbox" class="check" id="ischange" data-checkbox="icheckbox_square-blue"></th>
+                                                        <th>方针名</th>
+                                                        <th>价格</th>
+                                                        <th>折扣价格</th>
+                                                        <th>详情</th>
+                                                        <th>数量</th>
+                                                        <th>总价</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                <c:forEach items="${policies}" var="policy">
+	                                                <c:choose>
+														    <c:when test="${policy.id <=0}"><!-- 失效方针 -->
+																<tr class="outTime" style="background-color:silver">
+																	<td class="tableControl"><input type="checkbox" class="check" id="${policy.salesPolicyId }" data-checkbox="icheckbox_square-blue"></td>
+																	<td class="tableControl">${policy.title}</td>
+																	<td class="tableControl">${policy.price}</td>
+																	<td class="tableControl">${policy.renewDiscount}</td>
+																	<td class="tableControl" style="max-width:200px;white-space: pre-wrap;word-wrap: break-word;">${policy.remarks}</td>
+																	<td class="tableControl">
+																			<select name="rechargeNum" style="width:70px" disabled>
+																			</select>
+																	</td>
+																	<td class="tableControl">0.00</td>
+																	<td  style="display: none">${policy.salesPolicyId}</td>
+																	<td  style="display: none">${policy.classify}</td>
+																</tr>
+														    </c:when>
+														    <c:otherwise>                               
+															<tr>
+																<td class="tableControl"><input type="checkbox" class="check" id="${policy.salesPolicyId }" data-checkbox="icheckbox_square-blue"></td>
+																<td class="tableControl" style="max-width:200px;white-space: pre-wrap;word-wrap: break-word;">${policy.title}</td>
+																<td class="tableControl">${policy.price}</td>
+																<td class="tableControl">${policy.renewDiscount}</td>
+																<td class="tableControl" style="max-width:200px;white-space: pre-wrap;word-wrap: break-word;">${policy.remarks}</td>
+																<td class="tableControl">
+																		<select name="rechargeNum" style="width:70px" disabled>
+																			<!-- 如果方针失效，另做处理 -->
+																			<c:forEach var="s"  begin="0" end="${policy.id}">
+																					<option value="${s}" >${s }</option>
+																			</c:forEach>
+																		</select>
+																</td>
+																<td class="tableControl">0.00</td>
+																<td  style="display: none">${policy.salesPolicyId}</td>
+																<td  style="display: none">${policy.classify}</td>
+															</tr>
+														    </c:otherwise>
+													</c:choose>                 
+												</c:forEach>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-9"></div>
+                                            <div class="col-3" id="totalMoney">总价格：<span>0.00</span>元</div>
+                                            <div class="col-9"></div>
+                                            <div class="col-3">
+                                                <button type="button" class="btn btn-default" onclick="back()">返回</button>
+                                                <button type="button" class="btn btn-info" onclick="show()">购买</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content">
+				<!--对话框头-->
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<table class="table noboder" style="font-size: 13px;">
+	                	<thead>
+			                    <tr>
+			                        <td>商品名称</td>
+			                        <td>商品单价</td>
+			                        <td>折扣单价</td>
+			                        <td>商品数量</td>
+			                        <td>商品总价</td>
+			                    </tr>
+	                	</thead>
+	                    <tbody>
+			                    <tr>
+			                        <td>微爱</td>
+			                        <td>1000</td>
+			                        <td>800</td>
+			                        <td>1</td>
+			                        <td>10000.00元</td>
+			                    </tr>
+	                    </tbody>
+                    </table>
+			                        <p >总价：<span>9000.00</span>元</p>
+			                        <div id="infoBox">
+				                        <p >公众号余额扣款：<span>9000.00</span>元</p>
+				                        <p >VIP余额扣款：<span>1000.00</span>元</p>
+			                        </div>
+				</div>
+				<!--对话框尾-->
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+	                <button type="button" class="btn btn-primary save">保存</button>
+	            </div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		//checkbox监听
+		$('#ischange').on('ifChecked', function(event){ 
+			$('.check').iCheck('check');
+		});
+		$('#ischange').on('ifUnchecked', function(event){
+			$('.check').iCheck('uncheck');
+		});
+		//选中checkbox
+		$("#addProduct>tbody .check").on('ifChecked', function(event){
+			$(this).parent().parent().parent().find("select").removeAttr("disabled")
+		});
+		$('#addProduct>tbody .check').on('ifUnchecked', function(event){
+			$(this).parent().parent().parent().removeClass("checked").find("select").attr("disabled",true);
+ 			var op = $(this).parent().parent().parent().find("option")
+			$(op).each(function(index,element){
+				$(element).attr("selected",false);
+			})
+			$(op[0]).attr("selected",true) 
+			$(this).parent().parent().parent().children(":eq(6)").text('0.00')
+	         totalMoney();
+		});
+	    $("select").change(function () {
+	        var num = $(this).find("option:selected").text();
+	        if(parseInt(num)==0){
+	        	$(this).parent().parent().removeClass("checked")
+	        }else{
+	        	$(this).parent().parent().addClass("checked")
+	        }
+	        var price = parseFloat($(this).parent().parent().children(":eq(3)").text())
+	        var singleProductTotalMoney = parseFloat(price * num).toFixed(2);
+	        $(this).parent().parent().children(":eq(6)").text(singleProductTotalMoney);
+	         totalMoney();
+	    })
+	    //计算所有产品总价
+	    function totalMoney(){
+	         var allProductsTotalMoney = 0.00;
+	         var elements = $("#addProduct>tbody>tr.checked  :nth-child(7)");	  
+	         $(elements).each(function(index,element){
+			        	 allProductsTotalMoney += parseFloat($(element).text())
+	         })  
+	         $("#totalMoney span").text(allProductsTotalMoney); 
+	    }
+        var classilies;
+		function show() {
+	    	classilies="";
+	         var selectedOptions = $("#addProduct>tbody>tr.checked option:selected");
+			if(selectedOptions.length==0){
+				layer.alert('请选择购买方针', {skin: 'layui-layer-molv',closeBtn: 0,anim: 4});
+				return;
+			}		
+	         var elements = $("#addProduct>tbody>tr.checked  :nth-child(9)");	   
+	         $(elements).each(function(index,element){
+					classilies += $(element).text();
+	         })  
+	        var pubA = parseFloat($("#baseInfo td:eq(5) span").text());
+	        var vipA = parseFloat($("#baseInfo td:eq(7) span").text());
+	        var minaA = parseFloat($("#baseInfo td:eq(9) span").text());
+			var totalMoney = parseFloat($("#totalMoney span").text());
+			$("#infoBox").empty();
+			//算账结果信息
+			var resultInfo = accountMoney(totalMoney,pubA,minaA,vipA,classilies);
+			if(resultInfo==""){
+				  layer.alert('余额不足，请重新选择', {skin: 'layui-layer-molv',closeBtn: 0,anim: 4});
+				return;
+				}
+			$("#infoBox").append(resultInfo);
+			var elements = $("#addProduct>tbody>tr.checked:not(.outTime)");
+			var str1 = null;
+			$(elements).each(function(index,element){
+				var name = $(element).children(":eq(1)").text()
+				var price = $(element).children(":eq(2)").text()
+				var renewMoney = $(element).children(":eq(3)").text()
+				var num = $(element).find("option:selected").text()
+				var totalMoney = $(element).children(":eq(6)").text()	
+				str1 += "<tr><td>"+ name +"</td><td>"+ price +"</td><td>"+ renewMoney +"</td><td>"+ num +"</td><td>"+ totalMoney +"元</td></tr>"
+			})
+			$("#modal .modal-body  span:eq(0)").text($("#totalMoney span").text())
+			$("#modal tbody").empty().append(str1);
+			$("#modal").modal("show");
+		}
+		//失效方针
+	    $(document).ready(function(){
+	    	$(".outTime .check").attr("disabled",true);
+	    })
+	    //生成购买价格信息
+	    function accountMoney(totalMoney,pubA,minaA,vipA,classilies){ 	
+				var str = "";
+		    	if(classilies.indexOf("0")!=-1 && classilies.indexOf("1")==-1){
+					if(totalMoney<=pubA){
+				        str = "<p>公众号扣款：<span>" + totalMoney + "</span>元</p>";
+					}else if(totalMoney<=pubA+vipA){
+				        str =  "<p>公众号扣款：<span>" + pubA + "</span>元</p>"+"<p>VIP扣款：<span>" + (totalMoney-pubA) + "</span>元</p>";
+					}else{
+						return str;
+					}
+			}else if(classilies.indexOf("1")!=-1 && classilies.indexOf("0")==-1){
+					if(totalMoney<=minaA){
+				        str = "<p>小程序扣款：<span>" + totalMoney + "</span>元</p>";
+					}else if(totalMoney<=minaA+vipA){
+				        str =  "<p>小程序扣款：<span>" + minaA + "</span>元</p>"+"<p>VIP扣款：<span>" + (totalMoney-minaA) + "</span>元</p>";
+					}else{
+						return str;
+					}
+			}else{
+					if(totalMoney<=pubA){
+				        str = "<p>公众号扣款：<span>" + totalMoney + "</span>元</p>";
+					}else if(totalMoney<=pubA+minaA){
+				        str =  "<p>公众号扣款：<span>" + pubA + "</span>元</p>"+"<p>小程序扣款：<span>" + (totalMoney - pubA) + "</span>元</p>";
+					}else if(totalMoney<=pubA+minaA+vipA){
+				        str =  "<p>公众号扣款：<span>" + pubA + "</span>元</p>"+"<p>小程序扣款：<span>" + minaA + "</span>元</p>"+"<p>VIP扣款：<span>" + (totalMoney -pubA-minaA) + "</span>元</p>"
+					}else{
+						return str;
+					}
+			} 
+			return str;
+	    }
+		 //支付
+		var locked = false;
+	    $("#modal .save").click(function(){
+	    	if(!locked){
+				locked = true;
+				var elements = $("#addProduct>tbody>tr.checked:not(.outTime)");
+				var length = elements.length;
+					$(elements).each(function(index,element){
+							var num = $(element).find("option:selected").text()
+							var policyId = $(element).children(":eq(7)").text()
+						    if(classilies.indexOf("0")!=-1 && classilies.indexOf("1")==-1){
+										 payAllPublic(policyId,num,"addProduct",length,index+1)
+							}else if(classilies.indexOf("1")!=-1 && classilies.indexOf("0")==-1){	
+										payAllMina(policyId,num,"addProduct")
+							}else{	
+										payPublicAndMina(policyId,num,"addProduct")
+							} 
+				}) 
+	    	}
+		    
+	    })
+ 	    //公众号
+	    function payAllPublic(salesPolicyId,policyNumber,addProduct,length,time){
+	    			var index = layer.load(1, {shade: [0.1,'#fff']});
+ 					$.ajax({
+						url : "${ctx}/agentSystem/terminal/wasRecharge/payAllPublic",type : "post",dataType : "text",async:false,
+						data : {"salesPolicyId":salesPolicyId,"policyNumber":policyNumber,"terminalUserId":'${wasTerminalUser.terminalUserId}',"behavior":addProduct},
+						success : function(result) {
+								if("success"==result){
+									layer.close(index);
+									locked=true;
+									if(length==time){
+										$("#modal").modal("hide");
+										layer.msg("购买成功", {icon : 1,time : 1000});
+										window.location.href="${ctx}/agentSystem/terminal/wasRecharge/toAddProductList?terminalUserId=${wasTerminalUser.terminalUserId}";
+									}
+								}
+							}
+						}); 
+	    }
+	    //小程序
+	    function payAllMina(salesPolicyId,policyNumber,addProduct,length,time){
+					var index = layer.load(1, {shade: [0.1,'#fff']});
+ 					$.ajax({
+						url : "${ctx}/agentSystem/terminal/wasRecharge/payAllMina",type : "post",dataType : "text",async:false,
+						data : {"salesPolicyId":salesPolicyId,"policyNumber":policyNumber,"terminalUserId":'${wasTerminalUser.terminalUserId}',"behavior":addProduct},
+						success : function(result) {
+								if("success"==result){
+									layer.close(index);
+									locked=true;
+									if(length==time){
+										$("#modal").modal("hide");
+										layer.msg("购买成功", {icon : 1,time : 1000});
+										window.location.href="${ctx}/agentSystem/terminal/wasRecharge/toAddProductList?terminalUserId=${wasTerminalUser.terminalUserId}";
+									}
+								}
+							}
+						}); 
+	    }
+	    //混合
+	    function payPublicAndMina(salesPolicyId,policyNumber,addProduct,length,time){
+					var index = layer.load(1, {shade: [0.1,'#fff']});
+ 					$.ajax({
+						url : "${ctx}/agentSystem/terminal/wasRecharge/payPublicAndMina",type : "post",dataType : "text",async:false,
+						data : {"salesPolicyId":salesPolicyId,"policyNumber":policyNumber,"terminalUserId":'${wasTerminalUser.terminalUserId}',"behavior":addProduct},
+						success : function(result) {
+								if("success"==result){
+									layer.close(index);
+									locked=true;
+									if(length==time){
+										$("#modal").modal("hide");
+										layer.msg("购买成功", {icon : 1,time : 1000});
+										window.location.href="${ctx}/agentSystem/terminal/wasRecharge/toAddProductList?terminalUserId=${wasTerminalUser.terminalUserId}";
+									}
+								}
+							}
+						}); 
+	    } 
+	    function back(){
+			window.location.href="${ctx}/agentSystem/terminal/wasTerminalProduct/productList"
+	    }
+	</script>
+</body>
+</html>

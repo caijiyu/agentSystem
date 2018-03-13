@@ -1,0 +1,27 @@
+package com.jeeplus.modules.agentsystem.sysdata.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentsystem.sysdata.dao.WasMenuDao;
+import com.jeeplus.modules.sys.entity.Menu;
+
+@Service
+@Transactional(readOnly = true)
+public class WasMenuService extends CrudService<WasMenuDao, Menu>{
+
+	@Autowired
+	private WasMenuDao wasMenuDao;
+	
+	@Transactional(readOnly = false)
+	public void deleteMenu(Menu menu) {
+		wasMenuDao.deleteMenu(menu);
+	}
+	public List<Menu> selectChild(String id) {
+		return wasMenuDao.selectChild(id);
+	}
+}

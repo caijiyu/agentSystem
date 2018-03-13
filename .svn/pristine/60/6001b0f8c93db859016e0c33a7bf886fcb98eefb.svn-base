@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.agency.dao.WasHardwarePurchaseDao">
+    
+    
+    <sql id="wasHardwarePurchaseColumns">
+		a.hardwarePurchaseId AS "hardwarePurchaseId",
+		a.orderNo AS "orderNo",
+		a.userId AS "userId",
+		u.companyName AS "purchasedCompanyName",
+		a.deliveryMethod AS "deliveryMethod",
+		a.name AS "name",
+		a.phone AS "phone",
+		a.address AS "address",
+		a.hardwareId AS "hardwareId",
+		h.name AS "hardwareName",
+		a.number AS "number",
+		a.payMoney AS "payMoney",
+		a.expressCompany AS "expressCompany",
+		a.expressCoding AS "expressCoding",
+		a.expressNumber AS "expressNumber",
+		a.createDate AS "createDate",
+		a.deliverDate AS "deliverDate",
+		a.receiveDate AS "receiveDate",
+		a.createBy AS "createId",
+		us.login_name AS "createLoginName",
+		a.behavior AS "behavior",
+		a.publicExpend AS "publicExpend",
+		a.minaExpend AS "minaExpend",
+		a.hardwareExpend AS "hardwareExpend",
+		a.vipExpend AS "vipExpend",
+		a.type AS "type",
+		a.remarks AS "remarks",
+		a.invoiceNo AS "invoiceNo",
+		a.invoice AS "invoice",
+		a.sendState AS "sendState",
+		a.state AS "state"
+	</sql>
+	
+    <sql id="wasHardwarePurchaseJoins">
+		LEFT JOIN sys_user u ON u.id = a.userId
+		LEFT JOIN was_hardware h ON h.hardwareId = a.hardwareId
+		LEFT JOIN sys_user us ON us.id = a.createBy
+    </sql>
+    
+    <sql id="HardwarePurchaseColumns">
+		a.hardwarePurchaseId AS "hardwarePurchaseId",                
+		a.orderNo AS "orderNo",                
+		a.userId AS "userId",        
+		u.companyName AS "companyName",        
+		a.deliveryMethod AS "deliveryMethod",            
+		a.name AS "name",   
+		a.phone AS "phone", 
+		a.address AS "address",                
+		a.hardwareId AS "hardwareId",                
+		h.name AS "hardwareName",        
+		a.number AS "number",        
+		a.payMoney AS "payMoney",            
+		a.expressCompany AS "expressCompany",   
+		a.expressCoding AS "expressCoding",  
+		a.expressNumber AS "expressNumber",                
+		a.createDate AS "createDate",                
+		a.deliverDate AS "deliverDate",        
+		a.receiveDate AS "receiveDate",        
+		a.createBy AS "createBy",            
+		a.behavior AS "behavior",   
+		a.publicExpend AS "publicExpend",  
+		a.minaExpend AS "minaExpend",                
+		a.hardwareExpend AS "hardwareExpend",                
+		a.vipExpend AS "vipExpend",        
+		a.type AS "type",        
+		a.remarks AS "remarks",            
+		a.invoiceNo AS "invoiceNo",   
+		a.invoice AS "invoice", 
+		a.sendState AS "sendState", 
+		a.state AS "state"                
+							 
+	</sql>
+    <sql id="HardwarePurchaseJoins">
+    	LEFT JOIN sys_user u ON u.id = a.userId
+    	LEFT JOIN was_hardware h ON h.hardwareId = a.hardwareId
+    </sql>
+    		
+	<!-- <select id="get" resultType="WasHardwarePurchase">
+		SELECT 
+			<include refid="HardwarePurchaseColumns"/>
+		FROM was_hardware_purchase a
+			<include refid="HardwarePurchaseJoins"/>
+		<where>
+			<if test="orderNo != null and orderNo != ''">
+				AND a.orderNo = #{orderNo} 
+			</if>
+		</where>
+		
+	</select> -->
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_hardware_purchase SET 
+			state = 0
+		WHERE orderNo = #{orderNo}
+	</update>
+	
+	<!-- 根据主键ID或者硬件购买单号获取数据信息 -->
+	<select id="get" resultType="WasHardwarePurchase">
+		SELECT
+			<include refid="wasHardwarePurchaseColumns"/>
+		FROM was_hardware_purchase a
+			<include refid="wasHardwarePurchaseJoins"/>
+			<where>
+				<if test="hardwarePurchaseId != null">
+					AND a.hardwarePurchaseId = #{hardwarePurchaseId}
+				</if>
+				<if test="orderNo != null">
+					AND a.orderNo = #{orderNo}
+				</if>
+			</where>
+	</select>
+	
+	<!-- 分页查询硬件购买信息 -->
+	<select id="findList" resultType="WasHardwarePurchase">
+		SELECT
+			<include refid="wasHardwarePurchaseColumns"/>
+		FROM was_hardware_purchase a
+			<include refid="wasHardwarePurchaseJoins"/>
+			<where>
+				<if test="userId != null">
+					AND a.userId = #{userId}
+				</if>
+				<if test="deliveryMethod != null">
+					AND a.deliveryMethod = #{deliveryMethod}
+				</if>
+				<if test="purchasedCompanyName != null">
+					AND u.companyName LIKE 
+						<if test="dbName == 'oracle'">'%'||#{purchasedCompanyName}||'%'</if>
+						<if test="dbName == 'mssql'">'%'+#{purchasedCompanyName}+'%'</if>
+						<if test="dbName == 'mysql'">concat('%',#{purchasedCompanyName},'%')</if>
+				</if>
+				<!-- <if test="beginDate != null">
+					AND <![CDATA[ a.createDate >= #{beginDate} ]]>
+				</if>
+				<if test="endDate != null">
+					AND <![CDATA[ a.createDate <= #{endDate} ]]>
+				</if> -->
+				<!-- 时间范围搜索 -->
+				<if test="beginDate != null and beginDate != ''">
+					<![CDATA[   AND DATE_FORMAT(a.createDate, '%Y-%m-%d')>=  DATE_FORMAT(#{beginDate}, '%Y-%m-%d')   ]]>
+				</if>
+				<if test="endDate != null and endDate != ''">
+					<![CDATA[  AND DATE_FORMAT(a.createDate, '%Y-%m-%d') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d')    ]]>
+				</if>
+			
+				<if test="invoice != null">
+					AND a.invoice = #{invoice}
+				</if>
+				<if test="sendState != null">
+					AND a.sendState = #{sendState}
+				</if>
+				<if test="state != null">
+					AND a.state = #{state}
+				</if>
+				<if test="createDate != null and createDate != ''">
+					AND <![CDATA[ a.createDate >= #{createDate} ]]>
+				</if>
+			</where>
+			<choose>
+				<when test="orderingRule !=null">
+					ORDER BY 
+						<if test="orderingRule == 0"> createDate asc </if>
+				    	<if test="orderingRule == 1"> deliverDate asc </if>
+						<if test="orderingRule == 2"> receiveDate desc </if>
+				</when>
+				<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+					ORDER BY ${page.orderBy}
+				</when>
+				<otherwise>  
+            	</otherwise>  
+			</choose>
+	</select>
+	
+	<update id="update" parameterType="WasHardwarePurchase">
+		UPDATE was_hardware_purchase
+		<trim prefix="set" suffixOverrides=",">
+			<if test="deliverDate != null ">deliverDate =#{deliverDate},</if>
+			<if test="receiveDate != null ">receiveDate =#{receiveDate},</if>
+			<if test="expressCompany != null ">expressCompany =#{expressCompany},</if>
+			<if test="expressCoding != null ">expressCoding =#{expressCoding},</if>
+			<if test="expressNumber != null ">expressNumber =#{expressNumber},</if>
+			<if test="invoiceNo != null ">invoiceNo =#{invoiceNo},</if>
+			<if test="invoice != null ">invoice =#{invoice},</if>
+			<if test="sendState != null ">sendState =#{sendState},</if>
+			<if test="state != null ">state =#{state}</if>
+		 </trim>
+		WHERE hardwarePurchaseId = #{hardwarePurchaseId}
+	</update>
+	
+	<update id="updateUser">
+		UPDATE sys_user SET
+			hardwareAccount = #{hardwareAccount},
+			vipAccount = #{vipAccount},
+			hardwareExpend = #{userHardwareExpend},
+			vipExpend = #{userVipExpend}
+		WHERE id = #{createId}
+	</update>
+	
+	<insert id="insert">
+		INSERT INTO was_hardware_purchase(
+			hardwarePurchaseId,
+			orderNo,
+			userId,
+			deliveryMethod,
+			name,
+			phone,
+			address,
+			hardwareId,
+			number,
+			payMoney,
+			createDate,
+			createBy,
+			behavior,
+			publicExpend,
+			minaExpend,
+			hardwareExpend,
+			vipExpend,
+			remarks
+		) VALUES (
+			#{hardwarePurchaseId},
+			#{orderNo},
+			#{userId},
+			#{deliveryMethod},
+			#{name},
+			#{phone},
+			#{address},
+			#{hardwareId},
+			#{number},
+			#{payMoney},
+			#{createDate},
+			#{createId},
+			#{behavior},
+			#{publicExpend},
+			#{minaExpend},
+			#{hardwareExpend},
+			#{vipExpend},
+			#{remarks}
+		)
+	</insert>
+	
+</mapper>

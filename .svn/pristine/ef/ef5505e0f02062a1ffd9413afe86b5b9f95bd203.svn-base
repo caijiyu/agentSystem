@@ -1,0 +1,31 @@
+package com.jeeplus.modules.agentsystem.sysdata.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.service.CrudService;
+import com.jeeplus.modules.agentsystem.sysdata.dao.WasRoleDao;
+import com.jeeplus.modules.sys.entity.Role;
+
+@Service
+@Transactional(readOnly = true)
+public class WasRoleService extends CrudService<WasRoleDao, Role>{
+	@Autowired
+	private WasRoleDao wasRoleDao;
+	
+	@Override
+	public Page<Role> findPage(Page<Role> page, Role role) {
+		return super.findPage(page, role);
+	}
+	
+	public Integer	getUserIdByRoleId(Role role){
+		return wasRoleDao.getUserIdByRoleId(role);
+	}
+	
+	@Transactional(readOnly = false)
+	public int	deleteByLogic(Role role){
+		return wasRoleDao.deleteByLogic(role);
+	}
+}

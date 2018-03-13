@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.sysdata.dao.WasRoleDao">
+
+	<sql id="roleColumns">
+    	a.id,
+    	a.name,
+    	a.enname,
+    	a.role_type,
+		a.remarks
+    </sql>
+    
+     <!--根据id获取角色 -->
+    <select id="get" resultType="Role">
+		SELECT 
+			<include refid="roleColumns"/>
+		FROM sys_role a
+		WHERE a.id = #{id}
+	</select>
+	
+     <!--获取所有未删除的角色 -->
+    <select id="findAllList" resultType="Role">
+		SELECT
+			<include refid="roleColumns"/>
+		FROM sys_role a
+		WHERE a.del_flag ='0'
+		ORDER BY a.create_date DESC
+	</select>
+    
+     <!--角色列表-->
+    <select id="findList" resultType="Role">
+		SELECT 
+			<include refid="roleColumns"/>
+		FROM sys_role a
+		<where>
+				AND a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="!currentUser.admin">
+				AND a.id != '1'
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		ORDER BY a.create_date DESC
+	</select>
+	
+	 <!--根据角色获取拥有该角色的用户数量-->
+	<select id="getUserIdByRoleId" resultType="java.lang.Integer">
+		SELECT 
+			count(1)
+		FROM sys_user_role a
+		WHERE a.role_id = #{id}
+	</select>
+	
+	 <!--根据角色获取拥有代理商等级数量-->
+	<select id="getWasAgentLevelByRoleId" resultType="java.lang.Integer">
+		SELECT 
+			count(1)
+		FROM was_agent_level a
+		WHERE a.roleId = #{id} and a.state=1
+	</select>
+	
+	<!--逻辑删除角色-->
+	<update id="deleteByLogic">
+		UPDATE sys_role SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!--验证名字重复-->
+	<select id="getByName" resultType="Role">
+		SELECT
+			<include refid="roleColumns"/>
+		FROM sys_role a
+		WHERE a.name = #{0} AND a.del_flag ='0'
+	</select>
+</mapper>

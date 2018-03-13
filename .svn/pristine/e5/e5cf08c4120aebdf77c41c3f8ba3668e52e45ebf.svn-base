@@ -1,0 +1,35 @@
+package com.jeeplus.modules.agentsystem.utils;
+
+import com.jeeplus.common.utils.SpringContextHolder;
+import com.jeeplus.modules.agentsystem.terminal.dao.WasTerminalUserDao;
+import com.jeeplus.modules.agentsystem.terminal.entity.WasTerminalUser;
+import com.jeeplus.modules.tools.utils.ConfigurationFileHelper;
+
+/** 
+ * @author YeJR
+ * @date 创建时间：2017年10月20日 下午5:24:55 
+ * @version 1.0 
+ * @parameter  
+ * @since  
+ * @return  
+ */
+public class TerminalPermissionUtils {
+	
+	private String webUrl = ConfigurationFileHelper.getWebConnector();
+	private String minaUrl = ConfigurationFileHelper.getMinaConnector();
+	private String phpUrl = ConfigurationFileHelper.getPhpConnector();
+	
+	private static WasTerminalUserDao wasTerminalUserDao = SpringContextHolder.getBean(WasTerminalUserDao.class);
+	
+	public static synchronized WasTerminalUser sendTerminalPermissions(Integer terminalUserId) {
+		//查询出该终端的详细信息
+		WasTerminalUser wasTerminalUser = new WasTerminalUser();
+		wasTerminalUser.setTerminalUserId(terminalUserId);
+		wasTerminalUser = wasTerminalUserDao.getTerminalInfo(wasTerminalUser);
+		
+		
+		return wasTerminalUser;
+	}
+	
+	
+}

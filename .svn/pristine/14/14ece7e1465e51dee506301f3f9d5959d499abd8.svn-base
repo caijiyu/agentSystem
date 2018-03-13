@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.sysdata.dao.WasUserDao">
+    <resultMap type="com.jeeplus.modules.agentsystem.agency.entity.WasSysUser" id="userResultMap">
+          <id column="userId" property="id"/>
+       	 <result column="userName" property="name" />
+          <result column="loginName" property="login_name" />
+          <result column="phone" property="phone" />
+          <result column="mobile" property="mobile" />
+           <result column="companyName" property="companyName" />
+           <result column="password" property="password" />
+           <result column="state" property="state" />
+            <result column="companyParentIds" property="companyParentIds" />
+             <result column="endDate" property="endDate" />
+               <result column="remarks" property="remarks" />
+           <collection property="roleList" javaType="com.jeeplus.modules.sys.entity.Role">
+                <id column="roleId" property="id"/>
+                <result column="roleName" property="name"/>
+           </collection>
+     </resultMap>
+   
+   	
+   	<sql id="userColumns">
+    	a.id AS userId,
+    	a.name AS userName,
+    	a.login_name AS loginName,
+    	a.phone AS phone,
+		a.mobile AS mobile,
+		a.companyName AS companyName,
+		a.password AS password,
+		a.companyParentIds As companyParentIds,
+		a.state AS state,
+		a.endDate AS endDate,
+		a.remarks AS remarks
+    </sql>
+   
+   <!-- 根据登录名查询用户 -->
+	<select id="getByLoginName" resultType="WasSysUser">
+		SELECT
+			<include refid="userColumns"/>
+		FROM sys_user a
+		WHERE binary a.login_name = #{0}
+	</select>
+   
+   <!-- 根据id获取用户以及其拥有的角色集合 -->
+    <select id="get" parameterType="string"  resultMap="userResultMap">
+    	SELECT 
+			<include refid="userColumns"/>,b.id AS roleId,b.name AS roleName
+		FROM sys_user a 
+		LEFT JOIN sys_user_role c on a.id=c.user_id
+		LEFT JOIN sys_role b on b.id=c.role_id
+		<where>
+				And a.id=#{0}  
+		</where>
+    </select>
+   
+   <!-- 用户列表-->
+    <select id="findList" resultMap="userResultMap">
+		SELECT 
+			<include refid="userColumns"/>,b.id AS roleId,b.name AS roleName
+		FROM sys_user a 
+		LEFT JOIN sys_user_role c on a.id=c.user_id
+		LEFT JOIN sys_role b on b.id=c.role_id
+		<where>
+				AND a.del_flag = #{DEL_FLAG_NORMAL}   
+				AND a.state=1
+				AND (b.role_type!='代理商'||b.role_type is null)                     
+			<if test="!currentUser.admin">
+				AND a.id != '1'
+			</if>
+			<if test="login_name != null and login_name != ''">
+				AND a.login_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{login_name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{login_name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{login_name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		ORDER BY a.create_date DESC
+	</select>
+	
+	<!-- 根据id更新用户信息 -->
+	<update id="update">
+		UPDATE sys_user SET 
+			login_name = #{login_name}, 
+			password = #{password}, 
+			name = #{name}, 
+			companyName=#{companyName},
+			email = #{email}, 
+			phone = #{phone}, 
+			mobile = #{mobile}, 
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks}
+			WHERE id = #{id}
+	</update>
+	
+	<!--添加用户信息 -->
+	<insert id="insert">
+		INSERT INTO sys_user(
+			id, 
+			login_name, 
+			password, 
+			name, 
+			email, 
+			phone, 
+			mobile, 
+			companyName,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+			remarks,
+			login_flag,
+			del_flag,
+			state,
+			companyParentId,
+			companyParentIds
+		) VALUES (
+			#{id}, 
+			#{login_name}, 
+			#{password}, 
+			#{name}, 
+			#{email}, 
+			#{phone}, 
+			#{mobile}, 
+			#{companyName},
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks},
+			#{login_flag},
+			#{DEL_FLAG_NORMAL},
+			#{state},
+			#{companyParentId},
+			#{companyParentIds}
+		)
+	</insert>
+	
+	<!-- 添加用户和角色关联数据-->
+	<insert id="insertUserRole">
+		INSERT INTO sys_user_role(user_id, role_id) VALUES(#{0}, #{1})
+	</insert>
+	
+	<!-- 删除用户和角色关联表数据 -->
+	<delete id="deleteUserRole">
+		DELETE FROM sys_user_role WHERE user_id = #{0}
+	</delete>
+	
+	<!--逻辑删除用户 -->
+	<update id="delete">
+		UPDATE sys_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+		<!-- 根据id获取账号余额和押金 -->
+		<select id="getUserAccountMoney" parameterType="string"  resultType="WasSysUser">
+	    	SELECT 
+				id,publicAccount,minaAccount,hardwareAccount,vipAccount,publicExpend,minaExpend,hardwareExpend,vipExpend,cashPledge
+			FROM sys_user 
+			<where>
+					And id=#{0}  
+			</where>
+	    </select>
+	
+		<!-- 根据id更新账号余额和押金  -->
+		<update id="updateAccountMoney">
+		UPDATE sys_user SET 
+			cashPledge=#{cashPledge},
+			publicAccount = #{publicAccount},
+			minaAccount=#{minaAccount},
+			hardwareAccount=#{hardwareAccount},
+			vipAccount=#{vipAccount},
+			publicExpend=#{publicExpend},
+			minaExpend=#{minaExpend},
+			hardwareExpend=#{hardwareExpend},
+			vipExpend=#{vipExpend}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据登录名更新头像-->
+	<update id="updateUserPhoto">
+		UPDATE sys_user SET 
+			photo = #{photo}
+		WHERE login_name = #{login_name}
+	</update>
+</mapper>

@@ -1,0 +1,186 @@
+package com.jeeplus.modules.agentsystem.agency.web;
+
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.jeeplus.common.persistence.Page;
+import com.jeeplus.common.web.BaseController;
+import com.jeeplus.modules.agentsystem.agency.entity.WasConsumeSynthesis;
+import com.jeeplus.modules.agentsystem.agency.service.WasConsumeSynthesisService;
+import com.jeeplus.modules.agentsystem.agency.entity.WasInvoiceApplication;
+import com.jeeplus.modules.agentsystem.agency.service.WasInvoiceApplicationService;
+import com.jeeplus.modules.agentsystem.agency.service.WasSysUserService;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentSystemLog;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentSystemLogService;
+import com.jeeplus.modules.agentsystem.utils.KdniaoSubscribeAPI;
+import com.jeeplus.modules.agentsystem.utils.StringChangeUtils;
+
+import net.sf.json.JSONObject;
+
+/**
+ * 
+ * @author WR
+ * @version 2017-9-29
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/agentSystem/wasInvoiceApplication")
+public class WasInvoiceApplicationController extends BaseController{
+
+	@Autowired
+	private WasInvoiceApplicationService wasInvoiceApplicationService;
+	@Autowired
+	private WasConsumeSynthesisService consumeSynthesisService;
+	@Autowired
+	private WasAgentSystemLogService agentSystemLogService;
+	@Autowired
+	private WasSysUserService sysUserService;
+	
+	/**
+	 * 增删改列表页面申请中
+	 */
+	@RequiresPermissions("agentsystem:wasInvoiceApplication:list")
+	@RequestMapping(value = {"list", ""})
+	public String list(WasInvoiceApplication wasInvoiceApplication, HttpServletRequest request, HttpServletResponse response, Model model) {					
+		//列表显示
+		wasInvoiceApplication.setSendFlag(1);
+		//查看未发货的订单
+		wasInvoiceApplication.setSendState(1);
+		//查看未被删除的订单
+		wasInvoiceApplication.setState(1);		
+		wasInvoiceApplication.setCompanyName(StringChangeUtils.specialStr(wasInvoiceApplication.getCompanyName()));
+		Page<WasInvoiceApplication> page = wasInvoiceApplicationService.findPage(new Page<WasInvoiceApplication>(request, response), wasInvoiceApplication);        
+		model.addAttribute("wasInvoiceApplication",wasInvoiceApplication);
+		model.addAttribute("page", page);        
+		return "modules/agentsystem/agency/wasInvoiceApplication";
+	}
+	/**
+	 * 增删改列表页面已发货
+	 */
+	@RequiresPermissions("agentsystem:wasInvoiceApplication:listFinish")
+	@RequestMapping(value = {"listFinish", ""})
+	public String listFinish(WasInvoiceApplication wasInvoiceApplication, HttpServletRequest request, HttpServletResponse response, Model model) {					
+		//列表显示
+		wasInvoiceApplication.setSendFlag(0);
+		//查看未发货的订单
+		wasInvoiceApplication.setSendState(1);
+		//查看未被删除的订单
+		wasInvoiceApplication.setState(1);		
+		wasInvoiceApplication.setCompanyName(StringChangeUtils.specialStr(wasInvoiceApplication.getCompanyName()));
+		Page<WasInvoiceApplication> page = wasInvoiceApplicationService.findPage(new Page<WasInvoiceApplication>(request, response), wasInvoiceApplication);        
+		model.addAttribute("wasInvoiceApplication",wasInvoiceApplication);
+		model.addAttribute("page", page);        
+		return "modules/agentsystem/agency/wasInvoiceApplicationFinish";
+	}
+	//发货按钮展示数据
+	@RequiresPermissions("agentsystem:wasInvoiceApplication:deliver")
+	@RequestMapping(value = "deliver")
+	@ResponseBody
+	public WasInvoiceApplication deliver(WasInvoiceApplication wasInvoiceApplication){
+		wasInvoiceApplication = wasInvoiceApplicationService.get(wasInvoiceApplication);
+		return wasInvoiceApplication;
+	}
+	//发货保存的按钮
+	
+	@RequestMapping(value = "deliverSave")
+	@ResponseBody
+	public int deliverSave(WasInvoiceApplication wasInvoiceApplication) {
+		wasInvoiceApplication.setSendState(1);
+		wasInvoiceApplication.setDeliverDate(new Date());
+		int result = wasInvoiceApplicationService.update(wasInvoiceApplication);
+		return result;
+	}
+	//确认收货按钮confirmState
+	@RequiresPermissions("agentsystem:wasInvoiceApplication:confirmState")
+	@RequestMapping(value = "confirmState")
+	@ResponseBody
+	public int confirmState(WasInvoiceApplication wasInvoiceApplication) {
+		wasInvoiceApplication.setSendState(2);
+		wasInvoiceApplication.setReceiveDate(new Date());		
+		int result = wasInvoiceApplicationService.update(wasInvoiceApplication);
+		return result;
+	}
+	//驳回按钮的保存
+	@RequiresPermissions("agentsystem:wasInvoiceApplication:rejectSave")
+	@RequestMapping(value = "rejectSave")
+	@ResponseBody
+	public int rejectSave(WasInvoiceApplication wasInvoiceApplication,WasConsumeSynthesis consumeSynthesis,HttpServletRequest request, HttpServletResponse response, Model model) {				
+		wasInvoiceApplication.setSendState(3);
+		consumeSynthesis.setInvoice(0);
+		consumeSynthesis.setInvoiceNo(request.getParameter("invoiceNo"));		
+		int result = wasInvoiceApplicationService.update(wasInvoiceApplication);
+		if(result > 0){
+			int resultUpdateY =  consumeSynthesisService.updateInvoiceY(consumeSynthesis); 			
+			int resultUpdateR =  consumeSynthesisService.updateInvoiceR(consumeSynthesis);			
+			int resultUpdateC =  consumeSynthesisService.updateInvoiceC(consumeSynthesis);			
+			if((resultUpdateY>=0)||(resultUpdateR>=0)||(resultUpdateC>=0)){
+				return result;
+			}
+		}		
+		return -1;
+	}
+	//删除对应的开票信息
+	@RequiresPermissions("agentSystem:wasRecordExamine:invoice:delete")
+	@RequestMapping(value = "updateState")
+	@ResponseBody
+	public int updateState(WasInvoiceApplication wasInvoiceApplication,String menuId,String userId){
+		wasInvoiceApplication.setState(0);
+		int result = wasInvoiceApplicationService.update(wasInvoiceApplication);
+		//删除成功插入日志
+		agentSystemLogService.insert(new WasAgentSystemLog(menuId, new Date(), userId, "用户"+sysUserService.get(userId).getLogin_name()+"删除了开票记录Id："+wasInvoiceApplication.getInvoiceId()));
+		return result;
+	}
+	//查看的具体信息开票申请	
+	@RequiresPermissions("agentsystem:wasInvoiceApplication:lookInform")
+	@RequestMapping(value = "lookInform")
+	public String lookInform(WasConsumeSynthesis consumeSynthesis,WasInvoiceApplication wasInvoiceApplication, HttpServletRequest request, HttpServletResponse response, Model model) {										
+		wasInvoiceApplication.setInvoiceNo(request.getParameter("invoiceNo"));		
+		Integer finish = wasInvoiceApplication.getSendFlag();		
+		model.addAttribute("finish", finish);
+		Page<WasInvoiceApplication> page = wasInvoiceApplicationService.findPage(new Page<WasInvoiceApplication>(request, response), wasInvoiceApplication); 
+		model.addAttribute("page", page);
+		//开票单号信息
+		consumeSynthesis.setInvoiceNo(request.getParameter("invoiceNo"));
+		consumeSynthesis.setInvoice(1);
+		Page<WasConsumeSynthesis> pageB = consumeSynthesisService.findPage(new Page<WasConsumeSynthesis>(request, response), consumeSynthesis);
+		model.addAttribute("pageB", pageB);		
+		return "modules/agentsystem/agency/wasInvoiceApplicationForm";
+	}
+	//物流信息查看expressInform
+	@RequiresPermissions("agentsystem:wasInvoiceApplication:expressInform")
+	@RequestMapping(value = "expressInform")
+	@ResponseBody
+	public JSONObject expressInform(String expressCoding,String expressNumber){	
+		try {
+			String requestData = "{'ShipperCode': '"+expressCoding+"'," + "'LogisticCode':'"+expressNumber+"'}";
+			String result = KdniaoSubscribeAPI.orderTracesSubByJson(requestData);
+			JSONObject paramJson = JSONObject.fromObject(result);
+			return paramJson;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}				
+	}			
+	//查看的具体信息
+	@RequiresPermissions("agentSystem:wasRecordExamine:invoice:look")
+	@RequestMapping(value = "lookInvoice")
+	public String lookInformA(WasConsumeSynthesis consumeSynthesis,WasInvoiceApplication wasInvoiceApplication, HttpServletRequest request, HttpServletResponse response, Model model) {							
+		wasInvoiceApplication.setInvoiceNo(request.getParameter("invoiceNo"));
+		Page<WasInvoiceApplication> page = wasInvoiceApplicationService.findPage(new Page<WasInvoiceApplication>(request, response), wasInvoiceApplication); 
+        model.addAttribute("page", page);     
+		//开票单号信息
+		consumeSynthesis.setInvoiceNo(request.getParameter("invoiceNo"));
+		Page<WasConsumeSynthesis> pageB = consumeSynthesisService.findPage(new Page<WasConsumeSynthesis>(request, response), consumeSynthesis);
+		model.addAttribute("pageB", pageB);
+		return "modules/agentsystem/agency/wasInvoiceExamine";
+	}
+	
+}

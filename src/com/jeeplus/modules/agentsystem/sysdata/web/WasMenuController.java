@@ -1,0 +1,104 @@
+package com.jeeplus.modules.agentsystem.sysdata.web;
+
+import java.util.Date;
+import java.util.List;
+
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.common.collect.Lists;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasAgentSystemLog;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasAgentSystemLogService;
+import com.jeeplus.modules.agentsystem.sysdata.service.WasMenuService;
+import com.jeeplus.modules.sys.entity.Menu;
+import com.jeeplus.modules.sys.security.SystemAuthorizingRealm.Principal;
+import com.jeeplus.modules.sys.service.SystemService;
+import com.jeeplus.modules.sys.utils.UserUtils;
+
+/**
+ * 菜单管理Controller
+ * @author Ricky
+ * @version 2017-09-27
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/sysdata/menu")
+public class WasMenuController {
+	@Autowired
+	private SystemService systemService;
+	@Autowired
+	private WasMenuService wasMenuService;
+	@Autowired
+	private WasAgentSystemLogService wasAgentSystemLogService;
+	
+	/**
+	 * 获取单条数据
+	 */
+	@ResponseBody
+	@RequestMapping(value = "get")
+	public Menu getMenu(Menu menu) {
+		String id = menu.getId();
+		menu = systemService.getMenu(id);
+		menu.setParentName(menu.getParent().getName());
+		return menu;
+	}
+	
+	/**
+	 * 菜单列表展示
+	 */
+	@RequiresPermissions("sysdata:menu:list")
+	@RequestMapping(value = {"list", ""})
+	public String list(Menu menu, Model model) {
+		List<Menu> list = Lists.newArrayList();
+		List<Menu> sourcelist = systemService.findAllMenu();
+		Menu.sortList(list, sourcelist, Menu.getRootId(), true);
+        model.addAttribute("list", list);
+        return "modules/agentsystem/sysdata/wasMenuList";
+	}
+	
+	/**
+	 * 菜单保存
+	 */
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	@RequiresPermissions(value={"sysdata:menu:add","sysdata:menu:edit","sysdata:menu:addNext"},logical=Logical.OR)
+	@ResponseBody
+	@RequestMapping(value = "save")
+	public int save(Menu menu ,String menuIdaaa) {
+		Principal principal = UserUtils.getPrincipal();
+		if(menu.getId() == "" || menu.getId() == null){
+			wasAgentSystemLogService.insert(new WasAgentSystemLog(menuIdaaa,new Date(),principal.getId(),"用户"+principal.getLoginName()+"添加了菜单:"+menu.getName()));
+		}else{
+			wasAgentSystemLogService.insert(new WasAgentSystemLog(menuIdaaa,new Date(),principal.getId(),"用户"+principal.getLoginName()+"编辑了菜单:"+menu.getName()));
+		}
+		int result = 0;
+		systemService.saveMenu(menu);
+		result = 1;
+		return result;
+	}
+	
+	/**
+	 * 删除菜单(物理删除)
+	 */
+	@Transactional(readOnly = false,rollbackFor=Exception.class)
+	@RequiresPermissions("sysdata:menu:del")
+	@ResponseBody
+	@RequestMapping(value = "delete")
+	public int deleteMenu(Menu menu,String menuIdaaa) {
+		int result = 0;
+		Principal principal = UserUtils.getPrincipal();
+		List<Menu> list = wasMenuService.selectChild(menu.getId());
+		for(Menu aMenu:list){
+			wasMenuService.deleteMenu(aMenu);
+		}
+		systemService.deleteMenu(menu);
+		wasAgentSystemLogService.insert(new WasAgentSystemLog(menuIdaaa,new Date(),principal.getId(),"用户"+principal.getLoginName()+"删除了菜单id:"+menu.getId()));
+		result = 1;
+		return result;
+	}
+
+}

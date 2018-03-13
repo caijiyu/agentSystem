@@ -1,0 +1,196 @@
+package com.jeeplus.modules.agentsystem.agency.entity;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import com.jeeplus.common.persistence.DataEntity;
+/**
+ * 充消
+ * @author SZP
+ * @version 2017-09-29
+ */
+public class WasExpendPay extends DataEntity<WasExpendPay> {
+	private static final long serialVersionUID = 1L;
+	private Integer expendPayId;					//主键ID
+	private String orderNo;							//充消单号
+	private String userId;							//代理商ID
+	private String loginName;		    			//登录名
+	private String behavior;						//消费行为；总代开户，总代充值，财务转移
+	private BigDecimal payMoney;					//充消价格
+	private BigDecimal publicExpend;				//公众号消费
+	private BigDecimal minaExpend;					//小程序消费
+	private BigDecimal hardwareExpend;				//硬件消费
+	private BigDecimal vipExpend;					//VIP消费
+	private Integer type;							//类型（3：冲消表）
+	private String receivedUserId;					//被充值的代理商
+	private String receivedCompanyName;		    	//被充值的代理商公司全称
+	private String remarks;							//备注
+	private Date createDate;						//消费时间
+	private String createId;						//操作账户ID
+	private String invoiceNo;						//开票单号
+	private Integer invoice;						//是否开过票（0：没有开过票， 1：已经开过票）
+	private Integer state;							//状态（0：删除，1：正常）
+	private Date beginDate;							//查询开始时间
+	private Date endDate;							//查询结束时间
+
+	public WasExpendPay() {
+		super();
+	}
+	
+	public WasExpendPay(String orderNo, String userId, String behavior,
+			BigDecimal payMoney, BigDecimal publicExpend, BigDecimal minaExpend, BigDecimal hardwareExpend,
+			BigDecimal vipExpend, Integer type, String receivedUserId, String remarks, Date createDate, String createId,
+			String invoiceNo, Integer invoice, Integer state) {
+		super();
+		this.orderNo = orderNo;
+		this.userId = userId;
+		this.behavior = behavior;
+		this.payMoney = payMoney;
+		this.publicExpend = publicExpend;
+		this.minaExpend = minaExpend;
+		this.hardwareExpend = hardwareExpend;
+		this.vipExpend = vipExpend;
+		this.type = type;
+		this.receivedUserId = receivedUserId;
+		this.remarks = remarks;
+		this.createDate = createDate;
+		this.createId = createId;
+		this.invoiceNo = invoiceNo;
+		this.invoice = invoice;
+		this.state = state;
+	}
+
+
+	public Date getBeginDate() {
+		return beginDate;
+	}
+
+	public void setBeginDate(Date beginDate) {
+		this.beginDate = beginDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public Integer getExpendPayId() {
+		return expendPayId;
+	}
+	public void setExpendPayId(Integer expendPayId) {
+		this.expendPayId = expendPayId;
+	}
+	public String getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getBehavior() {
+		return behavior;
+	}
+	public void setBehavior(String behavior) {
+		this.behavior = behavior;
+	}
+	public BigDecimal getPayMoney() {
+		return payMoney;
+	}
+	public void setPayMoney(BigDecimal payMoney) {
+		this.payMoney = payMoney;
+	}
+	public BigDecimal getPublicExpend() {
+		return publicExpend;
+	}
+	public void setPublicExpend(BigDecimal publicExpend) {
+		this.publicExpend = publicExpend;
+	}
+	public BigDecimal getMinaExpend() {
+		return minaExpend;
+	}
+	public void setMinaExpend(BigDecimal minaExpend) {
+		this.minaExpend = minaExpend;
+	}
+	public BigDecimal getHardwareExpend() {
+		return hardwareExpend;
+	}
+	public void setHardwareExpend(BigDecimal hardwareExpend) {
+		this.hardwareExpend = hardwareExpend;
+	}
+	public BigDecimal getVipExpend() {
+		return vipExpend;
+	}
+	public void setVipExpend(BigDecimal vipExpend) {
+		this.vipExpend = vipExpend;
+	}
+	public Integer getType() {
+		return type;
+	}
+	public void setType(Integer type) {
+		this.type = type;
+	}
+	public String getReceivedUserId() {
+		return receivedUserId;
+	}
+	public void setReceivedUserId(String receivedUserId) {
+		this.receivedUserId = receivedUserId;
+	}
+	public String getRemarks() {
+		return remarks;
+	}
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+	public Date getCreateDate() {
+		return createDate;
+	}
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+	public String getCreateId() {
+		return createId;
+	}
+	public void setCreateId(String createId) {
+		this.createId = createId;
+	}
+	public String getInvoiceNo() {
+		return invoiceNo;
+	}
+	public void setInvoiceNo(String invoiceNo) {
+		this.invoiceNo = invoiceNo;
+	}
+	public Integer getInvoice() {
+		return invoice;
+	}
+	public void setInvoice(Integer invoice) {
+		this.invoice = invoice;
+	}
+	public Integer getState() {
+		return state;
+	}
+	public void setState(Integer state) {
+		this.state = state;
+	}
+	
+	public String getLoginName() {
+		return loginName;
+	}
+	public void setLoginName(String loginName) {
+		this.loginName = loginName;
+	}
+	public String getReceivedCompanyName() {
+		return receivedCompanyName;
+	}
+	public void setReceivedCompanyName(String receivedCompanyName) {
+		this.receivedCompanyName = receivedCompanyName;
+	}
+	
+	
+}

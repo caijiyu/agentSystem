@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.agentsystem.sysdata.dao.WasSoftwareModifyPriceDao">
+    
+	<sql id="wasSoftwareModifyPriceColumns">
+		a.modifypriceId AS "modifypriceId",
+		a.classify AS "classify",
+		a.price AS "price",
+		a.createDate AS "createDate",
+		a.createBy AS "createId",
+		a.updateDate AS "updateDate",
+		a.updateBy AS "updateId",
+		a.state AS "state"
+	</sql>
+	
+	<sql id="wasSoftwareModifyPriceJoins">
+	</sql>
+    
+	<select id="get" resultType="WasSoftwareModifyPrice">
+		SELECT 
+			<include refid="wasSoftwareModifyPriceColumns"/>
+		FROM was_software_modifyprice a
+		<include refid="wasSoftwareModifyPriceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WasSoftwareModifyPrice">
+		SELECT 
+			<include refid="wasSoftwareModifyPriceColumns"/>
+		FROM was_software_modifyprice a
+		<include refid="wasSoftwareModifyPriceJoins"/>
+		<where>
+			<if test="state != null">
+		AND a.state=#{state}
+		</if>
+		</where>
+		ORDER BY a.createDate DESC
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WasSoftwareModifyPrice">
+		SELECT 
+			<include refid="wasSoftwareModifyPriceColumns"/>
+		FROM was_software_modifyprice a
+		<include refid="wasSoftwareModifyPriceJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	<insert id="insert">
+		INSERT INTO was_software_modifyprice(
+			classify,
+			price,
+			createDate,
+			createBy,
+			updateDate,
+			updateBy,
+			state
+		) VALUES (
+			#{classify},
+			#{price},
+			#{createDate},
+			#{createId},
+			#{updateDate},
+			#{updateBy.id},
+			#{state}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE was_software_modifyprice SET 	
+			classify = #{classify},
+			price = #{price},
+			updateDate = #{updateDate},
+			updateBy = #{updateBy.id},
+			state = #{state}
+		WHERE modifypriceId = #{modifypriceId}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM was_software_modifyprice
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE was_software_modifyprice SET 
+			state = #{state}
+		WHERE modifypriceId = #{modifypriceId}
+	</update>
+	<!-- 根据modifypriceId查找实体 -->
+	<select id="findByModifypriceId" resultType="WasSoftwareModifyPrice">
+	select * FROM was_software_modifyprice  where modifypriceId = #{modifypriceId}
+	</select>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WasSoftwareModifyPrice" statementType="STATEMENT">
+		select * FROM was_software_modifyprice  where ${propertyName} = '${value}'
+	</select>
+	
+	
+	<select id="findChangeMoney" resultType="WasSoftwareModifyPrice" >
+		select * from was_software_modifyprice where state=1;
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

@@ -1,0 +1,451 @@
+
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/webpage/include/taglib.jsp"%>
+<html>
+<head>
+<%@ include file="/webpage/modules/agentsystem/include/head.jsp"%>
+</head>
+<body>
+<div class="divControl" hidden="hidden" id="hiddenDiv">
+	<div class="divControl">
+		<div class="card cardControl">
+			<!-- Nav tabs -->
+			<ul class="nav nav-tabs customtab" role="tablist">
+				<li class="nav-item">
+					<a id="notAnswere" class="nav-link active" data-toggle="tab" href="#home2" role="tab" onclick="switchover(0)"> 
+						<span class="hidden-sm-up"><i class="ti-home"></i></span> 
+						<span class="hidden-xs-down">未回复</span>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a id="allAnswere" class="nav-link" data-toggle="tab" href="#profile2" role="tab" onclick="switchover(1)"> 
+						<span class="hidden-sm-up"><i class="ti-user"></i></span> 
+						<span class="hidden-xs-down">已回复</span>
+					</a>
+				</li>
+			</ul>
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane p-20 active" id="home2" role="tabpanel">					
+					<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentSystem/wasAgentAnsweredList/listA" method="post" style="width: 100%" id="searchForm">
+							<button type="button" class="btn waves-effect waves-light btn-info" onclick="search()" style="float: right; margin-left: 15px">搜索</button>							
+								<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}" /> 
+								<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}" />
+							<div class="form-group col-6" style="margin-bottom: 0px; float: right;">
+								<div class=" input-group input-daterange" id="date-range">
+									<div style="display:inline-block;padding-top: 8px;">反馈时间范围:&nbsp;&nbsp;</div>
+									<input value="<fmt:formatDate value="${wasFeedBack.beginDate}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control" placeholder="选择申请开始时间" name="beginDate" style="text-align: left;" />
+									<span class="input-group-addon bg-info b-0 text-white height-control addCentreControl">至</span>
+									<input value="<fmt:formatDate value="${wasFeedBack.endDate}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control" placeholder="选择申请结束时间" name="endDate" style="text-align: left;" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<table id="contentTable" class="display nowrap table table-hover table-striped table-bordered">
+						<thead>
+							<tr>
+								
+								<th class="tableControl">公司名称</th>
+								<th class="tableControl">代理商等级</th>
+								<th class="tableControl">问题类型</th>
+								<th class="tableControl">反馈时间</th>
+								<th class="tableControl">问题描述</th>
+								<th class="tableControl">操作</th>
+							</tr>
+						</thead>
+						<tbody id="tbodyA">					
+							<c:forEach items="${page.list}" var="log">
+									<c:if test="${log.replyState == 0}">
+								<tr>
+																
+									<td class="tableControl">${log.companyName}</td>
+									<td class="tableControl">${log.name}</td>
+									<td class="tableControl">${log.type}</td>
+									<th class="tableControl"><fmt:formatDate value="${log.quizDate}" type="both" /></th>									
+									<td class="tableControl">${log.description}</td>
+									<td class="tableControl">
+									<shiro:hasPermission name="agentsystem:wasAgentAnsweredList:lookReply">
+									<button type="button" data-toggle="tooltip" 
+												data-original-title="回复"
+												class="btn btn-info btn-circle btn-xs"
+												onclick="reply('${log.feedbackId}');">
+												<i class="iconf icon-huifu"></i>
+											</button>	
+									</shiro:hasPermission>																		
+									</td>
+								
+								</tr>
+								</c:if>
+							</c:forEach>
+						</tbody>
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${page.count gt 10}">
+						<table:page page="${page}"></table:page>
+					</c:if>
+				</div>
+				<!-- 已回复对应的列表 -->
+				<div class="tab-pane p-20" id="profile2" role="tabpanel">
+									<div class="row col-9" style="float: right;">
+						<form action="${ctx}/agentSystem/wasAgentAnsweredList/listA" method="post" style="width: 100%" id="searchFormA">
+							<button type="button" class="btn waves-effect waves-light btn-info" onclick="searchA()" style="float: right; margin-left: 15px">搜索</button>						
+								<input id="pageNoA" name="pageNo" type="hidden" value="${pageA.pageNo}" /> 
+								<input id="pageSizeA" name="pageSize" type="hidden" value="${pageA.pageSize}" />
+							<div class="form-group col-6" style="margin-bottom: 0px; float: right;">
+								<div class=" input-group input-daterange" id="date-rangeA">
+									<div style="display:inline-block;padding-top: 8px;">回复时间范围:&nbsp;&nbsp;</div>
+									<input value="<fmt:formatDate value="${wasFeedBackA.beginDateA}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control" placeholder="选择申请开始时间" name="beginDateA" style="text-align: left;" />
+									<span class="input-group-addon bg-info b-0 text-white height-control addCentreControl">至</span>
+									<input value="<fmt:formatDate value="${wasFeedBackA.endDateA}" pattern="yyyy-MM-dd"/>" type="text" class="form-control height-control" placeholder="选择申请结束时间" name="endDateA" style="text-align: left;" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<table id="contentTable" class="display nowrap table table-hover table-striped table-bordered">
+						<thead>
+							<tr>
+								
+								<th class="tableControl">公司名称</th>
+								<th class="tableControl">代理商等级</th>
+								<th class="tableControl">问题类型</th>
+								<th class="tableControl">回复时间</th>
+								<th class="tableControl">问题描述</th>
+								<th class="tableControl">问题回复</th>
+								<th class="tableControl">操作</th>
+							</tr>
+						</thead>
+						<tbody>
+						
+							<c:forEach items="${pageA.list}" var="log">
+								<c:if test="${log.replyState == 1}">
+								<tr>									 								
+									<td class="tableControl">${log.companyName}</td>
+									<td class="tableControl">${log.name}</td>
+									<td class="tableControl">${log.type}</td>
+									<th class="tableControl"><fmt:formatDate value="${log.replyDate}" type="both" /></th>									
+									<td class="tableControl">${log.description}</td>
+									<td class="tableControl">${log.reply}</td>
+									<td class="tableControl">										
+											<shiro:hasPermission name="agentsystem:wasAgentAnsweredList:look">
+											<button type="button" data-toggle="tooltip"
+												data-original-title="查看"
+												class="btn btn-info btn-circle btn-xs"
+												onclick="lookInform('${log.feedbackId}');">
+												<i class="fa fa-search-plus"></i>
+											</button>
+											</shiro:hasPermission>
+											<shiro:hasPermission name="agentsystem:wasAgentAnsweredList:delete">
+											<button title="删除" type="button" data-toggle="tooltip" data-original-title="删除" class="btn btn-danger btn-circle btn-xs " 
+											onclick="deleteAll('${log.feedbackId}');">
+												<i class="fa fa-times"></i>
+											</button>
+											</shiro:hasPermission>
+									</td>									 
+								</tr>
+								</c:if> 
+							</c:forEach> 
+						</tbody> 
+					</table>
+					<!-- 分页代码 -->
+					<c:if test="${pageA.count gt 10}">
+						<table:page page="${pageA}"></table:page>
+					</c:if>			
+				</div>				
+			</div>
+		</div>
+	</div>
+	<!-- 回复的模态框 -->
+	<div class="modal fade" id="modalReply" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content">
+				<!--对话框头-->				
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<span>查看</span><button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form id="reply">
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">公司名称：</label>
+							<div class="col-9 controls" id="companyNameReply">
+								
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">代理等级：</label>
+							<div class="col-9 controls" id="nameReply">
+								
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">问题类型：</label>
+							<div class="col-9 controls" id="typeReply">
+								
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">问题描述：</label>
+							<div class="col-9 controls" id="descriptionReply">
+								
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">问题回复：</label>
+							<div class="col-9 controls" >
+								<textarea id="replyReply" name="reply" maxlength="100" class="form-control height-control" style="height:65px!important"></textarea>								
+							</div>
+						</div>
+						<input name="feedbackId" value="" id="feedbackIdReply" hidden="hidden">
+					</form>
+				</div>	
+				<!-- 对话框尾 -->
+				<div class="modal-footer" style="text-align: right; background-color: #f4f5f9; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+					<button type="button" class="btn btn-info" onclick="replySave();">保存</button>
+				</div>				
+			</div>
+		</div>
+	</div>
+	<!-- 查看的模态框 -->
+	<div class="modal fade" id="modal" data-backdrop="static">
+		<div class="modal-dialog">
+			<!--宽高、定位-->
+			<div class="modal-content">
+				<!--对话框头-->
+				
+				<div class="modal-header"
+					style="float: right; display: block; background-color: #f4f5f9; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+					<span>查看</span><button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+				</div>
+				<!--主体部分-->
+				<div class="modal-body">
+					<form>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">公司名称：</label>
+							<div class="col-9 controls" id="companyName">
+								
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">代理等级：</label>
+							<div class="col-9 controls" id="name">
+								
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">问题类型：</label>
+							<div class="col-9 controls" id="type">
+								
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">问题描述：</label>
+							<div class="col-9 controls" id="description">
+								
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="example-text-input" class="col-2 col-form-label">问题回复：</label>
+							<div class="col-9 controls" id="reply">								
+							</div>
+						</div>
+					</form>
+				</div>
+							
+			</div>
+		</div>
+	</div>
+</div>
+	<script type="text/javascript">
+	//查看的实现
+	function lookInform(feedbackId){
+		var index = layer.load(1, {shade: [0.1,'#fff']});		
+		$.ajax({
+		    url:'${ctx}/agentSystem/wasAgentAnsweredList/look',
+		    type:'POST',
+		    data:{
+		    	feedbackId : feedbackId,
+		    },
+		    dataType:'json',
+		    success:function(result){
+		    	layer.close(index);
+		    	$("#companyName").html('<div>'+result.list[0].companyName+'</div>');
+		    	$("#name").html('<div>'+result.list[0].name+'</div>');
+		    	$("#type").html('<div>'+result.list[0].type+'</div>');
+		    	$("#description").html('<div>'+result.list[0].description+'</div>');
+		    	$("#reply").html('<div>'+result.list[0].reply+'</div>');
+		    	$("#modal").modal("show");
+		    },
+		    error:function(xhr,textStatus){
+		    	layer.close(index);
+		    	layer.msg('操作失败！', { icon : 2 });
+		    },
+		});		
+	}
+	//删除的实现
+	function deleteAll(feedbackId){
+		
+		layer.confirm("确认删除？", {closeBtn: 0, icon : 3 ,skin : 'layui-layer-molv',btn: ['确认','取消']}, 
+				function(){	
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+					$.ajax({
+					    url:'${ctx}/agentSystem/wasAgentAnsweredList/delete',
+					    type:'POST',
+					    data:{
+					    	feedbackId:feedbackId,
+					    },
+					    dataType:'json',
+					    success:function(result){
+					    	layer.close(index);
+					    	if(result > 0){
+					    		layer.msg("操作成功！",{icon:1,time:1000},function(){
+					    			$("#searchFormA").submit();
+								});	
+					    	}
+					    },
+					    error:function(xhr,textStatus){
+					    	layer.close(index);
+					    	layer.msg('操作失败！', { icon : 2 });
+					    },
+					})
+				});
+	}
+	//回复的实现
+	function reply(feedbackId){
+		$("#feedbackIdReply").val(feedbackId);
+		var index = layer.load(1, {shade: [0.1,'#fff']});
+		$.ajax({
+		    url:'${ctx}/agentSystem/wasAgentAnsweredList/lookReply',
+		    type:'POST',
+		    data:{
+		    	feedbackId : feedbackId,
+		    },
+		    dataType:'json',
+		    success:function(result){
+		    	layer.close(index);
+		    	$("#companyNameReply").html('<div>'+result.list[0].companyName+'</div>');
+		    	$("#nameReply").html('<div>'+result.list[0].name+'</div>');
+		    	$("#typeReply").html('<div>'+result.list[0].type+'</div>');
+		    	$("#descriptionReply").html('<div>'+result.list[0].description+'</div>');		    	
+		    	$("#modalReply").modal("show");
+		    },
+		    error:function(xhr,textStatus){
+		    	layer.close(index);
+		    	layer.msg('操作失败！', { icon : 2 });
+		    },
+		});		
+	}
+	//回复保存
+	function replySave(){
+		var isValid =  $("#reply").valid();
+		if(isValid){
+			layer.confirm("确认保存？", {closeBtn: 0, icon : 3 ,skin : 'layui-layer-molv',btn: ['确认','取消']}, 
+					function(){
+				var index = layer.load(1, {shade: [0.1,'#fff']});
+				$.ajax({
+				    url:'${ctx}/agentSystem/wasAgentAnsweredList/replySave',
+				    type:'POST',
+				    data:$("#reply").serialize(),
+				    dataType:'json',
+				    success:function(result){
+				    	layer.close(index);
+				    	if(result > 0){
+				    		layer.msg("操作成功！",{icon:1,time:1000},function(){
+				    			$("#searchForm").submit();
+							});	
+				    	}
+				    },
+				    error:function(xhr,textStatus){
+				    	layer.close(index);
+				    	layer.msg('操作失败！', { icon : 2 });
+				    },
+				});
+				
+			});
+		}
+	}
+	//cookie记住页面的跳转
+	$("document").ready(function(){
+		var flag = $.cookie("answereFlag");
+		if(flag == "1"){
+			$("#allAnswere").trigger("click");						
+		}	
+		$("#hiddenDiv").removeAttr("hidden");
+		//表单验证
+		$("#reply").validate({
+			rules : {
+				reply : {
+					required : true,
+				},
+			},
+			messages : {
+				reply : {
+					required : "请填写回复",
+				},				
+			},
+			errorPlacement : function(error, element) {
+				error.insertAfter(element);
+				}
+			});
+	});
+	//针对tab切换会出现其他的问题
+	function switchover(answereFlag){
+		$.cookie("answereFlag",answereFlag);
+		$('#home2').removeClass("active");
+		$('#home2').attr("aria-expanded", false);
+		$('#profile2').removeClass("active");
+		$('#profile2').attr("aria-expanded", false);
+		$('#messages2').removeClass("active");
+		$('#messages2').attr("aria-expanded", false);
+	}	
+	//日期范围选择
+	jQuery('#date-range').datepicker({
+		toggleActive : true,
+		autoclose: true,
+		format : "yyyy-mm-dd"
+	});
+	//日期范围选择
+	jQuery('#date-rangeA').datepicker({
+		toggleActive : true,
+		autoclose: true,
+		format : "yyyy-mm-dd"
+	});
+	//未回复分页方法
+	function page(n,s) {
+		$("#pageNo").val(n);
+		$("#pageSize").val(s);
+		$("#searchForm").submit();
+		$("span.page-size").text(s);
+	}
+	//已回复的分页方法
+	function pageA(n,s) {
+		$("#pageNoA").val(n);
+		$("#pageSizeA").val(s);
+		$("#searchFormA").submit();
+		$("span.page-size").text(s);
+	}
+	//查询方法
+	function search(){//查询，页码清零
+		$("#pageNo").val(0);
+		$("#searchForm").submit();
+	}
+	function searchA(){//查询，页码清零
+		$("#pageNoA").val(0);
+		$("#searchFormA").submit();
+	}
+	//checkbox监听
+	$('#ischange').on('ifChecked', function(event){ //ifCreated 事件应该在插件初始化之前绑定 
+		$('.check').iCheck('check');
+	});
+	$('#ischange').on('ifUnchecked', function(event){ //ifUnchecked 事件应该在插件初始化之前绑定 
+		$('.check').iCheck('uncheck');
+	});
+	
+	</script>
+
+</body>
+</html>

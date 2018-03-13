@@ -1,0 +1,94 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentSystem.sysdata.entity;
+
+
+import java.math.BigDecimal;
+
+import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Length;
+
+import com.jeeplus.common.persistence.DataEntity;
+import com.jeeplus.common.utils.excel.annotation.ExcelField;
+
+/**
+ * 软件修改价Entity
+ * @author HJT
+ * @version 2017-09-29
+ */
+public class WasSoftwareModifyPrice extends DataEntity<WasSoftwareModifyPrice> {
+	
+	private static final long serialVersionUID = 1L;
+	private Integer modifypriceId;		// 主键ID
+	private Boolean classify;		// 分类（0：公众号，1：小程序）
+	private BigDecimal price;		// 修改费用
+	private Boolean state;		// 状态（0：删除，1：正常）
+	private String createId;		// 添加账号
+	private String updateId;		// 更新账号
+	
+	public String getCreateId() {
+		return createId;
+	}
+
+	public void setCreateId(String createId) {
+		this.createId = createId;
+	}
+
+	public String getUpdateId() {
+		return updateId;
+	}
+
+	public void setUpdateId(String updateId) {
+		this.updateId = updateId;
+	}
+
+	public WasSoftwareModifyPrice() {
+		super();
+	}
+
+	public WasSoftwareModifyPrice(String id){
+		super(id);
+	}
+
+	@NotNull(message="主键ID不能为空")
+	@ExcelField(title="主键ID", align=2, sort=0)
+	public Integer getModifypriceId() {
+		return modifypriceId;
+	}
+
+	public void setModifypriceId(Integer modifypriceId) {
+		this.modifypriceId = modifypriceId;
+	}
+	
+	@NotNull(message="分类（0：公众号，1：小程序）不能为空")
+	@ExcelField(title="分类（0：公众号，1：小程序）", dictType="", align=2, sort=1)
+	public Boolean getClassify() {
+		return classify;
+	}
+
+	public void setClassify(Boolean classify) {
+		this.classify = classify;
+	}
+	
+	@NotNull(message="修改费用不能为空")
+	@ExcelField(title="修改费用", align=2, sort=2)
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+	
+	@Length(min=1, max=4, message="添加账号长度必须介于 1 和 4 之间")
+	@ExcelField(title="添加账号", align=2, sort=7)
+	public Boolean getState() {
+		return state;
+	}
+
+	public void setState(Boolean state) {
+		this.state = state;
+	}
+	
+}

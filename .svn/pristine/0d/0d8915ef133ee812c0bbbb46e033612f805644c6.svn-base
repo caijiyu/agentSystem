@@ -1,0 +1,72 @@
+package com.jeeplus.modules.agentsystem.agency.dao;
+
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentsystem.agency.entity.WasConsumeSynthesis;
+
+/**
+ * 代理商消费综合实体DAO接口
+ * @author SZP
+ * @version 2017-09-29
+ */
+@MyBatisDao
+public interface WasConsumeSynthesisDao extends CrudDao<WasConsumeSynthesis> {
+	
+	/**
+	 * 更新
+	 * @param consumeSynthesis
+	 * @return
+	 */
+	public int updateInvoiceY(WasConsumeSynthesis consumeSynthesis);
+
+	/**
+	 * 更新
+	 * @param consumeSynthesis
+	 * @return
+	 */
+	public int updateInvoiceR(WasConsumeSynthesis consumeSynthesis);
+
+	/**
+	 * 更新
+	 * @param consumeSynthesis
+	 * @return
+	 */
+	public int updateInvoiceC(WasConsumeSynthesis consumeSynthesis);
+
+	/**
+	 * 显示列表
+	 * @param consumeSynthesis
+	 * @return
+	 */
+	public List<WasConsumeSynthesis> findForList(WasConsumeSynthesis consumeSynthesis);
+
+	/**
+	 * 更新
+	 * @param consumeSynthesis
+	 * @return
+	 */
+	public int updateOrderC(WasConsumeSynthesis consumeSynthesis);
+
+	/**
+	 * 更新
+	 * @param consumeSynthesis
+	 * @return
+	 */
+	public int updateOrderY(WasConsumeSynthesis consumeSynthesis);
+
+	/**
+	 * 更新
+	 * @param consumeSynthesis
+	 * @return
+	 */
+	public int updateOrderR(WasConsumeSynthesis consumeSynthesis);
+	
+	/**
+	 * 列表显示
+	 * @param consumeSynthesis
+	 * @return
+	 */
+	public List<WasConsumeSynthesis> findInvoiceList(WasConsumeSynthesis consumeSynthesis);
+}

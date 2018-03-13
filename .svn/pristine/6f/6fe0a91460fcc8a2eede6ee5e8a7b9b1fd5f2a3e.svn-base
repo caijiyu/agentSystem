@@ -1,0 +1,21 @@
+/**
+ * Copyright &copy; 2015-2020 <a href="http://www.jeeplus.org/">JeePlus</a> All rights reserved.
+ */
+package com.jeeplus.modules.agentsystem.sysdata.dao;
+
+import java.util.List;
+
+import com.jeeplus.common.persistence.CrudDao;
+import com.jeeplus.common.persistence.annotation.MyBatisDao;
+import com.jeeplus.modules.agentsystem.sysdata.entity.WasFileClassify;
+
+/**
+ * 文件分类DAO接口
+ * @author WB
+ * @version 2017-09-27
+ */
+@MyBatisDao
+public interface WasFileClassifyDao extends CrudDao<WasFileClassify> {
+	public Integer getFileClassifyByName(String fileClassifyName);
+	public List<WasFileClassify> findAllList();
+}
